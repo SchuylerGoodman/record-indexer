@@ -6,13 +6,12 @@ DROP TABLE IF EXISTS field_values;
 
 CREATE TABLE users
 (
-    uid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    uid INTEGER NOT NULL AUTOINCREMENT,
     first VARCHAR(255) NOT NULL,
     last VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255),
-    current_batch INTEGER,
-    PRIMARY KEY ( uid )
+    PRIMARY KEY ( uid, password )
 )
 
 CREATE TABLE projects
