@@ -8,54 +8,69 @@ package shared.model;
  *
  * @author goodm4n
  */
-public interface User {
-    
-    public static class InvalidUserInfoException extends Exception {}
+public class User {
     
     /**
-     * Loads a User from the database.
-     * If userName and userPassword do not match, throws an InvalidUserIdException.
+     * Getter for the unique User ID.
      * 
-     * @param userName name of the user account with password userPassword
-     * @param userPassword password for the user account that matches userName
-     * @throws shared.model.User.InvalidUserInfoException 
+     * @return int user ID
      */
-    public User loadUser(String userName, String userPassword) throws InvalidUserInfoException;
+    public int userId() {
+        return 0;
+    }
     
     /**
-     * Loads User settings like current project, etc from the local save file.
+     * Getter for the User's username
+     * 
+     * @return String username
      */
-    public void loadUserSettings();
+    public String username() {
+        return null;
+    }
     
     /**
-     * Saves User settings to the local save file.
+     * Getter for the User's email
+     * 
+     * @return String email
      */
-    public void saveUserSettings();
+    public String email() {
+        return null;
+    }
     
     /**
      * Getter for the user's first name.
      * 
      * @return String representing the User's first name.
      */
-    public String fName();
+    public String firstName() {
+        return null;
+    }
     
     /**
      * Getter for the user's last name.
      * 
      * @return String representing the User's last name.
      */
-    public String lName();
+    public String lastName() {
+        return null;
+    }
     
     /**
-     * Getter for the User's current Project.
+     * Getter for the number of records already indexed by the User
      * 
-     * @return Project
+     * @return int number of indexed records
      */
-    public Project currentProject();
+    public int indexedRecords() {
+        return 0;
+    }
     
     @Override
-    public int hashCode();
+    public int hashCode() {
+        return 0;
+    }
     
     @Override
-    public boolean equals(Object o);
+    public boolean equals(Object o) {
+        return false;
+    }
 }

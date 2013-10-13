@@ -1,48 +1,74 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package shared.model;
 
+import java.net.URL;
+
 /**
- *
- * @author goodm4n
+ * Model class to hold Field data in memory
+ * 
+ * @author schuyler
  */
-public interface Field<T extends Object> {
+public class Field {
     
     /**
-     * Loads the field keyed by field_id from the database into this object.
+     * Getter method for this Field's unique ID
      * 
-     * @param field_id 
+     * @return Unique Field identifier
      */
-    public void loadField(int fieldId);
+    public int fieldId() {
+        return 0;
+    }
     
     /**
-     * Getter for the internal value of the field.
+     * Getter method for the title of this Field (i.e. 'first name')
      * 
-     * @return the value from the database as a template object, or null if it 
-     * does not exist.
+     * @return Title string of this Field
      */
-    public T getValue();
+    public String title() {
+        return null;
+    }
     
     /**
-     * Getter for the name of the field for its project.
+     * Getter method for the leftmost x coordinate of this Field on the Image.
      * 
-     * @return String containing Field name
+     * @return x coordinate in pixels from the left edge of the Image
      */
-    public String getName();
+    public int xCoordinate() {
+        return 0;
+    }
     
     /**
-     * Getter for the column that the field is in for its project.
+     * Getter method for the width of this field on the Image.
      * 
-     * @return the column number
+     * @return width in pixels of the field.
      */
-    public int getColumn();
+    public int width() {
+        return 0;
+    }
     
-    @Override
-    public int hashCode();
+    /**
+     * Getter method for the URL path to the helper text for this field.
+     * 
+     * @return URL path to the Field's helper text.
+     */
+    public URL helpHtml() {
+        return null;
+    }
     
-    @Override
-    public boolean equals(Object o);
+    /**
+     * Getter method for the Project ID to which this Field belongs.
+     * 
+     * @return Unique Project Identifier
+     */
+    public int projectId() {
+        return 0;
+    }
     
+    /**
+     * Getter method for the column number.
+     * 
+     * @return Column number for the project.
+     */
+    public int columnNumber() {
+        return 0;
+    }
 }

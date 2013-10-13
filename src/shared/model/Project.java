@@ -1,63 +1,65 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package shared.model;
 
 /**
- *
+ * Model class to contain database information for an indexing Project in memory.
+ * 
  * @author Schuyler Goodman
  */
-public interface Project {
-    
+public class Project {
+
     /**
-     * Loads project data (batch ids, fields, etc.) keyed by
-     * <code>project_id</code> from the database into the project object.
-     * <p>
-     * Loads the first batch from this project into the project object.
+     * Getter method for the Project ID.
      * 
-     * @param project_id the unique id of the given project in the database.
+     * @return int Unique ID of this Project.
      */
-    public void loadProject(int projectId);
+    public int projectId() {
+        return 0;
+    }
     
     /**
-     * Loads the next Batch in line from the database into the project.
+     * Getter method for the title of this Project.
      * 
-     * @return the next Batch in line
+     * @return String Project title.
      */
-    public Batch nextBatch();
+    public String title() {
+        return null;
+    }
     
     /**
-     * Loads the last Batch in line from the database into the project.
+     * Getter method for the number of Fields in this Project.
      * 
-     * @return the last Batch in line
+     * @return int Field (column) number
      */
-    public Batch lastBatch();
+    public int numberOfFields() {
+        return 0;
+    }
     
     /**
-     * Returns the Batch object that is currently in view.
+     * Getter method for the top-left y coordinate of the Images in this Project.
      * 
-     * @return the current Batch in view, or the first if just initializing
+     * @return int top-left y coordinate
      */
-    public Batch currentBatch();
+    public int firstYCoord() {
+        return 0;
+    }
     
     /**
-     * Returns the Batch keyed by the batch_id in the database.
+     * Getter method for the height of each Field in this Project (all Fields are the same height).
      * 
-     * @param batch_id The unique batch id from the database.
-     * @return a Batch object specified by the batch_id if batch_id belongs to a batch from this project.  Otherwise return <code>null</code>.
+     * @return int height of each field
      */
-    public Batch loadBatch(int batchId);
-    
-    /**
-     * Submit the current project and save the input information into the database.
-     */
-    public void submit();
+    public int fieldHeight() {
+        return 0;
+    }
     
     @Override
-    public int hashCode();
+    public int hashCode() {
+        return 0;
+    }
     
     @Override
-    public boolean equals(Object o);
+    public boolean equals(Object o) {
+        return false;
+    }
     
 }
