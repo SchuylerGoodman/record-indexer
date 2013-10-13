@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package shared.model;
 
 import java.net.URL;
 
 /**
- *
+ * Model class to contain database information for an image in memory.
+ * 
  * @author schuyler
  */
 public class Image {

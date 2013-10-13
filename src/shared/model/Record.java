@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package shared.model;
 
 /**
- *
+ * Model class to contain database information for a record in memory.
+ * 
  * @author schuyler
  */
 public class Record {

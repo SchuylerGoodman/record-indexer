@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package server.dbaccess;
 
 import java.util.Collection;
 
 /**
- *
+ * Database Access class for the projects table.
+ * 
  * @author schuyler
  */
 public class Projects {

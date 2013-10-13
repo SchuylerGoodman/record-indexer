@@ -1,15 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package server.dbaccess;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 
 /**
- *
+ * Main Database Access class - assigns tasks to minion DA classes.
+ * 
  * @author schuyler
  */
 public class Database {
@@ -99,6 +95,24 @@ public class Database {
      * @return A Collection of Field objects.
      */
     public Collection<shared.model.Field> getFields(String username, String password, Object project) {
+        return null;
+    }
+    
+    /**
+     * Sends a request to the database to search for matching fields.
+     * 
+     * @param username The User's username, for authentication.
+     * @param password The User's password, for authentication.
+     * @param fields Comma-separated string with field IDs to search through.
+     * @param values Comma-separated string with search values.
+     * @return  Collection of a Collection of Objects.
+     *      Each inner Collection contains:
+     *          Integer batchId
+     *          URL imageURL
+     *          Integer recordNumber
+     *          Integer fieldId
+     */
+    public Collection<Collection<Object>> search(String username, String password, String fields, String values) {
         return null;
     }
     

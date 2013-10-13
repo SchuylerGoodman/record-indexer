@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package server.dbaccess;
 
 import java.net.URL;
 
 /**
- *
+ * Database Access class for the images table.
+ * 
  * @author schuyler
  */
 public class Images {
@@ -54,5 +51,15 @@ public class Images {
      * @param imageId Unique identifier for the image being unassigned.
      */
     protected void unassignUser(int imageId) {
+    }
+    
+    /**
+     * Searches the Images table for the path to an Image.
+     * 
+     * @param imageId Unique ID of the Image to search for.
+     * @return URL path to the Image on the server.
+     */
+    protected URL search(int imageId) {
+        return null;
     }
 }

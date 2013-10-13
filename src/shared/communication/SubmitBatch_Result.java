@@ -1,10 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package shared.communication;
 
 /**
+ * Communication class for the submitBatch API
  *
  * @author schuyler
  */

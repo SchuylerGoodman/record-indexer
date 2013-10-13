@@ -1,13 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package server.dbaccess;
 
 import java.util.Collection;
 
 /**
- *
+ * Database Access class for the records table.
+ * 
  * @author schuyler
  */
 public class Records {
@@ -39,6 +36,23 @@ public class Records {
      */
     protected boolean submitBatch(int imageId, Collection<shared.model.Record> records) {
         return false;
+    }
+    
+    /**
+     * Searches the records table for the records with the search values.
+     * <p>
+     * Precondition: User must exist.
+     * 
+     * @param fields Comma-separated string with field IDs to search through.
+     * @param values Comma-separated string with search values.
+     * @return Collection of a Collection of objects:
+     *      Each inner Collection contains:
+     *          Integer imageId
+     *          Integer recordNumber (the row number in the image)
+     *          Integer fieldId (ID of the Field to which the record belongs.
+     */
+    protected Collection<Object> search(String fields, String values) {
+        return null;
     }
     
 }

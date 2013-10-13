@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package client;
 
 /**
@@ -91,4 +87,23 @@ public class ToServer {
     public shared.communication.GetFields_Result getFields(shared.communication.GetFields_Param fieldParams) {
         return null;
     }
+    
+    /**
+     * Searches the database for fields.
+     * 
+     * @param searchParams shared.communication.Search_Param container for 
+     * the User's username and password, a comma-separated list of field ids, 
+     * and a comma-separated list of search strings.
+     * @return shared.communication.Search_Result container for a Collection 
+     * of a Collection of Objects.
+     *      Each inner Collection contains:
+     *          Integer batchId
+     *          URL imageURL
+     *          Integer recordNumber
+     *          Integer fieldId
+     */
+    public shared.communication.Search_Result search(shared.communication.Search_Param searchParams) {
+        return null;
+    }
+    
 }
