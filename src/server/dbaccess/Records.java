@@ -55,4 +55,39 @@ public class Records {
         return null;
     }
     
+    /**
+     * Inserts a new Record into the database.
+     * 
+     * @param newRecord shared.model.Record with the information to insert.
+     * @return shared.model.Record with the generated record ID
+     */
+    protected shared.model.Record insert(shared.model.Record newRecord) {
+        return null;
+    }
+
+    /**
+     * Update a record in the database.
+     * 
+     * @param record shared.model.Record with the information to update.
+     */
+    protected void update(shared.model.Record record) {
+    }
+    
+    /**
+     * Get records from the database.
+     * 
+     * @param recordIds Collection of record ids whose information is being requested.
+     * @return Collection of shared.model.Record objs with the requested information.
+     */
+    protected Collection<shared.model.Record> get(Collection<Integer> recordIds) {
+        return null;
+    }
+
+    /**
+     * Deletes a record from the database.
+     * 
+     * @param deleteRecord shared.model.Record to delete from the database.
+     */
+    protected void delete(shared.model.Record deleteRecord) {
+    }
 }

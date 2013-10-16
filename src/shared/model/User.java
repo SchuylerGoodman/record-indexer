@@ -5,7 +5,7 @@ package shared.model;
  * 
  * @author goodm4n
  */
-public class User {
+public class User implements ModelClass {
     
     /**
      * Getter for the unique User ID.

@@ -5,7 +5,7 @@ package shared.model;
  * 
  * @author schuyler
  */
-public class Record {
+public class Record implements ModelClass {
     
     /**
      * Getter method for the total number of columns in this record.

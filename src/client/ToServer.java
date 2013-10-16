@@ -106,4 +106,17 @@ public class ToServer {
         return null;
     }
     
+    /**
+     * Create a new user in the database.
+     * 
+     * @param userParams shared.communication.CreateUser_Param container for all 
+     * of the necessary parameters to create a new user.
+     * 
+     * @return shared.communication.CreateUser_Result container for the new user 
+     * id generated on creation.
+     */
+    public shared.communication.CreateUser_Result createUser(shared.communication.CreateUser_Param userParams) {
+        return null;
+    }
+    
 }

@@ -1,6 +1,7 @@
 package server.dbaccess;
 
 import java.net.URL;
+import java.util.Collection;
 
 /**
  * Database Access class for the images table.
@@ -61,5 +62,41 @@ public class Images {
      */
     protected URL search(int imageId) {
         return null;
+    }
+    
+    /**
+     * Inserts an new Image into the database.
+     * 
+     * @param newImage shared.model.Image model class to insert into the database.
+     * @return shared.model.Image with the generated image ID
+     */
+    protected shared.model.Image insert(shared.model.Image newImage) {
+        return null;
+    }
+
+    /**
+     * Updates an Image in the database.
+     * 
+     * @param image shared.model.Image to update.
+     */
+    protected void update(shared.model.Image image) {
+    }
+    
+    /**
+     * Gets data on the requested images from the database.
+     * 
+     * @param imageIds Collection of image IDs whose data we want.
+     * @return Collection of shared.model.Image objs with the requested info.
+     */
+    protected Collection<shared.model.Image> get(Collection<Integer> imageIds) {
+        return null;
+    }
+
+    /**
+     * Deletes an image from the database.
+     * 
+     * @param deleteImage Image to delete from the database.
+     */
+    protected void delete(shared.model.Image deleteImage) {
     }
 }

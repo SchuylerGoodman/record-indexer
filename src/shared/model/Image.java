@@ -7,7 +7,7 @@ import java.net.URL;
  * 
  * @author schuyler
  */
-public class Image {
+public class Image implements ModelClass {
     
     /**
      * Getter method for the unique Image ID.

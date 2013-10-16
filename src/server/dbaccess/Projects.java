@@ -38,4 +38,32 @@ public class Projects {
         return null;
     }
     
+    /**
+     * Inserts a new Project into the database.
+     * 
+     * @param newProject shared.model.Project with the info to insert into the database.
+     * @return shared.model.Project with the generated Project ID
+     */
+    protected shared.model.Project insert(shared.model.Project newProject) {
+        return null;
+    }
+
+    /**
+     * Updates a project from the database.
+     * 
+     * @param project shared.model.Project with the updated information.
+     */
+    protected void update(shared.model.Project project) {
+    }
+    
+    /**
+     * Gets a collection of Projects from the database.
+     * 
+     * @param projectIds Collection of IDs whose projects we want.
+     * @return Collection of shared.model.Project objects with the requested information.
+     */
+    protected Collection<shared.model.Project> get(Collection<Integer> projectIds) {
+        return null;
+    }
+    
 }

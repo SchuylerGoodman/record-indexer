@@ -116,4 +116,47 @@ public class Database {
         return null;
     }
     
+    /**
+     * Creates a new row for the given model class in the database.
+     * 
+     * @param newModel shared.model.ModelClass A model class to insert into the database.
+     * @return shared.model.ModelClass A model class from the shared.model package.
+     */
+    public shared.model.ModelClass insert(shared.model.ModelClass newModel) {
+        return null;
+    }
+
+    /**
+     * Updates the given model class in the database.
+     * 
+     * @param model shared.model.ModelClass A model class to update in the database.
+     */
+    public void update(shared.model.ModelClass model) {
+    }
+    
+    /**
+     * Loads a model class from the database.
+     * 
+     * @param tableName String case-insensitive: containing the name of the table to query. 
+     *    Options:
+     *      Users
+     *      Projects
+     *      Fields
+     *      Records
+     *      Images
+     * @param uniqueIds A collection of database ids to get from the table.
+     * @return Collection of Model Classes with the requested information.
+     */
+    public Collection<shared.model.ModelClass> get(String tableName, Collection<Integer> uniqueIds) {
+        return null;
+    }
+
+    /**
+     * Deletes information from the database.
+     * 
+     * @param deleteModel The model class to delete.
+     */
+    public void delete(shared.model.ModelClass deleteModel) {
+    }
+    
 }

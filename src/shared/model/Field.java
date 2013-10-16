@@ -7,7 +7,7 @@ import java.net.URL;
  * 
  * @author schuyler
  */
-public class Field {
+public class Field implements ModelClass {
     
     /**
      * Getter method for this Field's unique ID

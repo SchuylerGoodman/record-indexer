@@ -5,7 +5,7 @@ package shared.model;
  * 
  * @author Schuyler Goodman
  */
-public class Project {
+public class Project implements ModelClass {
 
     /**
      * Getter method for the Project ID.
