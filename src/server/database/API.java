@@ -1,14 +1,19 @@
-package server.dbaccess;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package server.database;
 
 import java.net.URL;
 import java.util.Collection;
 
 /**
- * Main Database Access class - assigns tasks to minion DA classes.
- * 
+ *
  * @author schuyler
  */
-public class Database {
+public class API {
+    
+    public static final String URLPREFIX = "http://students.cs.byu.edu/~goodm4n/indexer/";
     
     /**
      * Queries the database for the user specified.
@@ -114,49 +119,5 @@ public class Database {
      */
     public Collection<Collection<Object>> search(String username, String password, String fields, String values) {
         return null;
-    }
-    
-    /**
-     * Creates a new row for the given model class in the database.
-     * 
-     * @param newModel shared.model.ModelClass A model class to insert into the database.
-     * @return shared.model.ModelClass A model class from the shared.model package.
-     */
-    public shared.model.ModelClass insert(shared.model.ModelClass newModel) {
-        return null;
-    }
-
-    /**
-     * Updates the given model class in the database.
-     * 
-     * @param model shared.model.ModelClass A model class to update in the database.
-     */
-    public void update(shared.model.ModelClass model) {
-    }
-    
-    /**
-     * Loads a model class from the database.
-     * 
-     * @param tableName String case-insensitive: containing the name of the table to query. 
-     *    Options:
-     *      Users
-     *      Projects
-     *      Fields
-     *      Records
-     *      Images
-     * @param uniqueIds A collection of database ids to get from the table.
-     * @return Collection of Model Classes with the requested information.
-     */
-    public Collection<shared.model.ModelClass> get(String tableName, Collection<Integer> uniqueIds) {
-        return null;
-    }
-
-    /**
-     * Deletes information from the database.
-     * 
-     * @param deleteModel The model class to delete.
-     */
-    public void delete(shared.model.ModelClass deleteModel) {
-    }
-    
+    }    
 }

@@ -1,5 +1,7 @@
 package shared.model;
 
+import server.database.Database;
+
 /**
  * Model class to contain database information for a user in memory.
  * 
@@ -7,13 +9,65 @@ package shared.model;
  */
 public class User implements ModelClass {
     
+    private int id;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String password;
+    private String email;
+    private int indexedRecords;
+    
+    public User() {
+        this.id = 0;
+    }
+    
+    public User(int inId, String uName, String fName, String lName, String pWord, String inEmail, int numRecords) {
+        this.id = inId;
+        this.username = uName;
+        this.firstName = fName;
+        this.lastName = lName;
+        this.password = pWord;
+        this.email = inEmail;
+        this.indexedRecords = numRecords;
+    }
+    
+    public User(int inId, String uName, String fName, String lName, String pWord, String inEmail) {
+        this.id = inId;
+        this.username = uName;
+        this.firstName = fName;
+        this.lastName = lName;
+        this.password = pWord;
+        this.email = inEmail;
+        this.indexedRecords = 0;
+    }
+    
+    public User(String uName, String fName, String lName, String pWord, String inEmail, int numRecords) {
+        this.id = 0;
+        this.username = uName;
+        this.firstName = fName;
+        this.lastName = lName;
+        this.password = pWord;
+        this.email = inEmail;
+        this.indexedRecords = numRecords;
+    }
+    
+    public User(String uName, String fName, String lName, String pWord, String inEmail) {
+        this.id = 0;
+        this.username = uName;
+        this.firstName = fName;
+        this.lastName = lName;
+        this.password = pWord;
+        this.email = inEmail;
+        this.indexedRecords = 0;
+    }
+    
     /**
      * Getter for the unique User ID.
      * 
      * @return int user ID
      */
     public int userId() {
-        return 0;
+        return this.id;
     }
     
     /**
@@ -22,7 +76,16 @@ public class User implements ModelClass {
      * @return String username
      */
     public String username() {
-        return null;
+        return this.username;
+    }
+    
+    /**
+     * Getter for the User's password
+     * 
+     * @return String password
+     */
+    public String password() {
+        return this.password;
     }
     
     /**
@@ -31,7 +94,7 @@ public class User implements ModelClass {
      * @return String email
      */
     public String email() {
-        return null;
+        return this.email;
     }
     
     /**
@@ -40,7 +103,7 @@ public class User implements ModelClass {
      * @return String representing the User's first name.
      */
     public String firstName() {
-        return null;
+        return this.firstName;
     }
     
     /**
@@ -49,7 +112,7 @@ public class User implements ModelClass {
      * @return String representing the User's last name.
      */
     public String lastName() {
-        return null;
+        return this.lastName;
     }
     
     /**
@@ -58,16 +121,141 @@ public class User implements ModelClass {
      * @return int number of indexed records
      */
     public int indexedRecords() {
-        return 0;
+        return this.indexedRecords;
+    }
+
+    /**
+     * Setter for the User's user ID
+     * 
+     * @param newId ID to set
+     */
+    public void setUserId(int newId) {
+        this.id = newId;
+    }
+    
+    /**
+     * Setter for the User's username
+     * 
+     * @param newUsername username to set
+     */
+    public void setUsername(String newUsername) {
+        this.username = newUsername;
+    }
+    
+    /**
+     * Setter for the User's first name
+     * 
+     * @param newName first name to set
+     */
+    public void setFirstName(String newName) {
+        this.firstName = newName;
+    }
+    
+    /**
+     * Setter for the User's last name
+     * 
+     * @param newName last name to set
+     */
+    public void setLastName(String newName) {
+        this.lastName = newName;
+    }
+    
+    /**
+     * Setter for the User's password
+     * 
+     * @param newPassword password to set
+     */
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+    }
+    
+    /**
+     * Setter for the User's email
+     * 
+     * @param newEmail email to set
+     */
+    public void setEmail(String newEmail) {
+        this.email = newEmail;
+    }
+    
+    /**
+     * Setter for the number of indexed records
+     * 
+     * @param newNumber number to set
+     */
+    public void setIndexedRecords(int newNumber) {
+        this.indexedRecords = newNumber;
     }
     
     @Override
     public int hashCode() {
-        return 0;
+        int prime = 37;
+        int prime2 = 43;
+        int tRec = this.indexedRecords;
+        int tId = this.id;
+        if (tId == 0) {
+            tId = prime;
+        }
+        int hash = tId * username.length() * prime;
+        hash ^= firstName.length() * prime2;
+        hash *= lastName.length() * prime;
+        hash ^= password.length() * prime2;
+        hash *= email.length() * prime;
+        if (tRec == 0) {
+            tRec = prime2;
+        }
+        hash *= tRec;
+        
+        return hash;
     }
     
     @Override
     public boolean equals(Object o) {
-        return false;
+        if (o == null) {
+            return false;
+        }
+        if (this.getClass() != o.getClass()) {
+            return false;
+        }
+        User ob = (User) o;
+        if (this.id != ob.userId()) {
+            return false;
+        }
+        if (!this.username.equals(ob.username())
+                || !this.firstName.equals(ob.firstName())
+                || !this.lastName.equals(ob.lastName())
+                || !this.password.equals(ob.password())
+                || !this.email.equals(ob.email())
+                || this.indexedRecords != ob.indexedRecords())
+        {
+            return false;
+        }
+        return true;
     }
+
+    @Override
+    public boolean canInsert() {
+        if (username == null) {
+            return false;
+        }
+        if (firstName == null) {
+            return false;
+        }
+        if (lastName == null) {
+            return false;
+        }
+        if (password == null) {
+            return false;
+        }
+        if (email == null) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String getTableName() {
+        return Database.USERS;
+    }
+    
 }
