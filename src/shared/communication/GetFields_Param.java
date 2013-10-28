@@ -7,13 +7,29 @@ package shared.communication;
  */
 public class GetFields_Param {
     
+    private String username;
+    private String password;
+    private Object projectId;
+    
+    public GetFields_Param(String username, String password, int projectId) {
+        this.username = username;
+        this.password = password;
+        this.projectId = new Integer(projectId);
+    }
+    
+    public GetFields_Param(String username, String password, String projectId) {
+        this.username = username;
+        this.password = password;
+        this.projectId = projectId;
+    }
+    
     /**
      * Getter for the User's username.
      * 
      * @return The User's username
      */
     public String username() {
-        return null;
+        return username;
     }
     
     /**
@@ -22,7 +38,7 @@ public class GetFields_Param {
      * @return The User's password.
      */
     public String password() {
-        return null;
+        return password;
     }
     
     /**
@@ -34,8 +50,8 @@ public class GetFields_Param {
      * @return Integer representing the unique Project identifier
      * @return Empty string
      */
-    public Object project() {
-        return null;
+    public Object projectId() {
+        return projectId;
     }
     
 }

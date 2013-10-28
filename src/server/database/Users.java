@@ -1,6 +1,7 @@
 package server.database;
 
 import java.sql.*;
+import java.util.*;
 import java.util.logging.*;
 import shared.model.User;
 
@@ -174,12 +175,60 @@ public class Users {
         Logger.getLogger(Users.class.getName()).log(Level.FINE, "Leaving Users.update()");
         
     }
-    
+
     /**
-     * Gets Users from the database.;
+     * Gets all Users from the database.
      * 
      * @param connection open database connection
-     * @param userIds user ID of the User whose information is being requested.
+     * 
+     * @return List of shared.model.User objects with the requested information.
+     * @throws UserGetFailedException
+     * @throws SQLException
+     */
+    protected List<User> get(Connection connection)
+            throws UserGetFailedException, SQLException {
+        
+        Logger.getLogger(Users.class.getName()).log(Level.FINE, "Entering Users.get()");
+        if (connection == null) {
+            throw new UserGetFailedException("Database connection has not been initialized.");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<User> users = new ArrayList<>();
+        
+        try {
+            
+            String sql = "select * from users";
+            stmt = connection.prepareStatement(sql.toString());
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                users.add(new User(rs.getInt(1), rs.getString(2),
+                                    rs.getString(3), rs.getString(4),
+                                    rs.getString(5), rs.getString(6),
+                                    rs.getInt(7)));
+            }
+            
+        }
+        catch (SQLException ex) {
+            throw new UserGetFailedException(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        Logger.getLogger(Users.class.getName()).log(Level.FINE, "Leaving Users.get()");
+        return users;
+        
+    }
+    
+    /**
+     * Gets a User from the database.
+     * 
+     * @param connection open database connection
+     * @param userId user ID of the User whose information is being requested.
+     * 
      * @return shared.model.User object with the requested information.
      * @throws UserGetFailedException
      * @throws SQLException
@@ -204,6 +253,64 @@ public class Users {
             String sql = "select * from users where userId = ?";
             stmt = connection.prepareStatement(sql.toString());
             stmt.setInt(1, userId);
+            rs = stmt.executeQuery();
+            
+            int j = 0;
+            while (rs.next()) {
+                user = new User(rs.getInt(1), rs.getString(2),
+                                    rs.getString(3), rs.getString(4),
+                                    rs.getString(5), rs.getString(6),
+                                    rs.getInt(7));
+                ++j;
+            }
+            if (j > 1) {
+                throw new UserGetFailedException(
+                        String.format("Only one User should have been returned. Found %d", j));
+            }
+            
+        }
+        catch (SQLException ex) {
+            throw new UserGetFailedException(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        Logger.getLogger(Users.class.getName()).log(Level.FINE, "Leaving Users.get()");
+        return user;
+        
+    }
+    
+    /**
+     * Gets Users from the database.;
+     * 
+     * @param connection open database connection
+     * @param userId user ID of the User whose information is being requested.
+     * @return shared.model.User object with the requested information.
+     * @throws UserGetFailedException
+     * @throws SQLException
+     */
+    protected User get(Connection connection, String username, String password)
+            throws UserGetFailedException, SQLException {
+        
+        Logger.getLogger(Users.class.getName()).log(Level.FINE, "Entering Users.get()");
+        if (connection == null) {
+            throw new UserGetFailedException("Database connection has not been initialized.");
+        }
+        if (username == null || password == null) {
+            throw new UserGetFailedException("Username and password cannot be null.");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        User user = null;
+        
+        try {
+            
+            String sql = "select * from users where username = ? and password = ?";
+            stmt = connection.prepareStatement(sql.toString());
+            stmt.setString(1, username);
+            stmt.setString(2, password);
             rs = stmt.executeQuery();
             
             int j = 0;

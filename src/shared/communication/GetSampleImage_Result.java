@@ -9,6 +9,12 @@ import java.net.URL;
  */
 public class GetSampleImage_Result {
     
+    private URL imageURL;
+    
+    public GetSampleImage_Result(URL inURL) {
+        imageURL = inURL;
+    }
+    
     /**
      * Getter method for the sample image URL.
      * 

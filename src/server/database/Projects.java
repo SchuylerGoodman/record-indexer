@@ -1,11 +1,7 @@
 package server.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import shared.model.Project;
@@ -190,11 +186,58 @@ public class Projects {
     }
     
     /**
-     * Gets a collection of Projects from the database.
+     * Gets all Projects from the database.
      * 
      * @param connection Open database connection
-     * @param projectIds Collection of IDs whose projects we want.
-     * @return Collection of shared.model.Project objects with the requested information.
+     * 
+     * @return List of shared.model.Project objects with the requested information.
+     * @throws ProjectGetFailedException
+     * @throws SQLException
+     */
+    protected List<Project> get(Connection connection)
+            throws ProjectGetFailedException, SQLException {
+        
+        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Entering Projects.get()");
+        if (connection == null) {
+            throw new ProjectGetFailedException("Database connection has not been initialized.");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<Project> projects = new ArrayList<>();
+        
+        try {
+            
+            String sql = "select * from projects";
+            stmt = connection.prepareStatement(sql.toString());
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                projects.add(new Project(rs.getInt(1), rs.getString(2),
+                                    rs.getInt(3), rs.getInt(4),
+                                    rs.getInt(5)));
+            }
+            
+        }
+        catch (SQLException ex) {
+            throw new ProjectGetFailedException(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Leaving Projects.get()");
+        return projects;
+        
+    }
+    
+    /**
+     * Gets a Project from the database.
+     * 
+     * @param connection Open database connection
+     * @param projectId ID whose project we want.
+     * 
+     * @return shared.model.Project object with the requested information.
      * @throws ProjectGetFailedException
      * @throws SQLException
      */

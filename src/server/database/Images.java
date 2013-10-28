@@ -3,6 +3,8 @@ package server.database;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.*;
 import shared.model.Image;
 
@@ -220,11 +222,60 @@ public class Images {
     }
     
     /**
+     * Gets all images from the database.
+     * 
+     * @param connection Open database connection
+     * 
+     * @return shared.model.Image object with the requested info.
+     * @throws ImageGetFailedException
+     * @throws SQLException
+     */
+    protected List<Image> get(Connection connection)
+            throws ImageGetFailedException, SQLException {
+        
+        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Entering Images.get()");
+        if (connection == null) {
+            throw new ImageGetFailedException("Database connection has not been initialized.");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<Image> images = new ArrayList<>();
+        
+        try {
+            
+            String sql = "select * from images";
+            stmt = connection.prepareStatement(sql.toString());
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                images.add(new Image(rs.getInt(1), new URL(rs.getString(2)),
+                                  rs.getString(3), rs.getInt(4), rs.getInt(5)));
+            }
+            
+        }
+        catch (SQLException | MalformedURLException ex) {
+            throw new ImageGetFailedException(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        
+        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Leaving Images.get()");
+        return images;
+        
+    }
+    
+    /**
      * Gets data on the requested image from the database.
      * 
      * @param connection Open database connection
      * @param imageId Image ID whose data we want.
+     * 
      * @return shared.model.Image object with the requested info.
+     * @throws ImageGetFailedException
+     * @throws SQLException
      */
     protected Image get(Connection connection, int imageId)
             throws ImageGetFailedException, SQLException {

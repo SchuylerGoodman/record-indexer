@@ -7,13 +7,21 @@ package shared.communication;
  */
 public class GetProjects_Param {
     
+    private String username;
+    private String password;
+    
+    public GetProjects_Param(String inUsername, String inPassword) {
+        username = inUsername;
+        password = inPassword;
+    }
+    
     /**
      * Getter method for the username
      * 
      * @return String username.
      */
     public String username() {
-        return null;
+        return username;
     }
     
     /**
@@ -22,6 +30,6 @@ public class GetProjects_Param {
      * @return String password.
      */
     public String password() {
-        return null;
+        return password;
     }
 }

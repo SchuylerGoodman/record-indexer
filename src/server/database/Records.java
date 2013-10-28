@@ -1,7 +1,7 @@
 package server.database;
 
 import java.sql.*;
-import java.util.Collection;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import shared.model.Record;
@@ -33,6 +33,12 @@ public class Records {
     
     public static class RecordDeleteFailedException extends Database.DeleteFailedException {
         public RecordDeleteFailedException(String message) {
+            super(message);
+        }
+    }
+    
+    public static class RecordSearchFailedException extends Database.DatabaseException {
+        public RecordSearchFailedException(String message) {
             super(message);
         }
     }
@@ -194,10 +200,58 @@ public class Records {
     }
     
     /**
-     * Get records from the database using the unique record ID.
+     * Get all records from the database.
+     * 
+     * @param connection open database connection.
+     * 
+     * @return List of shared.model.Record objects with the requested information.
+     * @throws RecordGetFailedException
+     * @throws SQLException
+     */
+    protected List<Record> get(Connection connection)
+            throws RecordGetFailedException, SQLException {
+
+        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.get()");
+        if (connection == null) {
+            throw new RecordGetFailedException(
+                    "Database connection has not been initialized.");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<Record> records = new ArrayList<>();
+        
+        try {
+            
+            String sql = "select * from records";
+            stmt = connection.prepareStatement(sql.toString());
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                records.add(new Record(rs.getInt(1), rs.getInt(2),
+                                    rs.getInt(3), rs.getInt(4),
+                                    rs.getString(5)));
+            }
+            
+        }
+        catch (SQLException ex) {
+            throw new RecordGetFailedException(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Leaving Records.get()");
+        return records;
+        
+    }
+    
+    /**
+     * Get a record from the database using the unique record ID.
      * 
      * @param connection open database connection.
      * @param recordId record id whose information is being requested.
+     * 
      * @return shared.model.Record object with the requested information.
      * @throws RecordGetFailedException
      * @throws SQLException
@@ -363,6 +417,7 @@ public class Records {
      */
     protected void delete(Connection connection, int imageId, int fieldId, int rowNumber)
             throws RecordDeleteFailedException, SQLException {
+        
         Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.delete()");
         if (connection == null) {
             throw new RecordDeleteFailedException("Database connection has not been initialized.");
@@ -393,6 +448,73 @@ public class Records {
             if (stmt != null) stmt.close();
         }
         Logger.getLogger(Records.class.getName()).log(Level.FINE, "Leaving Records.delete()");
+        
+    }
+    
+    /**
+     * Searches the database for Records matching the given field IDs and matching strings.
+     * 
+     * @param connection Open database connection
+     * @param fieldIds List of field IDs to match
+     * @param matches List of Strings to match
+     * 
+     * @return List of matched Records
+     * @throws server.database.Records.RecordDeleteFailedException
+     * @throws SQLException 
+     */
+    public List<Record> search(Connection connection, List<String> fieldIds, List<String> matches)
+            throws RecordSearchFailedException, SQLException {
+        
+        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.search()");
+        if (connection == null) {
+            throw new RecordSearchFailedException("Database connection has not been initialized.");
+        }
+        ArrayList<Record> records = new ArrayList<>();
+        if (fieldIds.isEmpty() || matches.isEmpty()) {
+            Logger.getLogger(Records.class.getName()).log(
+                    Level.INFO, "Leaving Records.search() - One or more input parameters are empty.");
+            return records;
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            StringBuilder sql = new StringBuilder();
+            StringBuilder sqlValue = new StringBuilder();
+            for (String id : fieldIds) {
+                if (sql.length() > 0) {
+                    sql.append(" or ");
+                }
+                sql.append("fieldId=").append(id);
+            }
+            sql.insert(0, "select * from records where (");
+            sql.append(") and (");
+            for (String value : matches) {
+                if (sqlValue.length() > 0) {
+                    sqlValue.append(" or ");
+                }
+                sqlValue.append("value like \"%").append(value).append("%\"");
+            }
+            sqlValue.append(")");
+            sql.append(sqlValue);
+            
+            stmt = connection.prepareStatement(sql.toString());
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Record newRecord = new Record(rs.getInt(1), rs.getInt(2),
+                                              rs.getInt(3), rs.getInt(4),
+                                              rs.getString(5));
+                records.add(newRecord);
+            }
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Exiting Records.search()");
+        return records;
         
     }
     

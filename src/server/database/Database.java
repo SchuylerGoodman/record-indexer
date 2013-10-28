@@ -2,6 +2,8 @@ package server.database;
 
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.*;
 import shared.model.*;
 
@@ -158,7 +160,7 @@ public class Database {
                | Records.RecordInsertFailedException
                | Images.ImageInsertFailedException ex) {
             Logger.getLogger(Database.class.getName()).log(
-                    Level.FINE, String.format("Insert into %s table failed.", tableName.toLowerCase()), ex);
+                    Level.WARNING, String.format("Insert into %s table failed.", tableName.toLowerCase()), ex);
             throw new InsertFailedException(ex.getMessage());
         }
         Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.insert()");
@@ -212,10 +214,70 @@ public class Database {
                | Records.RecordUpdateFailedException
                | Images.ImageUpdateFailedException ex) {
             Logger.getLogger(Database.class.getName()).log(
-                    Level.FINE, String.format("Update to %s table failed.", tableName.toLowerCase()), ex);
+                    Level.WARNING, String.format("Update to %s table failed.", tableName.toLowerCase()), ex);
             throw new UpdateFailedException(ex.getMessage());
         }
         Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.update()");
+        
+    }
+
+    /**
+     * Loads all instances of a model class from the database.
+     * 
+     * @param tableName String case-insensitive: containing the name of the table to query. 
+     *    Output of ModelClass.getTableName()
+     *    Options:
+     *      USERS
+     *      PROJECTS
+     *      FIELDS
+     *      RECORDS
+     *      IMAGES
+     * @param uniqueId database id to get from the table.
+     * @return Model Class with the requested information.
+     */
+    public List<ModelClass> get(String tableName)
+            throws DatabaseException, GetFailedException {
+        
+        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
+        ArrayList<ModelClass> returnClasses = new ArrayList<>();
+        if (connection == null) {
+            throw new DatabaseException("Database transaction has not been started.");
+        }
+        
+        try {
+            if (USERS.equalsIgnoreCase(tableName)) {
+                returnClasses.addAll(users.get(connection));
+            }
+            else if (PROJECTS.equalsIgnoreCase(tableName)) {
+                returnClasses.addAll(projects.get(connection));
+            }
+            else if (FIELDS.equalsIgnoreCase(tableName)) {
+                returnClasses.addAll(fields.get(connection));
+            }
+            else if (RECORDS.equalsIgnoreCase(tableName)) {
+                returnClasses.addAll(records.get(connection));
+            }
+            else if (IMAGES.equalsIgnoreCase(tableName)) {
+                returnClasses.addAll(images.get(connection));
+            }
+            else {
+                throw new GetFailedException("Invalid input table name.");
+            }
+        }
+        catch (Users.UserGetFailedException
+               | Projects.ProjectGetFailedException
+               | Fields.FieldGetFailedException
+               | Records.RecordGetFailedException
+               | Images.ImageGetFailedException ex) {
+            Logger.getLogger(Database.class.getName()).log(
+                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
+            throw new GetFailedException(ex.getMessage());
+        }
+        catch (SQLException ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
+        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.get()");
+        return returnClasses;
         
     }
     
@@ -268,7 +330,7 @@ public class Database {
                | Records.RecordGetFailedException
                | Images.ImageGetFailedException ex) {
             Logger.getLogger(Database.class.getName()).log(
-                    Level.FINE, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
+                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
             throw new GetFailedException(ex.getMessage());
         }
         catch (SQLException ex) {
@@ -281,20 +343,20 @@ public class Database {
 
     /**
      * Loads a model class from the database for operations requiring two input parameters.
-     * Currently only supported for Field lookups.
+     * Currently only supported for User and Field lookups.
      * 
      * @param tableName String case-insensitive: containing the name of the table to query. 
      *    Output of ModelClass.getTableName()
      *    Options:
-     *      <Strike>USERS<\Strike>
+     *      USERS - Requires String username and String password
      *      <Strike>PROJECTS<\Strike>
-     *      FIELDS
+     *      FIELDS - Requires Integer project ID and Integer columnNumber
      *      <Strike>RECORDS<\Strike>
      *      <Strike>IMAGES<\Strike>
      * @param uniqueId database id to get from the table.
      * @return Model Class with the requested information.
      */
-    public ModelClass get(String tableName, int firstId, int secondId)
+    public ModelClass get(String tableName, Object firstId, Object secondId)
             throws DatabaseException, GetFailedException {
         
         Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
@@ -304,20 +366,36 @@ public class Database {
         }
         
         try {
-            if (FIELDS.equalsIgnoreCase(tableName)) {
-                returnClass = fields.get(connection, firstId, secondId);
+            if (USERS.equalsIgnoreCase(tableName)) {
+                if (firstId.getClass() == secondId.getClass() && firstId.getClass() == String.class) {
+                    String firstIdString = (String) firstId;
+                    String secondIdString = (String) secondId;
+                    returnClass = users.get(connection, firstIdString, secondIdString);
+                }
+                else {
+                    throw new GetFailedException(
+                            "Get from users table requires String inputs.");
+                }
+            }
+            else if (FIELDS.equalsIgnoreCase(tableName)) {
+                if (firstId.getClass() == secondId.getClass() && firstId.getClass() == Integer.class) {
+                    Integer firstIdInt = (Integer) firstId;
+                    Integer secondIdInt = (Integer) secondId;
+                    returnClass = fields.get(connection, firstIdInt.intValue(), secondIdInt.intValue());
+                }
+                else {
+                    throw new GetFailedException(
+                            "Get from fields table requires Integer inputs.");
+                }
             }
             else {
                 throw new GetFailedException("Invalid input table name.");
             }
         }
         catch (Users.UserGetFailedException
-               | Projects.ProjectGetFailedException
-               | Fields.FieldGetFailedException
-               | Records.RecordGetFailedException
-               | Images.ImageGetFailedException ex) {
+             | Fields.FieldGetFailedException ex) {
             Logger.getLogger(Database.class.getName()).log(
-                    Level.FINE, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
+                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
             throw new GetFailedException(ex.getMessage());
         }
         catch (SQLException ex) {
@@ -367,13 +445,34 @@ public class Database {
                | Records.RecordDeleteFailedException
                | Images.ImageDeleteFailedException ex) {
             Logger.getLogger(Database.class.getName()).log(
-                    Level.FINE, String.format("Delete from %s table failed.", tableName.toLowerCase()), ex);
+                    Level.WARNING, String.format("Delete from %s table failed.", tableName.toLowerCase()), ex);
             throw new DeleteFailedException(ex.getMessage());
         }
         catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage());
         }
         Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.delete()");
+        
+    }
+    
+    public List<Record> search(List<String> fieldIds, List<String> matches)
+            throws DatabaseException {
+        
+        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.search()");
+        if (connection == null) {
+            throw new DatabaseException("Database transaction has not been started.");
+        }
+        ArrayList<Record> recordOutput = new ArrayList<>();
+        
+        try {
+            recordOutput = (ArrayList) records.search(connection, fieldIds, matches);
+        }
+        catch (Records.RecordSearchFailedException | SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.WARNING, "Record search failed.", ex);
+            throw new DatabaseException(ex.getMessage());
+        }
+        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.search()");
+        return recordOutput;
         
     }
     

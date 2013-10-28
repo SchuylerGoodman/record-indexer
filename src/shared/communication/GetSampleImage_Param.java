@@ -7,13 +7,23 @@ package shared.communication;
  */
 public class GetSampleImage_Param {
     
+    private String username;
+    private String password;
+    private int projectId;
+    
+    public GetSampleImage_Param(String inUsername, String inPassword, int inId) {
+        username = inUsername;
+        password = inPassword;
+        projectId = inId;
+    }
+    
     /**
      * Getter method for the username.
      * 
      * @return String username
      */
     public String username() {
-        return null;
+        return username;
     }
     
     /**
@@ -22,7 +32,7 @@ public class GetSampleImage_Param {
      * @return String password
      */
     public String password() {
-        return null;
+        return password;
     }
     
     /**
@@ -31,7 +41,7 @@ public class GetSampleImage_Param {
      * @return int Project ID
      */
     public int projectId() {
-        return 0;
+        return projectId;
     }
     
 }

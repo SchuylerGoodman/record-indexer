@@ -3,7 +3,9 @@ package server.database;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.*;
 import shared.model.Field;
 
@@ -202,10 +204,65 @@ public class Fields {
     }
     
     /**
+     * Gets all Fields from the database.
+     * 
+     * @param connection Open database connection
+     * 
+     * @return shared.model.Field object with the requested data.
+     * @throws FieldGetFailedException
+     * @throws SQLException
+     */
+    protected List<Field> get(Connection connection)
+            throws SQLException, FieldGetFailedException {
+        
+        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
+        if (connection == null) {
+            throw new FieldGetFailedException("Database connection has not been initialized.");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<Field> fields = new ArrayList<>();
+        
+        try {
+            
+            String sql = "select * from fields";
+            stmt = connection.prepareStatement(sql.toString());
+            rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Field field = new Field(rs.getInt(1), rs.getString(2),
+                                    rs.getInt(3), rs.getInt(4),
+                                    new URL(rs.getString(5)), rs.getInt(6),
+                                    rs.getInt(7));
+                if (!rs.getString(8).isEmpty()) {
+                    field.setKnownData(new URL(rs.getString(8)));
+                }
+                fields.add(field);
+            }
+            
+        }
+        catch (SQLException | MalformedURLException ex) {
+            throw new FieldGetFailedException(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
+        return fields;
+        
+    }
+    
+    /**
      * Gets a Field from the database.
      * 
-     * @param fieldIds Collection of Field IDs to get from the database.
+     * @param connection Open database connection
+     * @param fieldId Field ID to get from the database.
+     * 
      * @return shared.model.Field object with the requested data.
+     * @throws FieldGetFailedException
+     * @throws SQLException
      */
     protected Field get(Connection connection, int fieldId)
             throws SQLException, FieldGetFailedException {
@@ -234,7 +291,10 @@ public class Fields {
                 field = new Field(rs.getInt(1), rs.getString(2),
                                     rs.getInt(3), rs.getInt(4),
                                     new URL(rs.getString(5)), rs.getInt(6),
-                                    rs.getInt(7), new URL(rs.getString(8)));
+                                    rs.getInt(7));
+                if (!rs.getString(8).isEmpty()) {
+                    field.setKnownData(new URL(rs.getString(8)));
+                }
                 ++j;
             }
             if (j > 1) {

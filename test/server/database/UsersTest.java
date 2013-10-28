@@ -244,6 +244,34 @@ public class UsersTest {
     }
     
     @Test
+    public void getWithUsernameAndPassword() throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
+            base = users.insert(connection, base);
+
+            // Returns a correct result
+            User result = users.get(connection, base.username(), base.password());
+            
+            Assert.assertEquals(result, base);
+            
+            // Returns null
+            base.setUsername("HL");
+            result = users.get(connection, base.username(), base.password());
+            
+            Assert.assertNull(result);
+            
+        } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
+            Assert.fail(ex.getMessage());
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+    }
+        
+    @Test
     public void delete() throws SQLException {
         
         PreparedStatement stmt = null;

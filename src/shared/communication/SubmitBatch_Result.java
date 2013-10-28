@@ -7,6 +7,12 @@ package shared.communication;
  */
 public class SubmitBatch_Result {
     
+    private boolean success;
+    
+    public SubmitBatch_Result(boolean result) {
+        success = result;
+    }
+    
     /**
      * Says if the submission was successful or not.
      * 
@@ -14,7 +20,7 @@ public class SubmitBatch_Result {
      * @return false if unsuccessful.
      */
     public boolean success() {
-        return false;
+        return success;
     }
     
 }

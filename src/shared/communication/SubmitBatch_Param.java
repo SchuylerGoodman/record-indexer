@@ -9,13 +9,25 @@ import java.util.Collection;
  */
 public class SubmitBatch_Param {
     
+    private String username;
+    private String password;
+    private int batchId;
+    private String records;
+    
+    public SubmitBatch_Param(String inUsername, String inPassword, int inId, String inRecords) {
+        username = inUsername;
+        password = inPassword;
+        batchId = inId;
+        records = inRecords;
+    }
+    
     /**
      * Getter method for the username of the User submitting the Image.
      * 
      * @return String
      */
     public String username() {
-        return null;
+        return username;
     }
     
     /**
@@ -24,7 +36,7 @@ public class SubmitBatch_Param {
      * @return String
      */
     public String password() {
-        return null;
+        return password;
     }
     
     /**
@@ -33,7 +45,7 @@ public class SubmitBatch_Param {
      * @return int
      */
     public int batchId() {
-        return 0;
+        return batchId;
     }
     
     /**
@@ -41,8 +53,8 @@ public class SubmitBatch_Param {
      * 
      * @return Collection of Record objects.
      */
-    public Collection<shared.model.Record> recordsIndexed() {
-        return null;
+    public String records() {
+        return records;
     }
     
 }

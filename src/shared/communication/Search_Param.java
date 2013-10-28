@@ -7,13 +7,25 @@ package shared.communication;
  */
 public class Search_Param {
     
+    private String username;
+    private String password;
+    private String fields;
+    private String values;
+    
+    public Search_Param(String username, String password, String fields, String values) {
+        this.username = username;
+        this.password = password;
+        this.fields = fields;
+        this.values = values;
+    }
+    
     /**
      * Getter method for the User's username.
      * 
      * @return The username
      */
     public String username() {
-        return null;
+        return username;
     }
     
     /**
@@ -22,7 +34,7 @@ public class Search_Param {
      * @return The password
      */
     public String password() {
-        return null;
+        return password;
     }
     
     /**
@@ -31,7 +43,7 @@ public class Search_Param {
      * @return String with comma-separated field ids
      */
     public String fields() {
-        return null;
+        return fields;
     }
     
     /**
@@ -40,7 +52,7 @@ public class Search_Param {
      * @return String comma-separated list of search strings.
      */
     public String values() {
-        return null;
+        return values;
     }
     
 }

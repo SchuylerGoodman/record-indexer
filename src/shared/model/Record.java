@@ -24,19 +24,19 @@ public class Record implements ModelClass {
         value = null;
     }
     
-    public Record(int inImageId, int inFieldId, int inNumber, String inValue) {
+    public Record(int inImageId, int inFieldId, int inRowNumber, String inValue) {
         recordId = 0;
         imageId = inImageId;
         fieldId = inFieldId;
-        rowNumber = inNumber;
+        rowNumber = inRowNumber;
         value = inValue;
     }
     
-    public Record(int inRecordId, int inImageId, int inFieldId, int inNumber, String inValue) {
+    public Record(int inRecordId, int inImageId, int inFieldId, int inRowNumber, String inValue) {
         recordId = inRecordId;
         imageId = inImageId;
         fieldId = inFieldId;
-        rowNumber = inNumber;
+        rowNumber = inRowNumber;
         value = inValue;
     }
     
