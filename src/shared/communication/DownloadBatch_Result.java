@@ -1,5 +1,6 @@
 package shared.communication;
 
+import java.io.Serializable;
 import java.util.List;
 import shared.model.Field;
 import shared.model.Image;
@@ -10,7 +11,7 @@ import shared.model.Project;
  * 
  * @author schuyler
  */
-public class DownloadBatch_Result {
+public class DownloadBatch_Result implements Serializable {
     
     private int imageId;
     private int projectId;

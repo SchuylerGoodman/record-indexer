@@ -1,6 +1,6 @@
 package shared.model;
 
-import java.util.Objects;
+import java.io.Serializable;
 import server.database.Database;
 
 /**
@@ -8,7 +8,7 @@ import server.database.Database;
  * 
  * @author schuyler
  */
-public class Field implements ModelClass {
+public class Field extends ModelClass implements Serializable {
     
     private int fieldId;
     private String title;

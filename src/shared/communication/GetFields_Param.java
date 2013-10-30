@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the getFields API
  * 
  * @author schuyler
  */
-public class GetFields_Param {
+public class GetFields_Param implements Serializable {
     
     private String username;
     private String password;

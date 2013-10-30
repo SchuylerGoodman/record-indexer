@@ -1,5 +1,6 @@
 package shared.communication;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Objects;
  * 
  * @author schuyler
  */
-public class ValidateUser_Result {
+public class ValidateUser_Result implements Serializable {
     
     public static class ValidateUser_ResultException extends Exception {
         public ValidateUser_ResultException(String message) {

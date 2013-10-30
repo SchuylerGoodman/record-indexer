@@ -4,30 +4,48 @@
  */
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  *
  * @author schuyler
  */
-public class CreateUser_Param {
+public class CreateUser_Param implements Serializable {
+    
+    private String username;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String email;
+    
+    public CreateUser_Param(String username, String password, String firstName,
+                            String lastName, String email) {
+        
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
     
     public String username() {
-        return null;
+        return username;
     }
     
     public String password() {
-        return null;
+        return password;
     }
     
     public String firstName() {
-        return null;
+        return firstName;
     }
     
     public String lastName() {
-        return null;
+        return lastName;
     }
     
     public String email() {
-        return null;
+        return email;
     }
     
 }

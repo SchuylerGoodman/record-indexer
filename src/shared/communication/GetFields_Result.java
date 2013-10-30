@@ -1,5 +1,6 @@
 package shared.communication;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
  * 
  * @author schuyler
  */
-public class GetFields_Result {
+public class GetFields_Result implements Serializable {
     
     private int projectId;
     private List<Integer> fieldIds;

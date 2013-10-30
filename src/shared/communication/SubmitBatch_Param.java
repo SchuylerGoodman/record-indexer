@@ -1,13 +1,13 @@
 package shared.communication;
 
-import java.util.Collection;
+import java.io.Serializable;
 
 /**
  * Communication class for the submitBatch API
  * 
  * @author schuyler
  */
-public class SubmitBatch_Param {
+public class SubmitBatch_Param implements Serializable {
     
     private String username;
     private String password;

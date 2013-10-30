@@ -1,5 +1,6 @@
 package shared.communication;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -7,7 +8,7 @@ import java.util.*;
  * 
  * @author schuyler
  */
-public class Search_Result {
+public class Search_Result implements Serializable {
     
     private List<Integer> imageIds;
     private List<String> imagePaths;

@@ -31,13 +31,8 @@ public class API {
         }
     }
     
-    public API() throws APIException {
-        try {
-            database = new Database();
-        } catch (Database.DatabaseException ex) {
-            Logger.getLogger(API.class.getName()).log(Level.SEVERE, "Error loading database.", ex);
-            throw new APIException("Database failed to load.");
-        }
+    public API(Database database) {
+        this.database = database;
     }
     
     /**
@@ -53,12 +48,10 @@ public class API {
 
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.validateUser()");
         ValidateUser_Result result;
-        boolean success = false;
         ArrayList<User> users = new ArrayList<>();
         try {
             try {
-                database.startTransaction();
-                
+
                 // Get the User with this username and password
                 User user = new User();
                 user.setUsername(params.username());
@@ -76,7 +69,6 @@ public class API {
                                                    user.firstName(),
                                                    user.lastName(),
                                                    user.indexedRecords());
-                    success = true;
                 }
                 else {
                     result = new ValidateUser_Result(false);
@@ -90,7 +82,6 @@ public class API {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.SEVERE, null, ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Exiting API.validateUser()");
         return result;
         
@@ -107,14 +98,12 @@ public class API {
         
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getProjects()");
         GetProjects_Result result;
-        boolean success = false;
         try {
             ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
             if (vResult == null || !vResult.validated()) {
                 result = null;
             }
             else {
-                database.startTransaction();
                 
                 // Get all Projects
                 ArrayList<Project> projects = (ArrayList) database.get(new Project());
@@ -127,7 +116,6 @@ public class API {
                     names.add(project.title());
                 }
                 result = new GetProjects_Result(ids, names);
-                success = true;
             }
         }
         catch (DatabaseException | GetFailedException ex) {
@@ -138,7 +126,6 @@ public class API {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.SEVERE, null, ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Exiting API.getProjects()");
         return result;
         

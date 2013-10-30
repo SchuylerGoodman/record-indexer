@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the search API
  * 
  * @author schuyler
  */
-public class Search_Param {
+public class Search_Param implements Serializable {
     
     private String username;
     private String password;

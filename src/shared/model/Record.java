@@ -1,5 +1,6 @@
 package shared.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 import server.database.Database;
 
@@ -8,7 +9,7 @@ import server.database.Database;
  * 
  * @author schuyler
  */
-public class Record implements ModelClass {
+public class Record extends ModelClass implements Serializable {
     
     private int recordId;
     private int imageId;

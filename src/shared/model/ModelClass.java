@@ -8,7 +8,7 @@ package shared.model;
  *
  * @author schuyler
  */
-public interface ModelClass {
+public abstract class ModelClass {
     
     /**
      * Checks if the model class contains all the requisite information to be
@@ -16,7 +16,7 @@ public interface ModelClass {
      * 
      * @return true if insertable, otherwise false
      */
-    public boolean canInsert();
+    public abstract boolean canInsert();
     
     /**
      * Returns the String representation of the name of the database table for
@@ -25,6 +25,6 @@ public interface ModelClass {
      * 
      * @return Name of the database table for this model class
      */
-    public String getTableName();
+    public abstract String getTableName();
     
 }

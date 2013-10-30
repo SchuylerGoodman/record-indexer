@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the getSampleImage API
  * 
  * @author schuyler
  */
-public class GetProjects_Param {
+public class GetProjects_Param implements Serializable {
     
     private String username;
     private String password;

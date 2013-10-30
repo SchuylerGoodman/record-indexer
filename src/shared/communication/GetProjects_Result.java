@@ -1,5 +1,6 @@
 package shared.communication;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -7,7 +8,7 @@ import java.util.*;
  * 
  * @author schuyler
  */
-public class GetProjects_Result {
+public class GetProjects_Result implements Serializable {
     
     private List<Integer> ids;
     private List<String> names;

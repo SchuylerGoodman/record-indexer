@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the downloadBatch API
  * 
  * @author schuyler
  */
-public class DownloadBatch_Param {
+public class DownloadBatch_Param implements Serializable {
 
     private String username;
     private String password;

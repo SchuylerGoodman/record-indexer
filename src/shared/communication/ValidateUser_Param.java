@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the validateUser API
  * 
  * @author schuyler
  */
-public class ValidateUser_Param {
+public class ValidateUser_Param implements Serializable {
     
     private String username;
     private String password;

@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the getSampleImage API
  * 
  * @author schuyler
  */
-public class GetSampleImage_Result {
+public class GetSampleImage_Result implements Serializable {
     
     private String imagePath;
     

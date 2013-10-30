@@ -1,11 +1,13 @@
 package shared.communication;
 
+import java.io.Serializable;
+
 /**
  * Communication class for the submitBatch API
  *
  * @author schuyler
  */
-public class SubmitBatch_Result {
+public class SubmitBatch_Result implements Serializable {
     
     private boolean success;
     

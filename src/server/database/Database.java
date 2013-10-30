@@ -62,6 +62,15 @@ public class Database {
         }
     }
    
+    public static void initialize() throws DatabaseException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        }
+        catch (ClassNotFoundException ex) {
+            throw new DatabaseException("Error initializing database: " + ex.getMessage());
+        }
+    }
+    
     public Database() throws DatabaseException {
         
         users = new Users();
@@ -70,19 +79,18 @@ public class Database {
         records = new Records();
         images = new Images();
         
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException ex) {
-            throw new DatabaseException(ex.getMessage());
-        }
+//        try {
+//            Class.forName("org.sqlite.JDBC");
+//        } catch (ClassNotFoundException ex) {
+//            throw new DatabaseException(ex.getMessage());
+//        }
         
     }
     
     public void startTransaction() throws DatabaseException {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:db"
-                        + File.separator + "main" + File.separator
-                        + "record-indexer.sqlite");
+            connection = DriverManager.getConnection("jdbc:sqlite:"
+                        + DATABASE_PATH);
             connection.setAutoCommit(false);
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage());

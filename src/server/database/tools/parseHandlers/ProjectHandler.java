@@ -97,7 +97,7 @@ public class ProjectHandler extends DefaultHandler {
     public void insertProject() throws SAXException {
         try {
             database.startTransaction();
-            project =  (Project) database.insert(project);
+            project = (Project) database.insert(project);
             database.endTransaction(true);
         }
         catch (Database.DatabaseException | Database.InsertFailedException ex) {

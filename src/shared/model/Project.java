@@ -1,5 +1,6 @@
 package shared.model;
 
+import java.io.Serializable;
 import server.database.Database;
 
 /**
@@ -7,7 +8,7 @@ import server.database.Database;
  * 
  * @author Schuyler Goodman
  */
-public class Project implements ModelClass {
+public class Project extends ModelClass implements Serializable {
 
     private int projectId;
     private String title;

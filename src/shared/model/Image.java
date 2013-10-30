@@ -1,5 +1,6 @@
 package shared.model;
 
+import java.io.Serializable;
 import server.database.Database;
 
 /**
@@ -7,7 +8,7 @@ import server.database.Database;
  * 
  * @author schuyler
  */
-public class Image implements ModelClass {
+public class Image extends ModelClass implements Serializable {
     
     private int imageId;
     private String path;
