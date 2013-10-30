@@ -18,7 +18,7 @@ public class Project implements ModelClass {
     public Project() {
         projectId = 0;
         title = null;
-        recordCount = 0;
+        recordCount = -1;
         firstYCoord = -1;
         fieldHeight = -1;
     }
@@ -141,13 +141,13 @@ public class Project implements ModelClass {
         if (tId == 0) {
             tId = prime;
         }
-        if (tFCount == 0) {
+        if (tFCount < 0) {
             tFCount = prime2;
         }
-        if (tYCoord == -1) {
+        if (tYCoord < 0) {
             tYCoord = prime ^ prime2;
         }
-        if (tFHeight == -1) {
+        if (tFHeight < 0) {
             tFHeight = prime * prime2;
         }
         if (this.title == null) {

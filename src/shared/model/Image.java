@@ -1,7 +1,5 @@
 package shared.model;
 
-import java.net.URL;
-import java.util.Objects;
 import server.database.Database;
 
 /**
@@ -12,7 +10,7 @@ import server.database.Database;
 public class Image implements ModelClass {
     
     private int imageId;
-    private URL path;
+    private String path;
     private String title;
     private int projectId;
     private int currentUser;
@@ -25,7 +23,7 @@ public class Image implements ModelClass {
         currentUser = 0;
     }
     
-    public Image(URL inPath, String inTitle, int inProjectId) {
+    public Image(String inPath, String inTitle, int inProjectId) {
         imageId = 0;
         path = inPath;
         title = inTitle;
@@ -33,7 +31,7 @@ public class Image implements ModelClass {
         currentUser = 0;
     }
     
-    public Image(URL inPath, String inTitle, int inProjectId, int inCurrentUser) {
+    public Image(String inPath, String inTitle, int inProjectId, int inCurrentUser) {
         imageId = 0;
         path = inPath;
         title = inTitle;
@@ -41,7 +39,7 @@ public class Image implements ModelClass {
         currentUser = inCurrentUser;
     }
     
-    public Image(int inImageId, URL inPath, String inTitle, int inProjectId) {
+    public Image(int inImageId, String inPath, String inTitle, int inProjectId) {
         imageId = inImageId;
         path = inPath;
         title = inTitle;
@@ -49,7 +47,7 @@ public class Image implements ModelClass {
         currentUser = 0;
     }
     
-    public Image(int inImageId, URL inPath, String inTitle, int inProjectId, int inCurrentUser) {
+    public Image(int inImageId, String inPath, String inTitle, int inProjectId, int inCurrentUser) {
         imageId = inImageId;
         path = inPath;
         title = inTitle;
@@ -67,11 +65,11 @@ public class Image implements ModelClass {
     }
     
     /**
-     * Getter method for the URL path to the Image
+     * Getter method for the String path to the Image
      * 
-     * @return URL path to this Image
+     * @return String path to this Image
      */
-    public URL path() {
+    public String path() {
         return path;
     }
     
@@ -114,9 +112,9 @@ public class Image implements ModelClass {
     /**
      * Setter method for the path to this image file on the server.
      * 
-     * @param newPath URL to set
+     * @param newPath String to set
      */
-    public void setPath(URL newPath) {
+    public void setPath(String newPath) {
         path = newPath;
     }
     
@@ -162,7 +160,7 @@ public class Image implements ModelClass {
             tPath = prime1;
         }
         else {
-            tPath = path.toString().length();
+            tPath = path.length();
         }
         int tTitle;
         if (title == null) {
@@ -197,10 +195,10 @@ public class Image implements ModelClass {
         if (this.imageId != other.imageId) {
             return false;
         }
-        if (!Objects.equals(this.path, other.path)) {
+        if (!this.path.equals(other.path)) {
             return false;
         }
-        if (!Objects.equals(this.title, other.title)) {
+        if (!this.title.equals(other.title)) {
             return false;
         }
         if (this.projectId != other.projectId) {

@@ -4,7 +4,6 @@
  */
 package server.database.tools.parseHandlers;
 
-import java.net.*;
 import java.util.logging.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -66,11 +65,7 @@ public class ImageHandler extends DefaultHandler {
                 String.format("Setting %s in new user to %s.", qName, content.toString()));
         
         if (qName.equalsIgnoreCase(FILE)) {
-            try {
-                image.setPath(new URL(API.URLPREFIX + content.toString()));
-            } catch (MalformedURLException ex) {
-                throw new SAXException("Invalid url given for image path.");
-            }
+            image.setPath(content.toString());
             image.setTitle(content.toString());
             tryInsertImage();
         }

@@ -1,7 +1,5 @@
 package shared.communication;
 
-import java.net.URL;
-
 /**
  * Communication class for the getSampleImage API
  * 
@@ -9,10 +7,10 @@ import java.net.URL;
  */
 public class GetSampleImage_Result {
     
-    private URL imageURL;
+    private String imagePath;
     
-    public GetSampleImage_Result(URL inURL) {
-        imageURL = inURL;
+    public GetSampleImage_Result(String inPath) {
+        imagePath = inPath;
     }
     
     /**
@@ -20,8 +18,8 @@ public class GetSampleImage_Result {
      * 
      * @return URL - the path to the sample image
      */
-    public URL imageURL() {
-        return null;
+    public String imagePath() {
+        return imagePath;
     }
     
 }

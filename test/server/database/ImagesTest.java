@@ -6,8 +6,8 @@ package server.database;
 
 import server.database.tools.DatabaseCreator;
 import java.io.File;
-import java.net.*;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.*;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
@@ -24,6 +24,8 @@ public class ImagesTest {
     
     private Connection connection;
     
+    private ArrayList<Image> imageList;
+    
     private static String databasePath = "db" + File.separator + "test" + File.separator
                 + "test-record-indexer.sqlite";
     
@@ -33,6 +35,7 @@ public class ImagesTest {
         try {
             Class.forName("org.sqlite.JDBC");
             images = new Images();
+            imageList = new ArrayList<>();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ImagesTest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -95,7 +98,7 @@ public class ImagesTest {
         ResultSet rs = null;
         
         try {
-            Image u0 = new Image(new URL("http://hooper.com/image"), "image", 1);
+            Image u0 = new Image("image.png", "image", 1);
             Image u01 = images.insert(connection, u0);
             String sql = "select * from images where imageId = ?";
             stmt = connection.prepareStatement(sql);
@@ -104,7 +107,7 @@ public class ImagesTest {
             Image u02 = new Image();
             while (rs.next()) {
                 u02.setImageId(rs.getInt(1));
-                u02.setPath(new URL(rs.getString(2)));
+                u02.setPath(rs.getString(2));
                 u02.setTitle(rs.getString(3));
                 u02.setProjectId(rs.getInt(4));
                 u02.setCurrentUser(rs.getInt(5));
@@ -112,8 +115,7 @@ public class ImagesTest {
             Assert.assertEquals(u01, u02);
         }
         catch (SQLException
-                | Images.ImageInsertFailedException 
-                | MalformedURLException ex) {
+                | Images.ImageInsertFailedException ex) {
             Assert.fail(ex.getMessage());
         }
         finally {
@@ -126,12 +128,12 @@ public class ImagesTest {
     public void throwsImageInsertFailedExceptionIfInsertingDuplicateURL()
             throws ImageInsertFailedException {
         try {
-            Image u0 = new Image(new URL("http://hooper.com/image"), "image", 1);
-            Image u1 = new Image(new URL("http://hooper.com/image"), "plumage", 1);
+            Image u0 = new Image("image.png", "image", 1);
+            Image u1 = new Image("image.png", "plumage", 1);
             images.insert(connection, u0);
             exception.expect(ImageInsertFailedException.class);
             images.insert(connection, u1);
-        } catch (SQLException | MalformedURLException ex) {
+        } catch (SQLException ex) {
             Assert.fail(ex.getMessage());
         }
     }
@@ -143,8 +145,8 @@ public class ImagesTest {
         ResultSet rs = null;
         
         try {
-            Image base = new Image(new URL("http://hooper.com/image"), "image", 1);
-            Image u0 = new Image(new URL("http://hooper.com/image2"), null, 1, 5);
+            Image base = new Image("image.png", "image", 1);
+            Image u0 = new Image("image2.png", null, 1, 5);
             
             base = images.insert(connection, base);
             u0.setImageId(base.imageId());
@@ -159,7 +161,7 @@ public class ImagesTest {
             Image u02 = new Image();
             while (rs.next()) {
                 u02.setImageId(rs.getInt(1));
-                u02.setPath(new URL(rs.getString(2)));
+                u02.setPath(rs.getString(2));
                 u02.setTitle(rs.getString(3));
                 u02.setProjectId(rs.getInt(4));
                 u02.setCurrentUser(rs.getInt(5));
@@ -173,8 +175,7 @@ public class ImagesTest {
         }
         catch (SQLException
                     | Images.ImageUpdateFailedException
-                    | ImageInsertFailedException
-                    | MalformedURLException ex) {
+                    | ImageInsertFailedException ex) {
             Assert.fail(ex.getMessage());
         }
         finally {
@@ -187,12 +188,12 @@ public class ImagesTest {
     public void throwsImageUpdateFailedExceptionWithNoImageId()
             throws ImageUpdateFailedException {
         try {
-            Image u0 = new Image(new URL("http://hooper.com/image"), "image", 1);
+            Image u0 = new Image("image.png", "image", 1);
             exception.expect(ImageUpdateFailedException.class);
             exception.expectMessage("No image ID found in input Image parameter.");
             images.update(connection, u0);
         }
-        catch (SQLException | MalformedURLException ex) {
+        catch (SQLException ex) {
             Assert.fail(ex.getMessage());
         }
     }
@@ -201,11 +202,11 @@ public class ImagesTest {
     public void throwsImageUpdateFailedExceptionIdNotFound()
             throws ImageUpdateFailedException {
         try {
-            Image u0 = new Image(100, new URL("http://hooper.com/image"), "image", 1);
+            Image u0 = new Image(100, "image.png", "image", 1);
             exception.expect(ImageUpdateFailedException.class);
             exception.expectMessage("ID 100 not found in 'images' table.");
             images.update(connection, u0);
-        } catch (SQLException | MalformedURLException ex) {
+        } catch (SQLException ex) {
             Assert.fail(ex.getMessage());
         }
     }
@@ -214,15 +215,15 @@ public class ImagesTest {
     public void throwsImageUpdateFailedExceptionDuplicatePath()
             throws ImageUpdateFailedException {
         try {
-            Image base = new Image(new URL("http://hooper.com/image"), "image", 1);
+            Image base = new Image("image.png", "image", 1);
             images.insert(connection, base);
-            Image u0 = new Image(new URL("http://hooper.com/image2"), "image2", 1);
+            Image u0 = new Image("image2.png", "image2", 1);
             u0 = images.insert(connection, u0);
-            u0.setPath(new URL("http://hooper.com/image"));
+            u0.setPath("image.png");
             exception.expect(ImageUpdateFailedException.class);
             exception.expectMessage("column path is not unique");
             images.update(connection, u0);
-        } catch (ImageInsertFailedException | SQLException | MalformedURLException ex) {
+        } catch (ImageInsertFailedException | SQLException ex) {
             Assert.fail(ex.getMessage());
         }
     }
@@ -232,44 +233,32 @@ public class ImagesTest {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            Image base = new Image(new URL("http://hooper.com/image"), "image", 1);
+            Image base = new Image("image.png", "image", 1);
             base = images.insert(connection, base);
+            Image get = new Image();
+            get.setImageId(base.imageId());
 
             // Returns a correct result
-            int id = base.imageId();
-            Image result = images.get(connection, id);
-            
-            Assert.assertEquals(result, base);
+            imageList.addAll(images.get(connection, get));
+            Assert.assertEquals(1, imageList.size());
+            Assert.assertEquals(imageList.get(0), base);
+            imageList.clear();
             
             // Returns null if not found
-            ++id;
-            result = images.get(connection, id);
-            
-            Assert.assertNull(result);
+            get.setImageId(base.imageId() + 1);
+            imageList.addAll(images.get(connection, get));
+            Assert.assertEquals(0, imageList.size());
             
         }
         catch (SQLException
                 | ImageInsertFailedException
-                | ImageGetFailedException
-                | MalformedURLException ex) {
+                | ImageGetFailedException ex) {
             Assert.fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
             if (rs != null) rs.close();
-        }
-    }
-    
-    @Test
-    public void throwsImagesGetFailedExceptionInvalidId() 
-            throws ImageGetFailedException {
-        try {
-            int id = -1;
-            exception.expect(ImageGetFailedException.class);
-            exception.expectMessage(String.format("%d is an invalid image ID.", id));
-            images.get(connection, id);
-        } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            imageList.clear();
         }
     }
     
@@ -280,7 +269,7 @@ public class ImagesTest {
         ResultSet rs = null;
         
         try {
-            Image base = new Image(new URL("http://hooper.com/image"), "image", 1);
+            Image base = new Image("image.png", "image", 1);
             base = images.insert(connection, base);
             
             int rightId = base.imageId();
@@ -300,8 +289,7 @@ public class ImagesTest {
         }
         catch (ImageDeleteFailedException
                 | SQLException
-                | ImageInsertFailedException
-                | MalformedURLException ex) {
+                | ImageInsertFailedException ex) {
             Assert.fail(ex.getMessage());
         }
         finally {

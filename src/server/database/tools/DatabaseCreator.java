@@ -32,6 +32,7 @@ public class DatabaseCreator {
     }
     
     public void createDatabase(File databaseFile, File sqliteStatements) throws SQLException {
+        databaseFile.delete();
         parseSqlite(sqliteStatements);
         Connection connection = null;
         Statement stmt = null;

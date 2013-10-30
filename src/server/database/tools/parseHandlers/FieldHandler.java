@@ -4,7 +4,6 @@
  */
 package server.database.tools.parseHandlers;
 
-import java.net.*;
 import java.util.logging.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -73,18 +72,10 @@ public class FieldHandler extends DefaultHandler {
             field.setWidth(Integer.parseInt(content.toString()));
         }
         if (qName.equalsIgnoreCase(HELPHTML)) {
-            try {
-                field.setHelpHtml(new URL(API.URLPREFIX + content.toString()));
-            } catch (MalformedURLException ex) {
-                throw new SAXException("Invalid URL given for known data path.");
-            }
+            field.setHelpHtml(content.toString());
         }
         if (qName.equalsIgnoreCase(KNOWNDATA)) {
-            try {
-                field.setKnownData(new URL(API.URLPREFIX + content.toString()));
-            } catch (MalformedURLException ex) {
-                throw new SAXException("Invalid URL given for known data path.");
-            }
+            field.setKnownData(content.toString());
         }
         if (qName.equalsIgnoreCase(ProjectHandler.FIELD)) {
             try {

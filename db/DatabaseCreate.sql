@@ -37,7 +37,8 @@ CREATE TABLE fields
     helpHtml VARCHAR(255) NOT NULL,
     columnNumber INTEGER NOT NULL,
     projectId INTEGER NOT NULL,
-    knownData VARCHAR(255) DEFAULT ''
+    knownData VARCHAR(255) DEFAULT '',
+    CONSTRAINT unq UNIQUE (columnNumber, projectId)
 );
 
 CREATE TABLE records

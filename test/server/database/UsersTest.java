@@ -7,6 +7,7 @@ package server.database;
 import server.database.tools.DatabaseCreator;
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.*;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
@@ -23,6 +24,8 @@ public class UsersTest {
     
     private Connection connection;
     
+    private ArrayList<User> userList;
+    
     private static String databasePath = "db" + File.separator + "test" + File.separator
                 + "test-record-indexer.sqlite";
     
@@ -32,6 +35,7 @@ public class UsersTest {
         try {
             Class.forName("org.sqlite.JDBC");
             users = new Users();
+            userList = new ArrayList<>();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(UsersTest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -220,19 +224,20 @@ public class UsersTest {
         ResultSet rs = null;
         try {
             User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
-            base = users.insert(connection, base);
 
+            base = users.insert(connection, base);
+            User get = new User(base.userId(), null, null, null, null, null);
+                    
             // Returns a correct result
-            int id = base.userId();
-            User result = users.get(connection, id);
-            
-            Assert.assertEquals(result, base);
+            userList.addAll(users.get(connection, get));
+            Assert.assertEquals(1, userList.size());
+            Assert.assertEquals(userList.get(0), base);
+            userList.clear();
             
             // Returns null if not found
-            ++id;
-            result = users.get(connection, id);
-            
-            Assert.assertNull(result);
+            get.setUserId(base.userId() + 1);
+            userList.addAll(users.get(connection, get));
+            Assert.assertEquals(0, userList.size());
             
         } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
             Assert.fail(ex.getMessage());
@@ -240,6 +245,7 @@ public class UsersTest {
         finally {
             if (stmt != null) stmt.close();
             if (rs != null) rs.close();
+            userList.clear();
         }
     }
     
@@ -250,17 +256,18 @@ public class UsersTest {
         try {
             User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
             base = users.insert(connection, base);
+            User get = new User(0, base.username(), null, null, base.password(), null);
 
             // Returns a correct result
-            User result = users.get(connection, base.username(), base.password());
-            
-            Assert.assertEquals(result, base);
+            userList.addAll(users.get(connection, get));
+            Assert.assertEquals(1, userList.size());
+            Assert.assertEquals(userList.get(0), base);
+            userList.clear();
             
             // Returns null
-            base.setUsername("HL");
-            result = users.get(connection, base.username(), base.password());
-            
-            Assert.assertNull(result);
+            get.setUsername("HL");
+            userList.addAll(users.get(connection, get));
+            Assert.assertEquals(0, userList.size());
             
         } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
             Assert.fail(ex.getMessage());
@@ -268,6 +275,7 @@ public class UsersTest {
         finally {
             if (stmt != null) stmt.close();
             if (rs != null) rs.close();
+            userList.clear();
         }
     }
         

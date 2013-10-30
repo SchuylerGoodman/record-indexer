@@ -2,14 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package server.database;
+package server.handleHttp;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import server.database.Database;
 import server.database.Database.*;
 import shared.communication.*;
 import shared.model.*;
@@ -19,8 +19,9 @@ import shared.model.*;
  * @author schuyler
  */
 public class API {
-    
-    public static final String URLPREFIX = "http://students.cs.byu.edu/~goodm4n/indexer/";
+  
+    public static final String URLPREFIX = "localhost/";
+//    public static final String URLPREFIX = "http://students.cs.byu.edu/~goodm4n/indexer/";
     
     private Database database;
     
@@ -53,11 +54,23 @@ public class API {
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.validateUser()");
         ValidateUser_Result result;
         boolean success = false;
+        ArrayList<User> users = new ArrayList<>();
         try {
             try {
                 database.startTransaction();
-                User user = (User) database.get(Database.USERS, params.username(), params.password());
-                if (user != null) { // Then the user exists.
+                
+                // Get the User with this username and password
+                User user = new User();
+                user.setUsername(params.username());
+                user.setPassword(params.password());
+                users.addAll((ArrayList) database.get(user));
+                
+                // Should return one or fewer results, because passwords are unique
+                assert users.size() <= 1;
+                
+                if (!users.isEmpty() && users.size() <= 1) { // Then the user exists.
+                    int onlyResult = 0;
+                    user = users.get(onlyResult);
                     result = new ValidateUser_Result(true,
                                                    user.userId(),
                                                    user.firstName(),
@@ -102,7 +115,11 @@ public class API {
             }
             else {
                 database.startTransaction();
-                ArrayList<Project> projects = (ArrayList) database.get(Database.PROJECTS);
+                
+                // Get all Projects
+                ArrayList<Project> projects = (ArrayList) database.get(new Project());
+                
+                // Add them to GetProjects_Result
                 ArrayList<Integer> ids = new ArrayList<>();
                 ArrayList<String> names = new ArrayList<>();
                 for (Project project : projects) {
@@ -146,22 +163,27 @@ public class API {
             }
             else {
                 database.startTransaction();
-                ArrayList<Image> images = (ArrayList) database.get(Database.IMAGES);
-                URL imageURL = null;
+                
+                // Get all Images from this Project
+                Image tImage = new Image();
+                tImage.setProjectId(params.projectId());
+                ArrayList<Image> images = (ArrayList) database.get(tImage);
+                
+                // Get an unassigned Image
+                String imagePath = null;
                 int index = 0;
-                while (imageURL == null || index >= images.size() - 1) {
+                while (imagePath == null || index >= images.size() - 1) {
                     Image currentImage = images.get(index);
-                    if (currentImage.projectId() == params.projectId()
-                            && currentImage.currentUser() == 0) {
-                        imageURL = currentImage.path();
+                    if (currentImage.currentUser() == 0) {
+                        imagePath = currentImage.path();
                     }
                     ++index;
                 }
-                if (imageURL == null) {
+                if (imagePath == null) {
                     result = null;
                 }
                 else {
-                    result = new GetSampleImage_Result(imageURL);
+                    result = new GetSampleImage_Result(imagePath);
                     success = true;
                 }
             }
@@ -198,17 +220,26 @@ public class API {
             }
             else {
                 database.startTransaction();
+                
                 // Get the project
-                Project project = (Project) database.get(Database.PROJECTS, params.projectId());
-                // Get all the images
-                ArrayList<Image> images = (ArrayList) database.get(Database.IMAGES);
+                Project project = new Project();
+                project.setProjectId(params.projectId());
+                ArrayList<Project> projects = (ArrayList) database.get(project);
+                
+                // projectId is unique, so should only return one project.
+                assert projects.size() == 1;
+                int firstProjectIndex = 0;
+                
+                // Get all the images from this Project
+                Image tImage = new Image();
+                tImage.setProjectId(params.projectId());
+                ArrayList<Image> images = (ArrayList) database.get(tImage);
                 Image image = null;
                 int index = 0;
                 while (image == null || index >= images.size() - 1) {
-                    // Find an unassigned image from the project
+                    // Find an unassigned image
                     Image currentImage = images.get(index);
-                    if (currentImage.projectId() == params.projectId()
-                            && currentImage.currentUser() == 0) {
+                    if (currentImage.currentUser() == 0) {
                         image = currentImage;
                     }
                     ++index;
@@ -221,14 +252,13 @@ public class API {
                     image.setCurrentUser(vResult.userId());
                     // Set the current user in the image to this user
                     database.update(image);
-                    ArrayList<Field> allFields = (ArrayList) database.get(Database.FIELDS);
-                    ArrayList<Field> fields = new ArrayList<>();
-                    for (Field field : allFields) {
-                        if (field.projectId() == params.projectId()) {
-                            fields.add(field);
-                        }
-                    }
-                    result = new DownloadBatch_Result(project, image, fields);
+                    
+                    // Get all Fields from this project
+                    Field tField = new Field();
+                    tField.setProjectId(params.projectId());
+                    ArrayList<Field> fields = (ArrayList) database.get(tField);
+                    result = new DownloadBatch_Result(
+                            projects.get(firstProjectIndex), image, fields);
                     success = true;
                 }
             }
@@ -266,36 +296,44 @@ public class API {
             }
             else { // user validated
                 database.startTransaction();
-                // Get the Image
-                Image image = (Image) database.get(Database.IMAGES, params.batchId());
-                // Get all Fields
-                ArrayList<Field> allFields = (ArrayList) database.get(Database.FIELDS);
-                ArrayList<Field> fields = new ArrayList<>();
-                // Get fields with the correct project ID
-                for (Field field : allFields) {
-                    if (field.projectId() == image.projectId()) {
-                        fields.add(field);
-                    }
-                }
-                // Split the records on ';' character
                 
+                // Get the Image
+                Image tImage = new Image();
+                tImage.setImageId(params.batchId());
+                ArrayList<Image> images = (ArrayList) database.get(tImage);
+                
+                // Should only return one result, since image IDs are unique
+                assert images.size() == 1;
+                int firstImageIndex = 0;
+                Image thisImage = images.get(firstImageIndex);
+                
+                // Get all Fields from this Image's project
+                Field tField = new Field();
+                tField.setProjectId(thisImage.projectId());
+                ArrayList<Field> fields = (ArrayList) database.get(tField);
+
+                // Split the records on ';' character
                 String[] records = params.records().split(";");
                 for (int rowNumber = 0; rowNumber < records.length; ++rowNumber) {
+
                     // Split the record values on ',' character
                     String[] values = records[rowNumber].split(",", -1);
                     for (int column = 1; column <= values.length; ++column) {
                         Field currentField = fields.get(column - 1);
+
                         // Insert the value for this record into the database
                         database.insert(new Record(params.batchId(), currentField.fieldId(), rowNumber, values[column - 1]));
                     }
                 }
+
                 // Update Current user for the image to 0 (unassign User)
-                image.setCurrentUser(0);
-                database.update(image);
+                thisImage.setCurrentUser(0);
+                database.update(thisImage);
+
                 // Update the number of indexed records for this user
-                User user = new User(vResult.userId(),
-                                     null, null, null, null, null,
-                                     vResult.recordsIndexed() + records.length);
+                User user = new User();
+                user.setUserId(vResult.userId());
+                user.setIndexedRecords(vResult.recordsIndexed() + records.length);
                 database.update(user);
                 success = true;
                 result = new SubmitBatch_Result(success);
@@ -335,11 +373,8 @@ public class API {
                 database.startTransaction();
                 boolean useAll = false;
                 int projectId;
-                // Get all fields
-                ArrayList<Field> allFields = (ArrayList) database.get(Database.FIELDS);
-                ArrayList<Integer> fieldIds = new ArrayList<>();
-                ArrayList<String> fieldTitles = new ArrayList<>();
-                // If the project ID is a String
+
+                // If the project ID is a String (It is an Object in params)
                 if (String.class == params.projectId().getClass()) {
                     String projectParam = (String) params.projectId();
                     if (projectParam.isEmpty()) { // And it is empty
@@ -360,13 +395,19 @@ public class API {
                 else { // If it is an Integer, get the int value.
                     projectId = ((Integer) params.projectId()).intValue();
                 }
-                // Get data out of either all Fields, if project ID is an empty String
-                // or out of the fields that match the projectId
-                for (Field field : allFields) {
-                    if (useAll || field.projectId() == projectId) {
-                        fieldIds.add(new Integer(field.fieldId()));
-                        fieldTitles.add(field.title());
-                    }
+
+                // Get Fields with the right project ID (or all Fields if
+                // params.projectID is an empty String)
+                Field tField = new Field();
+                tField.setProjectId(projectId);
+                ArrayList<Field> fields = (ArrayList) database.get(tField);
+
+                // Get IDs and Titles out of the Fields
+                ArrayList<Integer> fieldIds = new ArrayList<>();
+                ArrayList<String> fieldTitles = new ArrayList<>();
+                for (Field field : fields) {
+                    fieldIds.add(new Integer(field.fieldId()));
+                    fieldTitles.add(field.title());
                 }
                 if (fieldIds.size() != fieldTitles.size()) {
                     result = null;
@@ -406,32 +447,56 @@ public class API {
             }
             else { // User exists
                 database.startTransaction();
+                
+                // Extract field IDs and convert to ArrayList<String>
                 String[] fieldIdArray = params.fields().split(",", -1);
                 ArrayList<String> fieldIdsAsStrings = new ArrayList<>(Arrays.asList(fieldIdArray));
+                
+                // Extract values and convert to ArrayList<String>
                 String[] valueArray = params.values().split(",", -1);
                 ArrayList<String> values = new ArrayList<>(Arrays.asList(valueArray));
+                
+                // Search database for the Records with values in values and
+                // field IDs in fieldIdsAsStrings
                 ArrayList<Record> records = (ArrayList) database.search(fieldIdsAsStrings, values);
 
-                ArrayList<Integer> imageIds = new ArrayList<>();
-                ArrayList<URL> imageURLs = new ArrayList<>();
-                ArrayList<Integer> rowNumbers = new ArrayList<>();
-                ArrayList<Integer> fieldIds = new ArrayList<>();
-                HashMap<Integer, Image> images = new HashMap<>();
+                // Extract info for Search_Result
+                Image currentImage; // current Image for the iteration
+                ArrayList<Image> tImages; // result of get query inside for loop
+                ArrayList<Integer> imageIds = new ArrayList<>(); // for Search_Result
+                ArrayList<String> imagePaths = new ArrayList<>(); // for Search_Result
+                ArrayList<Integer> rowNumbers = new ArrayList<>(); // for Search_Result
+                ArrayList<Integer> fieldIds = new ArrayList<>(); // for Search_Result
+                HashMap<Integer, Image> images = new HashMap<>(); // To limit # of database queries
+                Image tImage = new Image(); // base Image object for running get queries
                 for (Record record : records) {
-                    Image currentImage;
+
+                    // If we haven't already grabbed this Image from the database
                     if (!images.containsKey(record.imageId())) {
-                        currentImage = (Image) database.get(Database.IMAGES, record.imageId());
+                        // Get this Image out of the database
+                        tImage.setImageId(record.imageId());
+                        tImages = (ArrayList) database.get(tImage);
+                        
+                        // Should only return one Image, because image IDs are unique
+                        assert tImages.size() == 1;
+                        int firstImageIndex = 0;
+                        currentImage = tImages.get(firstImageIndex);
+                        
+                        // Add this image to the map
                         images.put(new Integer(record.imageId()), currentImage);
                     }
-                    else {
+                    else { // If we have grabbed it already
+                        // Take it from the HashMap
                         currentImage = images.get(record.imageId());
                     }
+                    
+                    // Grab info from the Image and Record for the Search_Result
                     imageIds.add(currentImage.imageId());
-                    imageURLs.add(currentImage.path());
+                    imagePaths.add(currentImage.path());
                     rowNumbers.add(record.rowNumber());
                     fieldIds.add(new Integer(record.fieldId()));
                 }
-                result = new Search_Result(imageIds, imageURLs, rowNumbers, fieldIds);
+                result = new Search_Result(imageIds, imagePaths, rowNumbers, fieldIds);
                 success = true;
             }
         }
@@ -444,4 +509,5 @@ public class API {
         return result;
         
     }    
+    
 }

@@ -1,6 +1,5 @@
 package shared.communication;
 
-import java.net.URL;
 import java.util.List;
 import shared.model.Field;
 import shared.model.Image;
@@ -15,7 +14,7 @@ public class DownloadBatch_Result {
     
     private int imageId;
     private int projectId;
-    private URL imageURL;
+    private String imagePath;
     private int firstYCoord;
     private int recordHeight;
     private int numRecords;
@@ -25,7 +24,7 @@ public class DownloadBatch_Result {
     public DownloadBatch_Result(Project project, Image image, List<Field> inFields) {
         imageId = image.imageId();
         projectId = project.projectId();
-        imageURL = image.path();
+        imagePath = image.path();
         firstYCoord = project.firstYCoord();
         recordHeight = project.fieldHeight();
         numRecords = project.recordCount();
@@ -52,12 +51,12 @@ public class DownloadBatch_Result {
     }
     
     /**
-     * Getter method for the URL path to the image file on the server.
+     * Getter method for the String path to the image file on the server.
      * 
-     * @return Image URL
+     * @return Image Path
      */
-    public URL imageURL() {
-        return imageURL;
+    public String imagePath() {
+        return imagePath;
     }
     
     /**

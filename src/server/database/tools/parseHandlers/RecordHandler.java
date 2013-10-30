@@ -4,6 +4,7 @@
  */
 package server.database.tools.parseHandlers;
 
+import java.util.ArrayList;
 import java.util.logging.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -68,7 +69,16 @@ public class RecordHandler extends DefaultHandler {
             try {
                 ++currentColumn; // Columns are indexed from 1 to n. I need to fix this.
                 database.startTransaction();
-                currentFieldId = ((Field) database.get(Database.FIELDS, projectId, currentColumn)).fieldId();
+                Field tField = new Field();
+                tField.setProjectId(projectId);
+                tField.setColumnNumber(currentColumn);
+                ArrayList<Field> tFields = (ArrayList) database.get(tField);
+                // Should only return one match because the projectId and currentColumn
+                // combination is constrained to be unique in the database.
+                assert tFields.size() == 1;
+                
+                int firstFieldIndex = 0;
+                currentFieldId = tFields.get(firstFieldIndex).fieldId();
                 database.insert(new Record(imageId, currentFieldId, currentRow, content.toString()));
                 database.endTransaction(true);
             } catch (Database.DatabaseException

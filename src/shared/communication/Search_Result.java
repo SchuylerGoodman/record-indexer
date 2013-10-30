@@ -1,6 +1,5 @@
 package shared.communication;
 
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -11,15 +10,15 @@ import java.util.*;
 public class Search_Result {
     
     private List<Integer> imageIds;
-    private List<URL> imageURLs;
+    private List<String> imagePaths;
     private List<Integer> rowNumbers;
     private List<Integer> fieldIds;
     
-    public Search_Result(List<Integer> imageIds, List<URL> imageURLs,
+    public Search_Result(List<Integer> imageIds, List<String> imagePaths,
                          List<Integer> rowNumbers, List<Integer> fieldIds) {
         
         this.imageIds = imageIds;
-        this.imageURLs = imageURLs;
+        this.imagePaths = imagePaths;
         this.rowNumbers = rowNumbers;
         this.fieldIds = fieldIds;
     }
@@ -40,8 +39,8 @@ public class Search_Result {
      * 
      * @return List of image URLs
      */
-    public List<URL> imageURLs() {
-        return imageURLs;
+    public List<String> imagePaths() {
+        return imagePaths;
     }
 
     /**

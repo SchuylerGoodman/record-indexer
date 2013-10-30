@@ -7,6 +7,7 @@ package server.database;
 import server.database.tools.DatabaseCreator;
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.*;
 import org.junit.*;
 import org.junit.Rule;
@@ -20,9 +21,11 @@ import shared.model.Record;
  */
 public class RecordsTest {
     
-       private Records records;
+    private Records records;
     
     private Connection connection;
+    
+    private ArrayList<Record> recordList;
     
     private static String databasePath = "db" + File.separator + "test" + File.separator
                 + "test-record-indexer.sqlite";
@@ -33,6 +36,7 @@ public class RecordsTest {
         try {
             Class.forName("org.sqlite.JDBC");
             records = new Records();
+            recordList = new ArrayList<>();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(RecordsTest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -279,18 +283,19 @@ public class RecordsTest {
         try {
             Record base = new Record(0, 0, 0, "value");
             base = records.insert(connection, base);
+            Record get = new Record();
+            get.setRecordId(base.recordId());
 
             // Returns a correct result
-            int id = base.recordId();
-            Record result = records.get(connection, id);
-            
-            Assert.assertEquals(result, base);
+            recordList.addAll(records.get(connection, get));
+            Assert.assertEquals(1, recordList.size());
+            Assert.assertEquals(recordList.get(0), base);
+            recordList.clear();
             
             // Returns null if not found
-            ++id;
-            result = records.get(connection, id);
-            
-            Assert.assertNull(result);
+            get.setRecordId(base.recordId() + 1);
+            recordList.addAll(records.get(connection, get));
+            Assert.assertEquals(0, recordList.size());
             
         }
         catch (SQLException | RecordInsertFailedException | RecordGetFailedException ex) {
@@ -299,6 +304,7 @@ public class RecordsTest {
         finally {
             if (stmt != null) stmt.close();
             if (rs != null) rs.close();
+            recordList.clear();
         }
     }
     
@@ -311,20 +317,21 @@ public class RecordsTest {
         try {
             Record base = new Record(1, 2, 3, "value");
             base = records.insert(connection, base);
+            Record get = new Record();
+            get.setImageId(base.imageId());
+            get.setFieldId(base.fieldId());
+            get.setRowNumber(base.rowNumber());
 
             // Returns a correct result
-            int imageId = base.imageId();
-            int fieldId = base.fieldId();
-            int rowNumber = base.rowNumber();
-            Record result = records.get(connection, imageId, fieldId, rowNumber);
-            
-            Assert.assertEquals(result, base);
+            recordList.addAll(records.get(connection, get));
+            Assert.assertEquals(1, recordList.size());
+            Assert.assertEquals(recordList.get(0), base);
+            recordList.clear();
             
             // Returns null if not found
-            ++imageId;
-            result = records.get(connection, imageId, fieldId, rowNumber);
-            
-            Assert.assertNull(result);
+            get.setImageId(base.imageId() + 1);
+            recordList.addAll(records.get(connection, get));
+            Assert.assertEquals(0, recordList.size());
             
         }
         catch (SQLException | RecordInsertFailedException | RecordGetFailedException ex) {
@@ -333,6 +340,7 @@ public class RecordsTest {
         finally {
             if (stmt != null) stmt.close();
             if (rs != null) rs.close();
+            recordList.clear();
         }
     }
     

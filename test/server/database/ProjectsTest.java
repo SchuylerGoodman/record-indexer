@@ -7,6 +7,7 @@ package server.database;
 import server.database.tools.DatabaseCreator;
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.*;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
@@ -23,6 +24,8 @@ public class ProjectsTest {
     
     private Connection connection;
     
+    private ArrayList<Project> projectList;
+    
     private static String databasePath = "db" + File.separator + "test" + File.separator
                 + "test-record-indexer.sqlite";
     
@@ -32,6 +35,7 @@ public class ProjectsTest {
         try {
             Class.forName("org.sqlite.JDBC");
             projects = new Projects();
+            projectList = new ArrayList<>();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ProjectsTest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -216,18 +220,18 @@ public class ProjectsTest {
         try {
             Project base = new Project("Hoop", 1, 2, 3);
             base = projects.insert(connection, base);
+            Project get = new Project(base.projectId(), null, -1, -1, -1);
 
             // Returns a correct result
-            int id = base.projectId();
-            Project result = projects.get(connection, id);
-            
-            Assert.assertEquals(result, base);
+            projectList.addAll(projects.get(connection, get));
+            Assert.assertEquals(1, projectList.size());
+            Assert.assertEquals(projectList.get(0), base);
+            projectList.clear();
             
             // Returns null if not found
-            ++id;
-            result = projects.get(connection, id);
-            
-            Assert.assertNull(result);
+            get.setProjectId(base.projectId() + 1);
+            projectList.addAll(projects.get(connection, get));
+            Assert.assertEquals(0, projectList.size());
             
         }
         catch (SQLException
@@ -238,6 +242,7 @@ public class ProjectsTest {
         finally {
             if (stmt != null) stmt.close();
             if (rs != null) rs.close();
+            projectList.clear();
         }
     }
     

@@ -1,6 +1,5 @@
 package shared.model;
 
-import java.net.URL;
 import java.util.Objects;
 import server.database.Database;
 
@@ -15,23 +14,23 @@ public class Field implements ModelClass {
     private String title;
     private int xCoordinate;
     private int width;
-    private URL helpHtml;
+    private String helpHtml;
     private int columnNumber;
     private int projectId;
-    private URL knownData;
+    private String knownData;
     
     public Field() {
         fieldId = 0;
         title = null;
         xCoordinate = -1;
-        width = 0;
+        width = -1;
         helpHtml = null;
         columnNumber = 0;
         projectId = 0;
         knownData = null;
     }
     
-    public Field(String inTitle, int inXCoordinate, int inWidth, URL inHelpHtml,
+    public Field(String inTitle, int inXCoordinate, int inWidth, String inHelpHtml,
             int inColumnNumber, int inProjectId) {
         
         fieldId = 0;
@@ -44,8 +43,8 @@ public class Field implements ModelClass {
         knownData = null;
     }
     
-    public Field(String inTitle, int inXCoordinate, int inWidth, URL inHelpHtml,
-            int inColumnNumber, int inProjectId, URL inKnownData) {
+    public Field(String inTitle, int inXCoordinate, int inWidth, String inHelpHtml,
+            int inColumnNumber, int inProjectId, String inKnownData) {
         
         fieldId = 0;
         title = inTitle;
@@ -58,7 +57,7 @@ public class Field implements ModelClass {
     }
     
     public Field(int inFieldId, String inTitle, int inXCoordinate, int inWidth,
-            URL inHelpHtml, int inColumnNumber, int inProjectId) {
+            String inHelpHtml, int inColumnNumber, int inProjectId) {
         
         fieldId = inFieldId;
         title = inTitle;
@@ -71,7 +70,7 @@ public class Field implements ModelClass {
     }
     
     public Field(int inFieldId, String inTitle, int inXCoordinate, int inWidth,
-            URL inHelpHtml, int inColumnNumber, int inProjectId, URL inKnownData) {
+            String inHelpHtml, int inColumnNumber, int inProjectId, String inKnownData) {
         
         fieldId = inFieldId;
         title = inTitle;
@@ -120,11 +119,11 @@ public class Field implements ModelClass {
     }
     
     /**
-     * Getter method for the URL path to the helper text for this field.
+     * Getter method for the String path to the helper text for this field.
      * 
-     * @return URL path to the Field's helper text.
+     * @return String path to the Field's helper text.
      */
-    public URL helpHtml() {
+    public String helpHtml() {
         return helpHtml;
     }
     
@@ -147,11 +146,11 @@ public class Field implements ModelClass {
     }
     
     /**
-     * Getter method for the URL containing the known data for this field.
+     * Getter method for the String containing the known data for this field.
      * 
-     * @return URL path to the known data .txt file on the server
+     * @return String path to the known data .txt file on the server
      */
-    public URL knownData() {
+    public String knownData() {
         return knownData;
     }
     
@@ -194,9 +193,9 @@ public class Field implements ModelClass {
     /**
      * Setter for the location of the help text on the server.
      * 
-     * @param newUrl URL to set
+     * @param newUrl String to set
      */
-    public void setHelpHtml(URL newUrl) {
+    public void setHelpHtml(String newUrl) {
         helpHtml = newUrl;
     }
     
@@ -219,11 +218,11 @@ public class Field implements ModelClass {
     }
     
     /**
-     * Setter for the URL path of the known data .txt file for this field.
+     * Setter for the String path of the known data .txt file for this field.
      * 
-     * @param newUrl URL to set
+     * @param newUrl String to set
      */
-    public void setKnownData(URL newUrl) {
+    public void setKnownData(String newUrl) {
         knownData = newUrl;
     }
     
@@ -250,30 +249,30 @@ public class Field implements ModelClass {
             tHelp = prime2;
         }
         else {
-            tHelp = helpHtml.hashCode();
+            tHelp = helpHtml.length();
         }
         
         int tCol = columnNumber;
         int tProjectId = projectId;
         
-        if (tFieldId == 0) {
+        if (tFieldId < 1) {
             tFieldId = prime2;
         }
-        if (tXCoord == -1) {
+        if (tXCoord <= 0) {
             tXCoord = prime1;
         }
-        if (tWidth == 0) {
+        if (tWidth <= 0) {
             tWidth = prime;
         }
-        if (tCol == 0) {
+        if (tCol < 1) {
             tCol = prime1;
         }
-        if (tProjectId == 0) {
+        if (tProjectId < 1) {
             tProjectId = prime2;
         }
         int tKData;
         if (knownData == null) {
-            tKData = knownData.hashCode();
+            tKData = knownData.length();
         }
         else {
             tKData = prime;
@@ -303,7 +302,7 @@ public class Field implements ModelClass {
         if (this.fieldId != other.fieldId) {
             return false;
         }
-        if (!Objects.equals(this.title, other.title)) {
+        if (!this.title.equals(other.title)) {
             return false;
         }
         if (this.xCoordinate != other.xCoordinate) {
@@ -312,7 +311,7 @@ public class Field implements ModelClass {
         if (this.width != other.width) {
             return false;
         }
-        if (!Objects.equals(this.helpHtml, other.helpHtml)) {
+        if (!this.helpHtml.equals(other.helpHtml)) {
             return false;
         }
         if (this.columnNumber != other.columnNumber) {
@@ -335,7 +334,7 @@ public class Field implements ModelClass {
         if (xCoordinate < 0) {
             return false;
         }
-        if (width < 1) {
+        if (width < 0) {
             return false;
         }
         if (helpHtml == null) {

@@ -21,27 +21,11 @@ public class IndexerHandler extends DefaultHandler {
     
     private XMLReader reader;
     private Database database;
-    private String currentTable;
-    private int currentProjectId;
-    
-    private boolean onUser;
-    private boolean onProject;
-    private boolean onField;
-    private boolean onRecord;
-    private boolean onImage;
     
     public IndexerHandler(XMLReader reader) throws Database.DatabaseException {
         
         this.reader = reader;
         database = new Database();
-        currentTable = null;
-        currentProjectId = 0;
-        
-        onUser = false;
-        onProject = false;
-        onField = false;
-        onRecord = false;
-        onImage = false;
         
     }
 

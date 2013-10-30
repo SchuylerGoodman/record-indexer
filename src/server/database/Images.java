@@ -1,7 +1,5 @@
 package server.database;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,60 +38,6 @@ public class Images {
     }
     
     /**
-     * Queries the database for a sample Image from the project specified in imageParams.
-     * <p>
-     * Preconditions:   Username and password belong to a User in the database.
-     *                  Project ID refers to a project available to the User.
-     * 
-     * @param username
-     * @param password
-     * @param projectId unique identifier for the project from which to extract 
-     * a sample Image
-     * @return URL pointing to the sample Image for later download
-     * @return null if User does not exist, or no project has projectId
-     
-     */
-    protected URL getSampleImage(String username, String password, int projectId) {
-        return null;
-    }
-    
-    /**
-     * Asks the database to find the first Image belonging to the specified 
-     * Project with no assigned User.
-     * <p>
-     * Assigns this Image to the User.
-     * Preconditions:   User must actually exist.
-     *                  Project must actually exist.
-     * 
-     * @param projectId Unique identifier for the project from which to 
-     * download an Image.
-     * @return shared.model.Image containing the path to this Image, etc.
-     * @return null if User does not exist, or no project has projectId
-     
-     */
-    protected shared.model.Image downloadBatch(int projectId) {
-        return null;
-    }
-
-    /**
-     * Sets the currentUser field in the images table at imageId to null.
-     * 
-     * @param imageId Unique identifier for the image being unassigned.
-     */
-    protected void unassignUser(int imageId) {
-    }
-    
-    /**
-     * Searches the Images table for the path to an Image.
-     * 
-     * @param imageId Unique ID of the Image to search for.
-     * @return URL path to the Image on the server.
-     */
-    protected URL search(int imageId) {
-        return null;
-    }
-    
-    /**
      * Inserts an new Image into the database.
      * 
      * @param connection Open database connection
@@ -124,7 +68,7 @@ public class Images {
             }
             sql.append(")");
             stmt = connection.prepareStatement(sql.toString());
-            stmt.setString(1, newImage.path().toString());
+            stmt.setString(1, newImage.path());
             stmt.setString(2, newImage.title());
             stmt.setInt(3, newImage.projectId());
             if (newImage.currentUser() > 0) {
@@ -180,7 +124,7 @@ public class Images {
             StringBuilder sql = new StringBuilder();
 
             if (image.path() != null) {
-                sql.append(" path=\"").append(image.path().toString()).append("\"");
+                sql.append(" path=\"").append(image.path()).append("\"");
             }
             if (image.title() != null) {
                 if (sql.length() > 0) sql.append(",");
@@ -222,15 +166,18 @@ public class Images {
     }
     
     /**
-     * Gets all images from the database.
+     * Gets all matching Images from the database.
      * 
      * @param connection Open database connection
+     * @param image Image object - all initialized information will be used to
+     * get all matching images from the database. Calling this function with the
+     * empty Image constructor will return all images from the database.
      * 
      * @return shared.model.Image object with the requested info.
      * @throws ImageGetFailedException
      * @throws SQLException
      */
-    protected List<Image> get(Connection connection)
+    protected List<Image> get(Connection connection, Image image)
             throws ImageGetFailedException, SQLException {
         
         Logger.getLogger(Images.class.getName()).log(Level.FINE, "Entering Images.get()");
@@ -244,17 +191,46 @@ public class Images {
         
         try {
             
-            String sql = "select * from images";
+            StringBuilder sql = new StringBuilder();
+            StringBuilder wheres = new StringBuilder();
+            sql.append("select * from images");
+
+            if (image.imageId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                wheres.append("imageId=").append(image.imageId());
+            }
+            if (image.path() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("path=\"").append(image.path()).append("\"");
+            }
+            if (image.title() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("title=\"").append(image.title()).append("\"");
+            }
+            if (image.projectId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("projectId=").append(image.projectId());
+            }
+            if (image.currentUser() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("currentUser=").append(image.currentUser());
+            }
+            sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                images.add(new Image(rs.getInt(1), new URL(rs.getString(2)),
-                                  rs.getString(3), rs.getInt(4), rs.getInt(5)));
+                images.add(new Image(rs.getInt(1), rs.getString(2),
+                                     rs.getString(3), rs.getInt(4),
+                                     rs.getInt(5)));
             }
             
         }
-        catch (SQLException | MalformedURLException ex) {
+        catch (SQLException ex) {
             throw new ImageGetFailedException(ex.getMessage());
         }
         finally {
@@ -267,62 +243,62 @@ public class Images {
         
     }
     
-    /**
-     * Gets data on the requested image from the database.
-     * 
-     * @param connection Open database connection
-     * @param imageId Image ID whose data we want.
-     * 
-     * @return shared.model.Image object with the requested info.
-     * @throws ImageGetFailedException
-     * @throws SQLException
-     */
-    protected Image get(Connection connection, int imageId)
-            throws ImageGetFailedException, SQLException {
-        
-        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Entering Images.get()");
-        if (connection == null) {
-            throw new ImageGetFailedException("Database connection has not been initialized.");
-        }
-        if (imageId < 1) {
-            throw new ImageGetFailedException(
-                    String.format("%d is an invalid image ID.", imageId));
-        }
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Image image = null;
-        
-        try {
-            
-            String sql = "select * from images where imageId = ?";
-            stmt = connection.prepareStatement(sql.toString());
-            stmt.setInt(1, imageId);
-            rs = stmt.executeQuery();
-            
-            int j = 0;
-            while (rs.next()) {
-                image = new Image(rs.getInt(1), new URL(rs.getString(2)),
-                                  rs.getString(3), rs.getInt(4), rs.getInt(5));
-                ++j;
-            }
-            if (j > 1) {
-                throw new ImageGetFailedException(String.format(
-                        "Only one Image should have been returned. Found %d", j));
-            }
-            
-        }
-        catch (SQLException | MalformedURLException ex) {
-            throw new ImageGetFailedException(ex.getMessage());
-        }
-        finally {
-            if (stmt != null) stmt.close();
-            if (rs != null) rs.close();
-        }
-        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Leaving Images.get()");
-        return image;
-        
-    }
+//    /**
+//     * Gets data on the requested image from the database.
+//     * 
+//     * @param connection Open database connection
+//     * @param imageId Image ID whose data we want.
+//     * 
+//     * @return shared.model.Image object with the requested info.
+//     * @throws ImageGetFailedException
+//     * @throws SQLException
+//     */
+//    protected Image get(Connection connection, int imageId)
+//            throws ImageGetFailedException, SQLException {
+//        
+//        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Entering Images.get()");
+//        if (connection == null) {
+//            throw new ImageGetFailedException("Database connection has not been initialized.");
+//        }
+//        if (imageId < 1) {
+//            throw new ImageGetFailedException(
+//                    String.format("%d is an invalid image ID.", imageId));
+//        }
+//        
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        Image image = null;
+//        
+//        try {
+//            
+//            String sql = "select * from images where imageId = ?";
+//            stmt = connection.prepareStatement(sql.toString());
+//            stmt.setInt(1, imageId);
+//            rs = stmt.executeQuery();
+//            
+//            int j = 0;
+//            while (rs.next()) {
+//                image = new Image(rs.getInt(1), rs.getString(2),
+//                                  rs.getString(3), rs.getInt(4), rs.getInt(5));
+//                ++j;
+//            }
+//            if (j > 1) {
+//                throw new ImageGetFailedException(String.format(
+//                        "Only one Image should have been returned. Found %d", j));
+//            }
+//            
+//        }
+//        catch (SQLException ex) {
+//            throw new ImageGetFailedException(ex.getMessage());
+//        }
+//        finally {
+//            if (stmt != null) stmt.close();
+//            if (rs != null) rs.close();
+//        }
+//        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Leaving Images.get()");
+//        return image;
+//        
+//    }
 
     /**
      * Deletes an image from the database.

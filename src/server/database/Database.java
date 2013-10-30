@@ -235,7 +235,7 @@ public class Database {
      * @param uniqueId database id to get from the table.
      * @return Model Class with the requested information.
      */
-    public List<ModelClass> get(String tableName)
+    public List<ModelClass> get(ModelClass model)
             throws DatabaseException, GetFailedException {
         
         Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
@@ -244,21 +244,22 @@ public class Database {
             throw new DatabaseException("Database transaction has not been started.");
         }
         
+        String tableName = model.getTableName();
         try {
             if (USERS.equalsIgnoreCase(tableName)) {
-                returnClasses.addAll(users.get(connection));
+                returnClasses.addAll(users.get(connection, (User) model));
             }
             else if (PROJECTS.equalsIgnoreCase(tableName)) {
-                returnClasses.addAll(projects.get(connection));
+                returnClasses.addAll(projects.get(connection, (Project) model));
             }
             else if (FIELDS.equalsIgnoreCase(tableName)) {
-                returnClasses.addAll(fields.get(connection));
+                returnClasses.addAll(fields.get(connection, (Field) model));
             }
             else if (RECORDS.equalsIgnoreCase(tableName)) {
-                returnClasses.addAll(records.get(connection));
+                returnClasses.addAll(records.get(connection, (Record) model));
             }
             else if (IMAGES.equalsIgnoreCase(tableName)) {
-                returnClasses.addAll(images.get(connection));
+                returnClasses.addAll(images.get(connection, (Image) model));
             }
             else {
                 throw new GetFailedException("Invalid input table name.");
@@ -281,130 +282,130 @@ public class Database {
         
     }
     
-    /**
-     * Loads a model class from the database.
-     * 
-     * @param tableName String case-insensitive: containing the name of the table to query. 
-     *    Output of ModelClass.getTableName()
-     *    Options:
-     *      USERS
-     *      PROJECTS
-     *      FIELDS
-     *      RECORDS
-     *      IMAGES
-     * @param uniqueId database id to get from the table.
-     * @return Model Class with the requested information.
-     */
-    public ModelClass get(String tableName, int uniqueId)
-            throws DatabaseException, GetFailedException {
-        
-        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
-        ModelClass returnClass = null;
-        if (connection == null) {
-            throw new DatabaseException("Database transaction has not been started.");
-        }
-        
-        try {
-            if (USERS.equalsIgnoreCase(tableName)) {
-                returnClass = users.get(connection, uniqueId);
-            }
-            else if (PROJECTS.equalsIgnoreCase(tableName)) {
-                returnClass = projects.get(connection, uniqueId);
-            }
-            else if (FIELDS.equalsIgnoreCase(tableName)) {
-                returnClass = fields.get(connection, uniqueId);
-            }
-            else if (RECORDS.equalsIgnoreCase(tableName)) {
-                returnClass = records.get(connection, uniqueId);
-            }
-            else if (IMAGES.equalsIgnoreCase(tableName)) {
-                returnClass = images.get(connection, uniqueId);
-            }
-            else {
-                throw new GetFailedException("Invalid input table name.");
-            }
-        }
-        catch (Users.UserGetFailedException
-               | Projects.ProjectGetFailedException
-               | Fields.FieldGetFailedException
-               | Records.RecordGetFailedException
-               | Images.ImageGetFailedException ex) {
-            Logger.getLogger(Database.class.getName()).log(
-                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
-            throw new GetFailedException(ex.getMessage());
-        }
-        catch (SQLException ex) {
-            throw new DatabaseException(ex.getMessage());
-        }
-        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.get()");
-        return returnClass;
-        
-    }
-
-    /**
-     * Loads a model class from the database for operations requiring two input parameters.
-     * Currently only supported for User and Field lookups.
-     * 
-     * @param tableName String case-insensitive: containing the name of the table to query. 
-     *    Output of ModelClass.getTableName()
-     *    Options:
-     *      USERS - Requires String username and String password
-     *      <Strike>PROJECTS<\Strike>
-     *      FIELDS - Requires Integer project ID and Integer columnNumber
-     *      <Strike>RECORDS<\Strike>
-     *      <Strike>IMAGES<\Strike>
-     * @param uniqueId database id to get from the table.
-     * @return Model Class with the requested information.
-     */
-    public ModelClass get(String tableName, Object firstId, Object secondId)
-            throws DatabaseException, GetFailedException {
-        
-        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
-        ModelClass returnClass = null;
-        if (connection == null) {
-            throw new DatabaseException("Database transaction has not been started.");
-        }
-        
-        try {
-            if (USERS.equalsIgnoreCase(tableName)) {
-                if (firstId.getClass() == secondId.getClass() && firstId.getClass() == String.class) {
-                    String firstIdString = (String) firstId;
-                    String secondIdString = (String) secondId;
-                    returnClass = users.get(connection, firstIdString, secondIdString);
-                }
-                else {
-                    throw new GetFailedException(
-                            "Get from users table requires String inputs.");
-                }
-            }
-            else if (FIELDS.equalsIgnoreCase(tableName)) {
-                if (firstId.getClass() == secondId.getClass() && firstId.getClass() == Integer.class) {
-                    Integer firstIdInt = (Integer) firstId;
-                    Integer secondIdInt = (Integer) secondId;
-                    returnClass = fields.get(connection, firstIdInt.intValue(), secondIdInt.intValue());
-                }
-                else {
-                    throw new GetFailedException(
-                            "Get from fields table requires Integer inputs.");
-                }
-            }
-            else {
-                throw new GetFailedException("Invalid input table name.");
-            }
-        }
-        catch (Users.UserGetFailedException
-             | Fields.FieldGetFailedException ex) {
-            Logger.getLogger(Database.class.getName()).log(
-                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
-            throw new GetFailedException(ex.getMessage());
-        }
-        catch (SQLException ex) {
-            throw new DatabaseException(ex.getMessage());
-        }
-        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.get()");
-        return returnClass;
-        
-    }
+//    /**
+//     * Loads a model class from the database.
+//     * 
+//     * @param tableName String case-insensitive: containing the name of the table to query. 
+//     *    Output of ModelClass.getTableName()
+//     *    Options:
+//     *      USERS
+//     *      PROJECTS
+//     *      FIELDS
+//     *      RECORDS
+//     *      IMAGES
+//     * @param uniqueId database id to get from the table.
+//     * @return Model Class with the requested information.
+//     */
+//    public ModelClass get(String tableName, int uniqueId)
+//            throws DatabaseException, GetFailedException {
+//        
+//        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
+//        ModelClass returnClass = null;
+//        if (connection == null) {
+//            throw new DatabaseException("Database transaction has not been started.");
+//        }
+//        
+//        try {
+//            if (USERS.equalsIgnoreCase(tableName)) {
+//                returnClass = users.get(connection, uniqueId);
+//            }
+//            else if (PROJECTS.equalsIgnoreCase(tableName)) {
+//                returnClass = projects.get(connection, uniqueId);
+//            }
+//            else if (FIELDS.equalsIgnoreCase(tableName)) {
+//                returnClass = fields.get(connection, uniqueId);
+//            }
+//            else if (RECORDS.equalsIgnoreCase(tableName)) {
+//                returnClass = records.get(connection, uniqueId);
+//            }
+//            else if (IMAGES.equalsIgnoreCase(tableName)) {
+//                returnClass = images.get(connection, uniqueId);
+//            }
+//            else {
+//                throw new GetFailedException("Invalid input table name.");
+//            }
+//        }
+//        catch (Users.UserGetFailedException
+//               | Projects.ProjectGetFailedException
+//               | Fields.FieldGetFailedException
+//               | Records.RecordGetFailedException
+//               | Images.ImageGetFailedException ex) {
+//            Logger.getLogger(Database.class.getName()).log(
+//                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
+//            throw new GetFailedException(ex.getMessage());
+//        }
+//        catch (SQLException ex) {
+//            throw new DatabaseException(ex.getMessage());
+//        }
+//        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.get()");
+//        return returnClass;
+//        
+//    }
+//
+//    /**
+//     * Loads a model class from the database for operations requiring two input parameters.
+//     * Currently only supported for User and Field lookups.
+//     * 
+//     * @param tableName String case-insensitive: containing the name of the table to query. 
+//     *    Output of ModelClass.getTableName()
+//     *    Options:
+//     *      USERS - Requires String username and String password
+//     *      <Strike>PROJECTS<\Strike>
+//     *      FIELDS - Requires Integer project ID and Integer columnNumber
+//     *      <Strike>RECORDS<\Strike>
+//     *      <Strike>IMAGES<\Strike>
+//     * @param uniqueId database id to get from the table.
+//     * @return Model Class with the requested information.
+//     */
+//    public ModelClass get(String tableName, Object firstId, Object secondId)
+//            throws DatabaseException, GetFailedException {
+//        
+//        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Entering Database.get()");
+//        ModelClass returnClass = null;
+//        if (connection == null) {
+//            throw new DatabaseException("Database transaction has not been started.");
+//        }
+//        
+//        try {
+//            if (USERS.equalsIgnoreCase(tableName)) {
+//                if (firstId.getClass() == secondId.getClass() && firstId.getClass() == String.class) {
+//                    String firstIdString = (String) firstId;
+//                    String secondIdString = (String) secondId;
+//                    returnClass = users.get(connection, firstIdString, secondIdString);
+//                }
+//                else {
+//                    throw new GetFailedException(
+//                            "Get from users table requires String inputs.");
+//                }
+//            }
+//            else if (FIELDS.equalsIgnoreCase(tableName)) {
+//                if (firstId.getClass() == secondId.getClass() && firstId.getClass() == Integer.class) {
+//                    Integer firstIdInt = (Integer) firstId;
+//                    Integer secondIdInt = (Integer) secondId;
+//                    returnClass = fields.get(connection, firstIdInt.intValue(), secondIdInt.intValue());
+//                }
+//                else {
+//                    throw new GetFailedException(
+//                            "Get from fields table requires Integer inputs.");
+//                }
+//            }
+//            else {
+//                throw new GetFailedException("Invalid input table name.");
+//            }
+//        }
+//        catch (Users.UserGetFailedException
+//             | Fields.FieldGetFailedException ex) {
+//            Logger.getLogger(Database.class.getName()).log(
+//                    Level.WARNING, String.format("Get from %s table failed.", tableName.toLowerCase()), ex);
+//            throw new GetFailedException(ex.getMessage());
+//        }
+//        catch (SQLException ex) {
+//            throw new DatabaseException(ex.getMessage());
+//        }
+//        Logger.getLogger(Database.class.getName()).log(Level.FINE, "Leaving Database.get()");
+//        return returnClass;
+//        
+//    }
     
     /**
      * Deletes information from the database.

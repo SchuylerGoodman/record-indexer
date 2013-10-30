@@ -1,7 +1,5 @@
 package server.database;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,11 +96,11 @@ public class Fields {
             stmt.setString(1, newField.title());
             stmt.setInt(2, newField.xCoordinate());
             stmt.setInt(3, newField.width());
-            stmt.setString(4, newField.helpHtml().toString());
+            stmt.setString(4, newField.helpHtml());
             stmt.setInt(5, newField.columnNumber());
             stmt.setInt(6, newField.projectId());
             if (newField.knownData() != null) {
-                stmt.setString(7, newField.knownData().toString());
+                stmt.setString(7, newField.knownData());
             }
             
             if (stmt.executeUpdate() == 1) {
@@ -153,17 +151,17 @@ public class Fields {
             if (field.title() != null) {
                 sql.append(" title=\"").append(field.title()).append("\"");
             }
-            if (field.xCoordinate() != -1) {
+            if (field.xCoordinate() > -1) {
                 if (sql.length() > 0) sql.append(",");
                 sql.append(" xCoordinate=").append(field.xCoordinate());
             }
-            if (field.width() > 0) {
+            if (field.width() > -1) {
                 if (sql.length() > 0) sql.append(",");
                 sql.append(" width=").append(field.width());
             }
             if (field.helpHtml() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" helpHtml=\"").append(field.helpHtml().toString()).append("\"");
+                sql.append(" helpHtml=\"").append(field.helpHtml()).append("\"");
             }
             if (field.columnNumber() > 0) {
                 if (sql.length() > 0) sql.append(",");
@@ -175,7 +173,7 @@ public class Fields {
             }
             if (field.knownData() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" knownData=\"").append(field.knownData().toString()).append("\"");
+                sql.append(" knownData=\"").append(field.knownData()).append("\"");
             }
             if (sql.length() > 0) {
                 sql.insert(0, "update fields set");
@@ -204,15 +202,18 @@ public class Fields {
     }
     
     /**
-     * Gets all Fields from the database.
+     * Gets all matching Fields from the database.
      * 
      * @param connection Open database connection
+     * @param field Field object - all initialized information will be used to
+     * get all matching fields from the database. Calling this function with the
+     * empty Field constructor will return all fields from the database.
      * 
      * @return shared.model.Field object with the requested data.
      * @throws FieldGetFailedException
      * @throws SQLException
      */
-    protected List<Field> get(Connection connection)
+    protected List<Field> get(Connection connection, Field field)
             throws SQLException, FieldGetFailedException {
         
         Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
@@ -226,23 +227,67 @@ public class Fields {
         
         try {
             
-            String sql = "select * from fields";
+            StringBuilder sql = new StringBuilder();
+            StringBuilder wheres = new StringBuilder();
+            sql.append("select * from fields");
+
+            if (field.fieldId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                wheres.append("fieldId=").append(field.fieldId());
+            }
+            if (field.title() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("title=\"").append(field.title()).append("\"");
+            }
+            if (field.xCoordinate() > -1) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("xCoordinate=").append(field.xCoordinate());
+            }
+            if (field.width() > -1) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("width=").append(field.width());
+            }
+            if (field.helpHtml() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("helpHtml=\"").append(field.helpHtml()).append("\"");
+            }
+            if (field.columnNumber() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("columnNumber=").append(field.columnNumber());
+            }
+            if (field.projectId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("projectId=").append(field.projectId());
+            }
+            if (field.knownData() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("knownData=\"").append(field.knownData()).append("\"");
+            }
+            sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());
             rs = stmt.executeQuery();
             
+            int j = 0;
             while (rs.next()) {
-                Field field = new Field(rs.getInt(1), rs.getString(2),
+                fields.add(new Field(rs.getInt(1), rs.getString(2),
                                     rs.getInt(3), rs.getInt(4),
-                                    new URL(rs.getString(5)), rs.getInt(6),
-                                    rs.getInt(7));
-                if (!rs.getString(8).isEmpty()) {
-                    field.setKnownData(new URL(rs.getString(8)));
+                                    rs.getString(5), rs.getInt(6),
+                                    rs.getInt(7)));
+                if (rs.getString(8) != null) {
+                    fields.get(j).setKnownData(rs.getString(8));
                 }
-                fields.add(field);
+                ++j;
             }
             
         }
-        catch (SQLException | MalformedURLException ex) {
+        catch (SQLException ex) {
             throw new FieldGetFailedException(ex.getMessage());
         }
         finally {
@@ -254,126 +299,126 @@ public class Fields {
         
     }
     
-    /**
-     * Gets a Field from the database.
-     * 
-     * @param connection Open database connection
-     * @param fieldId Field ID to get from the database.
-     * 
-     * @return shared.model.Field object with the requested data.
-     * @throws FieldGetFailedException
-     * @throws SQLException
-     */
-    protected Field get(Connection connection, int fieldId)
-            throws SQLException, FieldGetFailedException {
-        
-        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
-        if (connection == null) {
-            throw new FieldGetFailedException("Database connection has not been initialized.");
-        }
-        if (fieldId < 1) {
-            throw new FieldGetFailedException("%d is an invalid field ID.");
-        }
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Field field = null;
-        
-        try {
-            
-            String sql = "select * from fields where fieldId = ?";
-            stmt = connection.prepareStatement(sql.toString());
-            stmt.setInt(1, fieldId);
-            rs = stmt.executeQuery();
-            
-            int j = 0;
-            while (rs.next()) {
-                field = new Field(rs.getInt(1), rs.getString(2),
-                                    rs.getInt(3), rs.getInt(4),
-                                    new URL(rs.getString(5)), rs.getInt(6),
-                                    rs.getInt(7));
-                if (!rs.getString(8).isEmpty()) {
-                    field.setKnownData(new URL(rs.getString(8)));
-                }
-                ++j;
-            }
-            if (j > 1) {
-                throw new FieldGetFailedException(
-                        String.format("Only one Field should have been returned. Found %d", j));
-            }
-            
-        }
-        catch (SQLException | MalformedURLException ex) {
-            throw new FieldGetFailedException(ex.getMessage());
-        }
-        finally {
-            if (stmt != null) stmt.close();
-            if (rs != null) rs.close();
-        }
-        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
-        return field;
-        
-    }
-    
-    /**
-     * Gets a Field from the database by the project id and column number.
-     * 
-     * @param connection Open database connection
-     * @param projectId Project ID to which the requested field belongs
-     * @param columnNumber the column in the project in which this field is found
-     * @return shared.model.Field object with the requested data.
-     */
-    protected Field get(Connection connection, int projectId, int columnNumber)
-            throws SQLException, FieldGetFailedException {
-        
-        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
-        if (connection == null) {
-            throw new FieldGetFailedException("Database connection has not been initialized.");
-        }
-        if (projectId < 1 || columnNumber < 1) {
-            throw new FieldGetFailedException("Invalid input IDs.");
-        }
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Field field = null;
-        
-        try {
-            
-            String sql = "select * from fields where projectId = ? and columnNumber = ?";
-            stmt = connection.prepareStatement(sql.toString());
-            stmt.setInt(1, projectId);
-            stmt.setInt(2, columnNumber);
-            rs = stmt.executeQuery();
-            
-            int j = 0;
-            while (rs.next()) {
-                field = new Field(rs.getInt(1), rs.getString(2),
-                                    rs.getInt(3), rs.getInt(4),
-                                    new URL(rs.getString(5)), rs.getInt(6),
-                                    rs.getInt(7));
-                if (!rs.getString(8).isEmpty()) {
-                    field.setKnownData(new URL(rs.getString(8)));
-                }
-                ++j;
-            }
-            if (j > 1) {
-                throw new FieldGetFailedException(
-                        String.format("Only one Field should have been returned. Found %d", j));
-            }
-            
-        }
-        catch (SQLException | MalformedURLException ex) {
-            throw new FieldGetFailedException(ex.getMessage());
-        }
-        finally {
-            if (stmt != null) stmt.close();
-            if (rs != null) rs.close();
-        }
-        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
-        return field;
-        
-    }
+//    /**
+//     * Gets a Field from the database.
+//     * 
+//     * @param connection Open database connection
+//     * @param fieldId Field ID to get from the database.
+//     * 
+//     * @return shared.model.Field object with the requested data.
+//     * @throws FieldGetFailedException
+//     * @throws SQLException
+//     */
+//    protected Field get(Connection connection, int fieldId)
+//            throws SQLException, FieldGetFailedException {
+//        
+//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
+//        if (connection == null) {
+//            throw new FieldGetFailedException("Database connection has not been initialized.");
+//        }
+//        if (fieldId < 1) {
+//            throw new FieldGetFailedException("%d is an invalid field ID.");
+//        }
+//        
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        Field field = null;
+//        
+//        try {
+//            
+//            String sql = "select * from fields where fieldId = ?";
+//            stmt = connection.prepareStatement(sql.toString());
+//            stmt.setInt(1, fieldId);
+//            rs = stmt.executeQuery();
+//            
+//            int j = 0;
+//            while (rs.next()) {
+//                field = new Field(rs.getInt(1), rs.getString(2),
+//                                    rs.getInt(3), rs.getInt(4),
+//                                    rs.getString(5), rs.getInt(6),
+//                                    rs.getInt(7));
+//                if (rs.getString(8) != null) {
+//                    field.setKnownData(rs.getString(8));
+//                }
+//                ++j;
+//            }
+//            if (j > 1) {
+//                throw new FieldGetFailedException(
+//                        String.format("Only one Field should have been returned. Found %d", j));
+//            }
+//            
+//        }
+//        catch (SQLException ex) {
+//            throw new FieldGetFailedException(ex.getMessage());
+//        }
+//        finally {
+//            if (stmt != null) stmt.close();
+//            if (rs != null) rs.close();
+//        }
+//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
+//        return field;
+//        
+//    }
+//    
+//    /**
+//     * Gets a Field from the database by the project id and column number.
+//     * 
+//     * @param connection Open database connection
+//     * @param projectId Project ID to which the requested field belongs
+//     * @param columnNumber the column in the project in which this field is found
+//     * @return shared.model.Field object with the requested data.
+//     */
+//    protected Field get(Connection connection, int projectId, int columnNumber)
+//            throws SQLException, FieldGetFailedException {
+//        
+//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
+//        if (connection == null) {
+//            throw new FieldGetFailedException("Database connection has not been initialized.");
+//        }
+//        if (projectId < 1 || columnNumber < 1) {
+//            throw new FieldGetFailedException("Invalid input IDs.");
+//        }
+//        
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        Field field = null;
+//        
+//        try {
+//            
+//            String sql = "select * from fields where projectId = ? and columnNumber = ?";
+//            stmt = connection.prepareStatement(sql.toString());
+//            stmt.setInt(1, projectId);
+//            stmt.setInt(2, columnNumber);
+//            rs = stmt.executeQuery();
+//            
+//            int j = 0;
+//            while (rs.next()) {
+//                field = new Field(rs.getInt(1), rs.getString(2),
+//                                    rs.getInt(3), rs.getInt(4),
+//                                    rs.getString(5), rs.getInt(6),
+//                                    rs.getInt(7));
+//                if (!rs.getString(8).isEmpty()) {
+//                    field.setKnownData(rs.getString(8));
+//                }
+//                ++j;
+//            }
+//            if (j > 1) {
+//                throw new FieldGetFailedException(
+//                        String.format("Only one Field should have been returned. Found %d", j));
+//            }
+//            
+//        }
+//        catch (SQLException ex) {
+//            throw new FieldGetFailedException(ex.getMessage());
+//        }
+//        finally {
+//            if (stmt != null) stmt.close();
+//            if (rs != null) rs.close();
+//        }
+//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
+//        return field;
+//        
+//    }
     
     /**
      * Deletes a Field from the database.

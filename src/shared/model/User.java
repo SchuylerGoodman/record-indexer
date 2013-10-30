@@ -19,6 +19,12 @@ public class User implements ModelClass {
     
     public User() {
         this.id = 0;
+        this.username = null;
+        this.firstName = null;
+        this.lastName = null;
+        this.password = null;
+        this.email = null;
+        this.indexedRecords = -1;
     }
     
     public User(int inId, String uName, String fName, String lName, String pWord, String inEmail, int numRecords) {
@@ -38,7 +44,7 @@ public class User implements ModelClass {
         this.lastName = lName;
         this.password = pWord;
         this.email = inEmail;
-        this.indexedRecords = 0;
+        this.indexedRecords = -1;
     }
     
     public User(String uName, String fName, String lName, String pWord, String inEmail, int numRecords) {
@@ -58,7 +64,7 @@ public class User implements ModelClass {
         this.lastName = lName;
         this.password = pWord;
         this.email = inEmail;
-        this.indexedRecords = 0;
+        this.indexedRecords = -1;
     }
     
     /**
@@ -201,7 +207,7 @@ public class User implements ModelClass {
         hash *= lastName.length() * prime;
         hash ^= password.length() * prime2;
         hash *= email.length() * prime;
-        if (tRec == 0) {
+        if (tRec < 0) {
             tRec = prime2;
         }
         hash *= tRec;

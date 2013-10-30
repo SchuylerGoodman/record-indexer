@@ -200,15 +200,18 @@ public class Records {
     }
     
     /**
-     * Get all records from the database.
+     * Get all matching Records from the database.
      * 
      * @param connection open database connection.
+     * @param record Record object - all initialized information will be used to
+     * get all matching records from the database. Calling this function with the
+     * empty Record constructor will return all records from the database.
      * 
      * @return List of shared.model.Record objects with the requested information.
      * @throws RecordGetFailedException
      * @throws SQLException
      */
-    protected List<Record> get(Connection connection)
+    protected List<Record> get(Connection connection, Record record)
             throws RecordGetFailedException, SQLException {
 
         Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.get()");
@@ -223,14 +226,42 @@ public class Records {
         
         try {
             
-            String sql = "select * from records";
+            StringBuilder sql = new StringBuilder();
+            StringBuilder wheres = new StringBuilder();
+            sql.append("select * from records");
+
+            if (record.recordId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                wheres.append("recordId=").append(record.recordId());
+            }
+            if (record.imageId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("imageId=").append(record.imageId());
+            }
+            if (record.fieldId() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("fieldId=").append(record.fieldId());
+            }
+            if (record.rowNumber() > 0) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("rowNumber=").append(record.rowNumber());
+            }
+            if (record.value() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("value=\"").append(record.value()).append("\"");
+            }
+            sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());
             rs = stmt.executeQuery();
             
             while (rs.next()) {
                 records.add(new Record(rs.getInt(1), rs.getInt(2),
-                                    rs.getInt(3), rs.getInt(4),
-                                    rs.getString(5)));
+                                       rs.getInt(3), rs.getInt(4),
+                                       rs.getString(5)));
             }
             
         }
@@ -246,124 +277,124 @@ public class Records {
         
     }
     
-    /**
-     * Get a record from the database using the unique record ID.
-     * 
-     * @param connection open database connection.
-     * @param recordId record id whose information is being requested.
-     * 
-     * @return shared.model.Record object with the requested information.
-     * @throws RecordGetFailedException
-     * @throws SQLException
-     */
-    protected Record get(Connection connection, int recordId)
-            throws RecordGetFailedException, SQLException {
-
-        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.get()");
-        if (connection == null) {
-            throw new RecordGetFailedException(
-                    "Database connection has not been initialized.");
-        }
-        if (recordId < 1) {
-            throw new RecordGetFailedException(String.format("%d is an invalid record ID.", recordId));
-        }
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Record record = null;
-        
-        try {
-            
-            String sql = "select * from records where recordId = ?";
-            stmt = connection.prepareStatement(sql.toString());
-            stmt.setInt(1, recordId);
-            rs = stmt.executeQuery();
-            
-            int j = 0;
-            while (rs.next()) {
-                record = new Record(rs.getInt(1), rs.getInt(2),
-                                    rs.getInt(3), rs.getInt(4),
-                                    rs.getString(5));
-                ++j;
-            }
-            if (j > 1) {
-                throw new RecordGetFailedException(
-                        String.format("Only one Record should have been returned. Found %d", j));
-            }
-            
-        }
-        catch (SQLException ex) {
-            throw new RecordGetFailedException(ex.getMessage());
-        }
-        finally {
-            if (stmt != null) stmt.close();
-            if (rs != null) rs.close();
-        }
-        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Leaving Records.get()");
-        return record;
-        
-    }
-
-    /**
-     * Get records from the database using the combination of imageId, fieldId, and rowNumber.
-     * 
-     * @param connection open database connection.
-     * @param imageId image id to whom the requested record belongs
-     * @param fieldId field id to whom the requested record belongs
-     * @param rowNumber row number of the requested record in the image
-     * @return shared.model.Record object with the requested information.
-     * @throws RecordGetFailedException
-     * @throws SQLException
-     */
-    protected Record get(Connection connection, int imageId, int fieldId, int rowNumber)
-            throws RecordGetFailedException, SQLException {
-
-        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.get()");
-        if (connection == null) {
-            throw new RecordGetFailedException(
-                    "Database connection has not been initialized.");
-        }
-        if (imageId < 1 || fieldId < 1 || rowNumber < 1) {
-            throw new RecordGetFailedException("One or more of the given IDs is invalid.");
-        }
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Record record = null;
-        
-        try {
-            
-            String sql = "select * from records where imageId = ? and fieldId = ? and rowNumber = ?";
-            stmt = connection.prepareStatement(sql.toString());
-            stmt.setInt(1, imageId);
-            stmt.setInt(2, fieldId);
-            stmt.setInt(3, rowNumber);
-            rs = stmt.executeQuery();
-            
-            int j = 0;
-            while (rs.next()) {
-                record = new Record(rs.getInt(1), rs.getInt(2),
-                                    rs.getInt(3), rs.getInt(4),
-                                    rs.getString(5));
-                ++j;
-            }
-            if (j > 1) {
-                throw new RecordGetFailedException(
-                        String.format("Only one Record should have been returned. Found %d", j));
-            }
-            
-        }
-        catch (SQLException ex) {
-            throw new RecordGetFailedException(ex.getMessage());
-        }
-        finally {
-            if (stmt != null) stmt.close();
-            if (rs != null) rs.close();
-        }
-        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Leaving Records.get()");
-        return record;
-        
-    }
+//    /**
+//     * Get a record from the database using the unique record ID.
+//     * 
+//     * @param connection open database connection.
+//     * @param recordId record id whose information is being requested.
+//     * 
+//     * @return shared.model.Record object with the requested information.
+//     * @throws RecordGetFailedException
+//     * @throws SQLException
+//     */
+//    protected Record get(Connection connection, int recordId)
+//            throws RecordGetFailedException, SQLException {
+//
+//        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.get()");
+//        if (connection == null) {
+//            throw new RecordGetFailedException(
+//                    "Database connection has not been initialized.");
+//        }
+//        if (recordId < 1) {
+//            throw new RecordGetFailedException(String.format("%d is an invalid record ID.", recordId));
+//        }
+//        
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        Record record = null;
+//        
+//        try {
+//            
+//            String sql = "select * from records where recordId = ?";
+//            stmt = connection.prepareStatement(sql.toString());
+//            stmt.setInt(1, recordId);
+//            rs = stmt.executeQuery();
+//            
+//            int j = 0;
+//            while (rs.next()) {
+//                record = new Record(rs.getInt(1), rs.getInt(2),
+//                                    rs.getInt(3), rs.getInt(4),
+//                                    rs.getString(5));
+//                ++j;
+//            }
+//            if (j > 1) {
+//                throw new RecordGetFailedException(
+//                        String.format("Only one Record should have been returned. Found %d", j));
+//            }
+//            
+//        }
+//        catch (SQLException ex) {
+//            throw new RecordGetFailedException(ex.getMessage());
+//        }
+//        finally {
+//            if (stmt != null) stmt.close();
+//            if (rs != null) rs.close();
+//        }
+//        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Leaving Records.get()");
+//        return record;
+//        
+//    }
+//
+//    /**
+//     * Get records from the database using the combination of imageId, fieldId, and rowNumber.
+//     * 
+//     * @param connection open database connection.
+//     * @param imageId image id to whom the requested record belongs
+//     * @param fieldId field id to whom the requested record belongs
+//     * @param rowNumber row number of the requested record in the image
+//     * @return shared.model.Record object with the requested information.
+//     * @throws RecordGetFailedException
+//     * @throws SQLException
+//     */
+//    protected Record get(Connection connection, int imageId, int fieldId, int rowNumber)
+//            throws RecordGetFailedException, SQLException {
+//
+//        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Entering Records.get()");
+//        if (connection == null) {
+//            throw new RecordGetFailedException(
+//                    "Database connection has not been initialized.");
+//        }
+//        if (imageId < 1 || fieldId < 1 || rowNumber < 1) {
+//            throw new RecordGetFailedException("One or more of the given IDs is invalid.");
+//        }
+//        
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        Record record = null;
+//        
+//        try {
+//            
+//            String sql = "select * from records where imageId = ? and fieldId = ? and rowNumber = ?";
+//            stmt = connection.prepareStatement(sql.toString());
+//            stmt.setInt(1, imageId);
+//            stmt.setInt(2, fieldId);
+//            stmt.setInt(3, rowNumber);
+//            rs = stmt.executeQuery();
+//            
+//            int j = 0;
+//            while (rs.next()) {
+//                record = new Record(rs.getInt(1), rs.getInt(2),
+//                                    rs.getInt(3), rs.getInt(4),
+//                                    rs.getString(5));
+//                ++j;
+//            }
+//            if (j > 1) {
+//                throw new RecordGetFailedException(
+//                        String.format("Only one Record should have been returned. Found %d", j));
+//            }
+//            
+//        }
+//        catch (SQLException ex) {
+//            throw new RecordGetFailedException(ex.getMessage());
+//        }
+//        finally {
+//            if (stmt != null) stmt.close();
+//            if (rs != null) rs.close();
+//        }
+//        Logger.getLogger(Records.class.getName()).log(Level.FINE, "Leaving Records.get()");
+//        return record;
+//        
+//    }
     
     /**
      * Deletes a record from the database using the unique record id.

@@ -186,15 +186,18 @@ public class Projects {
     }
     
     /**
-     * Gets all Projects from the database.
+     * Gets all matching Projects from the database.
      * 
      * @param connection Open database connection
+     * @param project Project object - all initialized information will be used to
+     * get all matching users from the database. Calling this function with the
+     * empty Project constructor will return all projects from the database.
      * 
      * @return List of shared.model.Project objects with the requested information.
      * @throws ProjectGetFailedException
      * @throws SQLException
      */
-    protected List<Project> get(Connection connection)
+    protected List<Project> get(Connection connection, Project project)
             throws ProjectGetFailedException, SQLException {
         
         Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Entering Projects.get()");
@@ -208,7 +211,35 @@ public class Projects {
         
         try {
             
-            String sql = "select * from projects";
+            StringBuilder sql = new StringBuilder();
+            StringBuilder wheres = new StringBuilder();
+            sql.append("select * from projects");
+
+            if (project.projectId() > 0) {
+                wheres.append(" where ");
+                wheres.append("projectId=").append(project.projectId());
+            }
+            if (project.title() != null) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("title=\"").append(project.title()).append("\"");
+            }
+            if (project.recordCount() > -1) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("recordCount=").append(project.recordCount());
+            }
+            if (project.firstYCoord() > -1) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("firstYCoord=\"").append(project.firstYCoord());
+            }
+            if (project.fieldHeight() > -1) {
+                if (wheres.length() < 1) wheres.append(" where ");
+                else wheres.append(" and ");
+                wheres.append("fieldHeight=\"").append(project.fieldHeight());
+            }
+            sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());
             rs = stmt.executeQuery();
             
@@ -231,62 +262,62 @@ public class Projects {
         
     }
     
-    /**
-     * Gets a Project from the database.
-     * 
-     * @param connection Open database connection
-     * @param projectId ID whose project we want.
-     * 
-     * @return shared.model.Project object with the requested information.
-     * @throws ProjectGetFailedException
-     * @throws SQLException
-     */
-    protected Project get(Connection connection, int projectId)
-            throws ProjectGetFailedException, SQLException {
-        
-        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Entering Projects.get()");
-        if (connection == null) {
-            throw new ProjectGetFailedException("Database connection has not been initialized.");
-        }
-        if (projectId < 1) {
-            throw new ProjectGetFailedException("%d is an invalid project ID.");
-        }
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Project project = null;
-        
-        try {
-            
-            String sql = "select * from projects where projectId = ?";
-            stmt = connection.prepareStatement(sql.toString());
-            stmt.setInt(1, projectId);
-            rs = stmt.executeQuery();
-            
-            int j = 0;
-            while (rs.next()) {
-                project = new Project(rs.getInt(1), rs.getString(2),
-                                    rs.getInt(3), rs.getInt(4),
-                                    rs.getInt(5));
-                ++j;
-            }
-            if (j > 1) {
-                throw new ProjectGetFailedException(
-                        String.format("Only one Project should have been returned. Found %d", j));
-            }
-            
-        }
-        catch (SQLException ex) {
-            throw new ProjectGetFailedException(ex.getMessage());
-        }
-        finally {
-            if (stmt != null) stmt.close();
-            if (rs != null) rs.close();
-        }
-        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Leaving Projects.get()");
-        return project;
-        
-    }
+//    /**
+//     * Gets a Project from the database.
+//     * 
+//     * @param connection Open database connection
+//     * @param projectId ID whose project we want.
+//     * 
+//     * @return shared.model.Project object with the requested information.
+//     * @throws ProjectGetFailedException
+//     * @throws SQLException
+//     */
+//    protected Project get(Connection connection, int projectId)
+//            throws ProjectGetFailedException, SQLException {
+//        
+//        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Entering Projects.get()");
+//        if (connection == null) {
+//            throw new ProjectGetFailedException("Database connection has not been initialized.");
+//        }
+//        if (projectId < 1) {
+//            throw new ProjectGetFailedException("%d is an invalid project ID.");
+//        }
+//        
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        Project project = null;
+//        
+//        try {
+//            
+//            String sql = "select * from projects where projectId = ?";
+//            stmt = connection.prepareStatement(sql.toString());
+//            stmt.setInt(1, projectId);
+//            rs = stmt.executeQuery();
+//            
+//            int j = 0;
+//            while (rs.next()) {
+//                project = new Project(rs.getInt(1), rs.getString(2),
+//                                    rs.getInt(3), rs.getInt(4),
+//                                    rs.getInt(5));
+//                ++j;
+//            }
+//            if (j > 1) {
+//                throw new ProjectGetFailedException(
+//                        String.format("Only one Project should have been returned. Found %d", j));
+//            }
+//            
+//        }
+//        catch (SQLException ex) {
+//            throw new ProjectGetFailedException(ex.getMessage());
+//        }
+//        finally {
+//            if (stmt != null) stmt.close();
+//            if (rs != null) rs.close();
+//        }
+//        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Leaving Projects.get()");
+//        return project;
+//        
+//    }
     
     
     protected void delete(Connection connection, int projectId)
