@@ -1,0 +1,62 @@
+DROP TABLE IF EXISTS users;
+
+DROP TABLE IF EXISTS projects;
+
+DROP TABLE IF EXISTS fields;
+
+DROP TABLE IF EXISTS records;
+
+DROP TABLE IF EXISTS images;
+
+CREATE TABLE users
+(
+    userId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    first VARCHAR(255) NOT NULL,
+    last VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    records INTEGER DEFAULT 0
+);
+
+CREATE TABLE projects
+(
+    projectId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(255) NOT NULL UNIQUE,
+    recordCount INTEGER NOT NULL,
+    firstYCoord INTEGER NOT NULL,
+    fieldHeight INTEGER NOT NULL
+);
+
+CREATE TABLE fields
+(
+    fieldId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(255) NOT NULL,
+    xCoordinate INTEGER NOT NULL,
+    width INTEGER NOT NULL,
+    helpHtml VARCHAR(255) NOT NULL,
+    columnNumber INTEGER NOT NULL,
+    projectId INTEGER NOT NULL,
+    knownData VARCHAR(255) DEFAULT '',
+    CONSTRAINT unq UNIQUE (columnNumber, projectId)
+);
+
+CREATE TABLE records
+(
+    recordId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    imageId INTEGER NOT NULL,
+    fieldId INTEGER NOT NULL,
+    rowNumber INTEGER NOT NULL,
+    value VARCHAR(255),
+    CONSTRAINT unq UNIQUE (imageId, fieldId, rowNumber)
+);
+
+CREATE TABLE images
+(
+    imageId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    path VARCHAR(255) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    projectId INTEGER NOT NULL,
+    currentUser INTEGER DEFAULT 0
+);
+
