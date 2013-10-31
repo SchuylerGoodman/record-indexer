@@ -2,15 +2,21 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package server.handleHttp;
+package server;
 
+import server.handlers.GetFieldsHandler;
+import server.handlers.DownloadBatchHandler;
+import server.handlers.SubmitBatchHandler;
+import server.handlers.GetSampleImageHandler;
+import server.handlers.GetProjectsHandler;
+import server.handlers.SearchHandler;
+import server.handlers.ValidateUserHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import java.net.*;
 import java.util.logging.*;
 import server.database.*;
 import server.database.Database.*;
-import server.handleHttp.handlers.*;
 
 /**
  *
@@ -22,10 +28,10 @@ public class Server {
     public static final int RESPONSE_FAILURE = 500;
     public static final int RESPONSE_NOT_FOUND = 404;
     
-    private static final int SERVER_PORT_NUMBER = 8080;
+    private static int SERVER_PORT_NUMBER;
     private static final int MAX_WAITING_CONNECTIONS = 10;
     
-    private static Logger logger;
+    public static Logger logger;
     
     static {
             try {
@@ -40,7 +46,7 @@ public class Server {
 
             Level logLevel = Level.FINE;
 
-            logger = Logger.getLogger("contactmanager"); 
+            logger = Logger.getLogger("recordindexer"); 
             logger.setLevel(logLevel);
             logger.setUseParentHandlers(false);
 
@@ -64,7 +70,8 @@ public class Server {
     private GetFieldsHandler getFieldsHandler;
     private SearchHandler searchHandler;
 
-    private Server() {
+    private Server(int port) {
+        SERVER_PORT_NUMBER = port;
         validateUserHandler = new ValidateUserHandler();
         getProjectsHandler = new GetProjectsHandler();
         getSampleImageHandler = new GetSampleImageHandler();
@@ -110,7 +117,19 @@ public class Server {
     }
     
     public static void main(String[] args) {
-        Server serve = new Server();
+        int port = 0;
+        if (args.length != 1) {
+            usage();
+        }
+        else {
+            port = Integer.parseInt(args[0]);
+        }
+        Server serve = new Server(port);
+    }
+    
+    private static void usage() {
+        System.out.println("Usage: Server [port-number]");
+        System.exit(0);
     }
 
 }

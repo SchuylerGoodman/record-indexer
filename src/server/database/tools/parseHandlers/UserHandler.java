@@ -85,8 +85,14 @@ public class UserHandler extends DefaultHandler {
                 database.endTransaction(true);
             }
             catch (Database.DatabaseException | Database.InsertFailedException ex) {
-                database.endTransaction(false);
-                throw new SAXException(ex.getMessage());
+                try {
+                    database.endTransaction(false);
+                } catch (Database.DatabaseException ex1) {
+                    Logger.getLogger(FieldHandler.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+                finally {
+                    throw new SAXException(ex.getMessage());
+                }
             }
             reader.setContentHandler(parent);
         }

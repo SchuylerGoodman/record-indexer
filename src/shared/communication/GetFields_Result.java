@@ -8,13 +8,24 @@ import java.util.List;
  * 
  * @author schuyler
  */
-public class GetFields_Result implements Serializable {
+public class GetFields_Result extends RequestResult implements Serializable {
+
+    public class GetFields_ResultException extends Exception {
+        public GetFields_ResultException(String message) {
+            super(message);
+        }
+    }
     
     private int projectId;
     private List<Integer> fieldIds;
     private List<String> fieldTitles;
     
-    public GetFields_Result(int projectId, List<Integer> fieldIds, List<String> fieldTitles) {
+    public GetFields_Result(int projectId, List<Integer> fieldIds, List<String> fieldTitles)
+            throws GetFields_ResultException {
+        
+        if (fieldIds.size() != fieldTitles.size()) {
+            throw new GetFields_ResultException("Field IDs list and Field Titles list must be the same size.");
+        }
         this.projectId = projectId;
         this.fieldIds = fieldIds;
         this.fieldTitles = fieldTitles;
@@ -47,6 +58,16 @@ public class GetFields_Result implements Serializable {
      */
     public List<String> fieldTitles() {
         return fieldTitles;
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fieldIds.size(); ++i) {
+            sb.append(this.projectId).append("\n");
+            sb.append(this.fieldIds.get(i)).append("\n");
+            sb.append(this.fieldTitles.get(i)).append("\n");
+        }
+        return sb.toString();
     }
     
 }

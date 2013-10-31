@@ -7,7 +7,7 @@ import java.io.Serializable;
  * 
  * @author schuyler
  */
-public class DownloadBatch_Param implements Serializable {
+public class DownloadBatch_Param extends RequestParam implements Serializable {
 
     private String username;
     private String password;

@@ -36,36 +36,7 @@ public class Projects {
             super(message);
         }
     }
-    
-    /**
-     * Query the database for the projects available to the current User.
-     * <p>
-     * Precondition: Username and password belong to an actual User.
-     * 
-     * @param username
-     * @param password
-     * 
-     * @return Collection of a Collection of Objects - Inner Container will have 
-     * a [Integer, String] => [Project Id, Project Name] pair.
-     */
-    protected Collection<Collection<Object>> getProjects(String username, String password) {
-        return null;
-    }
-    
-    /**
-     * Finds the Project keyed by projectId and sends it back up the line.
-     * <p>
-     * Precondition: Username and password belong to an actual User.
-     * 
-     * @param projectId Unique identifier for the Project to download.
-     * @return shared.model.Project The container for the Project, Batch, Field, 
-     * and Record data to be downloaded.
-     * @return null if the user or project ID does not exist.
-     */
-    protected shared.model.Project downloadBatch(int projectId) {
-        return null;
-    }
-    
+
     /**
      * Inserts a new Project into the database.
      * 
@@ -261,65 +232,16 @@ public class Projects {
         return projects;
         
     }
-    
-//    /**
-//     * Gets a Project from the database.
-//     * 
-//     * @param connection Open database connection
-//     * @param projectId ID whose project we want.
-//     * 
-//     * @return shared.model.Project object with the requested information.
-//     * @throws ProjectGetFailedException
-//     * @throws SQLException
-//     */
-//    protected Project get(Connection connection, int projectId)
-//            throws ProjectGetFailedException, SQLException {
-//        
-//        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Entering Projects.get()");
-//        if (connection == null) {
-//            throw new ProjectGetFailedException("Database connection has not been initialized.");
-//        }
-//        if (projectId < 1) {
-//            throw new ProjectGetFailedException("%d is an invalid project ID.");
-//        }
-//        
-//        PreparedStatement stmt = null;
-//        ResultSet rs = null;
-//        Project project = null;
-//        
-//        try {
-//            
-//            String sql = "select * from projects where projectId = ?";
-//            stmt = connection.prepareStatement(sql.toString());
-//            stmt.setInt(1, projectId);
-//            rs = stmt.executeQuery();
-//            
-//            int j = 0;
-//            while (rs.next()) {
-//                project = new Project(rs.getInt(1), rs.getString(2),
-//                                    rs.getInt(3), rs.getInt(4),
-//                                    rs.getInt(5));
-//                ++j;
-//            }
-//            if (j > 1) {
-//                throw new ProjectGetFailedException(
-//                        String.format("Only one Project should have been returned. Found %d", j));
-//            }
-//            
-//        }
-//        catch (SQLException ex) {
-//            throw new ProjectGetFailedException(ex.getMessage());
-//        }
-//        finally {
-//            if (stmt != null) stmt.close();
-//            if (rs != null) rs.close();
-//        }
-//        Logger.getLogger(Projects.class.getName()).log(Level.FINE, "Leaving Projects.get()");
-//        return project;
-//        
-//    }
-    
-    
+
+    /**
+     * Deletes a Project from the database
+     * 
+     * @param connection Open database connection
+     * @param projectId Id of the project to delete
+     * 
+     * @throws server.database.Projects.ProjectDeleteFailedException
+     * @throws SQLException 
+     */
     protected void delete(Connection connection, int projectId)
             throws ProjectDeleteFailedException, SQLException {
         

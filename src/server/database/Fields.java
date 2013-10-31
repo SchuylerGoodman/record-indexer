@@ -2,7 +2,6 @@ package server.database;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.*;
 import shared.model.Field;
@@ -38,31 +37,6 @@ public class Fields {
         }
     }
     
-    /**
-     * Builds a collection of shared.model.Field objects that belong to projectId.
-     * <p>
-     * Preconditions:   User must actually exist.
-     * 
-     * @param projectId The unique identifier of the project whose fields we want.
-     * @return Collection of shared.model.Field objects
-     */
-    protected Collection<shared.model.Field> downloadBatch(int projectId) {
-        return null;
-    }
-    
-    /**
-     * Gets the fields requested by the client.
-     * <p>
-     * Preconditions:   User must actually exist.
-     * 
-     * @param project An Object representing either an Integer with a Project ID, 
-     * or an empty string signifying to return the fields for all projects.
-     * @return A Collection of shared.model.Field objects.
-     */
-    protected Collection<shared.model.Field> getFields(Object project) {
-        return null;
-    }
-
     /**
      * Creates a new Field in the database.
      * 
@@ -298,128 +272,7 @@ public class Fields {
         return fields;
         
     }
-    
-//    /**
-//     * Gets a Field from the database.
-//     * 
-//     * @param connection Open database connection
-//     * @param fieldId Field ID to get from the database.
-//     * 
-//     * @return shared.model.Field object with the requested data.
-//     * @throws FieldGetFailedException
-//     * @throws SQLException
-//     */
-//    protected Field get(Connection connection, int fieldId)
-//            throws SQLException, FieldGetFailedException {
-//        
-//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
-//        if (connection == null) {
-//            throw new FieldGetFailedException("Database connection has not been initialized.");
-//        }
-//        if (fieldId < 1) {
-//            throw new FieldGetFailedException("%d is an invalid field ID.");
-//        }
-//        
-//        PreparedStatement stmt = null;
-//        ResultSet rs = null;
-//        Field field = null;
-//        
-//        try {
-//            
-//            String sql = "select * from fields where fieldId = ?";
-//            stmt = connection.prepareStatement(sql.toString());
-//            stmt.setInt(1, fieldId);
-//            rs = stmt.executeQuery();
-//            
-//            int j = 0;
-//            while (rs.next()) {
-//                field = new Field(rs.getInt(1), rs.getString(2),
-//                                    rs.getInt(3), rs.getInt(4),
-//                                    rs.getString(5), rs.getInt(6),
-//                                    rs.getInt(7));
-//                if (rs.getString(8) != null) {
-//                    field.setKnownData(rs.getString(8));
-//                }
-//                ++j;
-//            }
-//            if (j > 1) {
-//                throw new FieldGetFailedException(
-//                        String.format("Only one Field should have been returned. Found %d", j));
-//            }
-//            
-//        }
-//        catch (SQLException ex) {
-//            throw new FieldGetFailedException(ex.getMessage());
-//        }
-//        finally {
-//            if (stmt != null) stmt.close();
-//            if (rs != null) rs.close();
-//        }
-//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
-//        return field;
-//        
-//    }
-//    
-//    /**
-//     * Gets a Field from the database by the project id and column number.
-//     * 
-//     * @param connection Open database connection
-//     * @param projectId Project ID to which the requested field belongs
-//     * @param columnNumber the column in the project in which this field is found
-//     * @return shared.model.Field object with the requested data.
-//     */
-//    protected Field get(Connection connection, int projectId, int columnNumber)
-//            throws SQLException, FieldGetFailedException {
-//        
-//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Entering Fields.get()");
-//        if (connection == null) {
-//            throw new FieldGetFailedException("Database connection has not been initialized.");
-//        }
-//        if (projectId < 1 || columnNumber < 1) {
-//            throw new FieldGetFailedException("Invalid input IDs.");
-//        }
-//        
-//        PreparedStatement stmt = null;
-//        ResultSet rs = null;
-//        Field field = null;
-//        
-//        try {
-//            
-//            String sql = "select * from fields where projectId = ? and columnNumber = ?";
-//            stmt = connection.prepareStatement(sql.toString());
-//            stmt.setInt(1, projectId);
-//            stmt.setInt(2, columnNumber);
-//            rs = stmt.executeQuery();
-//            
-//            int j = 0;
-//            while (rs.next()) {
-//                field = new Field(rs.getInt(1), rs.getString(2),
-//                                    rs.getInt(3), rs.getInt(4),
-//                                    rs.getString(5), rs.getInt(6),
-//                                    rs.getInt(7));
-//                if (!rs.getString(8).isEmpty()) {
-//                    field.setKnownData(rs.getString(8));
-//                }
-//                ++j;
-//            }
-//            if (j > 1) {
-//                throw new FieldGetFailedException(
-//                        String.format("Only one Field should have been returned. Found %d", j));
-//            }
-//            
-//        }
-//        catch (SQLException ex) {
-//            throw new FieldGetFailedException(ex.getMessage());
-//        }
-//        finally {
-//            if (stmt != null) stmt.close();
-//            if (rs != null) rs.close();
-//        }
-//        Logger.getLogger(Fields.class.getName()).log(Level.FINE, "Leaving Fields.get()");
-//        return field;
-//        
-//    }
-    
+
     /**
      * Deletes a Field from the database.
      * 

@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author schuyler
  */
-public class CreateUser_Result implements Serializable {
+public class CreateUser_Result extends RequestResult implements Serializable {
  
     private int userId;
     

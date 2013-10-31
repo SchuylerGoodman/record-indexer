@@ -32,6 +32,7 @@ public class DatabaseCreator {
     }
     
     public void createDatabase(File databaseFile, File sqliteStatements) throws SQLException {
+        
         databaseFile.delete();
         parseSqlite(sqliteStatements);
         Connection connection = null;
@@ -40,15 +41,12 @@ public class DatabaseCreator {
         int result;
         try {
             String path = "jdbc:sqlite:" + databaseFile.getAbsolutePath();
-//            String path = "db" + File.separator + "test" + File.separator
-//                + "test-create-database.sqlite";
             connection = DriverManager.getConnection(path);
             connection.setAutoCommit(false);
 
             for (String statement : this.statements) {
                 stmt = connection.createStatement();
                 result = stmt.executeUpdate(statement);
-//                System.out.println(rs.toString());
             }
             connection.commit();
         }

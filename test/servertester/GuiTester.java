@@ -10,6 +10,7 @@ public class GuiTester {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(
 				new Runnable() {
+                                        @Override
 					public void run() {
 						IndexerServerTesterFrame frame = new IndexerServerTesterFrame();			
 						Controller controller = new Controller();

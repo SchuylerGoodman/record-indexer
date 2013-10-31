@@ -242,63 +242,6 @@ public class Images {
         return images;
         
     }
-    
-//    /**
-//     * Gets data on the requested image from the database.
-//     * 
-//     * @param connection Open database connection
-//     * @param imageId Image ID whose data we want.
-//     * 
-//     * @return shared.model.Image object with the requested info.
-//     * @throws ImageGetFailedException
-//     * @throws SQLException
-//     */
-//    protected Image get(Connection connection, int imageId)
-//            throws ImageGetFailedException, SQLException {
-//        
-//        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Entering Images.get()");
-//        if (connection == null) {
-//            throw new ImageGetFailedException("Database connection has not been initialized.");
-//        }
-//        if (imageId < 1) {
-//            throw new ImageGetFailedException(
-//                    String.format("%d is an invalid image ID.", imageId));
-//        }
-//        
-//        PreparedStatement stmt = null;
-//        ResultSet rs = null;
-//        Image image = null;
-//        
-//        try {
-//            
-//            String sql = "select * from images where imageId = ?";
-//            stmt = connection.prepareStatement(sql.toString());
-//            stmt.setInt(1, imageId);
-//            rs = stmt.executeQuery();
-//            
-//            int j = 0;
-//            while (rs.next()) {
-//                image = new Image(rs.getInt(1), rs.getString(2),
-//                                  rs.getString(3), rs.getInt(4), rs.getInt(5));
-//                ++j;
-//            }
-//            if (j > 1) {
-//                throw new ImageGetFailedException(String.format(
-//                        "Only one Image should have been returned. Found %d", j));
-//            }
-//            
-//        }
-//        catch (SQLException ex) {
-//            throw new ImageGetFailedException(ex.getMessage());
-//        }
-//        finally {
-//            if (stmt != null) stmt.close();
-//            if (rs != null) rs.close();
-//        }
-//        Logger.getLogger(Images.class.getName()).log(Level.FINE, "Leaving Images.get()");
-//        return image;
-//        
-//    }
 
     /**
      * Deletes an image from the database.

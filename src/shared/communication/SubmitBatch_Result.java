@@ -7,7 +7,7 @@ import java.io.Serializable;
  *
  * @author schuyler
  */
-public class SubmitBatch_Result implements Serializable {
+public class SubmitBatch_Result extends RequestResult implements Serializable {
     
     private boolean success;
     
@@ -23,6 +23,16 @@ public class SubmitBatch_Result implements Serializable {
      */
     public boolean success() {
         return success;
+    }
+    
+    @Override
+    public String toString() {
+        if (success) {
+            return "TRUE\n";
+        }
+        else {
+            return "FAILED\n";
+        }
     }
     
 }

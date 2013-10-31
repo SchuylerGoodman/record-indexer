@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author schuyler
  */
-public class CreateUser_Param implements Serializable {
+public class CreateUser_Param extends RequestParam implements Serializable {
     
     private String username;
     private String password;

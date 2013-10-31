@@ -8,7 +8,7 @@ import java.util.Objects;
  * 
  * @author schuyler
  */
-public class ValidateUser_Result implements Serializable {
+public class ValidateUser_Result extends RequestResult implements Serializable {
     
     public static class ValidateUser_ResultException extends Exception {
         public ValidateUser_ResultException(String message) {
@@ -153,6 +153,18 @@ public class ValidateUser_Result implements Serializable {
             return false;
         }
         return true;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Boolean.toString(valid).toUpperCase()).append("\n");
+        if (valid) {
+            sb.append(firstName).append("\n");
+            sb.append(lastName).append("\n");
+            sb.append(recordsIndexed).append("\n");
+        }
+        return sb.toString();
     }
     
 }

@@ -11,7 +11,6 @@ import java.util.logging.*;
 import javax.xml.parsers.*;
 import org.xml.sax.*;
 import server.database.Database;
-import shared.model.*;
 
 /**
  *
@@ -24,15 +23,20 @@ public class DatabaseImporter {
     public static void main(String[] args) {
         
         try {
+            String recordPath = null;
+            if (args.length != 1) {
+                usage();
+            }
+            else {
+                recordPath = args[0];
+            }
             DatabaseCreator dbc = new DatabaseCreator();
             dbc.createDatabase(new File(Database.DATABASE_PATH), new File(Database.STATEMENT_PATH));
-            
-            String filename = args[0];
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser SaxParser = spf.newSAXParser();
             XMLReader reader = SaxParser.getXMLReader();
-            reader.setContentHandler(new IndexerHandler(reader));
-            reader.parse(new InputSource(new BufferedInputStream(new FileInputStream(filename))));
+            reader.setContentHandler(new IndexerHandler(reader)); // Set initial parsing handler
+            reader.parse(new InputSource(new BufferedInputStream(new FileInputStream(recordPath))));
             
         } catch (ParserConfigurationException
                | SAXException
@@ -42,6 +46,11 @@ public class DatabaseImporter {
             Logger.getLogger(DatabaseImporter.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    private static void usage() {
+        System.out.println("Usage: DatabaseImporter [path_to_Records.xml]");
+        System.exit(0);
     }
 
 }

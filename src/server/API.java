@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package server.handleHttp;
+package server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,17 +23,13 @@ public class API {
     public static final String URLPREFIX = "localhost/";
 //    public static final String URLPREFIX = "http://students.cs.byu.edu/~goodm4n/indexer/";
     
-    private Database database;
-    
     public static class APIException extends Exception {
         public APIException(String message) {
             super(message);
         }
     }
     
-    public API(Database database) {
-        this.database = database;
-    }
+    public API() {}
     
     /**
      * Queries the database for the user specified.
@@ -44,7 +40,7 @@ public class API {
      * 
      * @return shared.communication.ValidateUser_Result with results.
      */
-    public ValidateUser_Result validateUser(ValidateUser_Param params) {
+    public static ValidateUser_Result validateUser(Database database, ValidateUser_Param params) {
 
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.validateUser()");
         ValidateUser_Result result;
@@ -94,12 +90,12 @@ public class API {
      * 
      * @return shared.communication.GetProjects_Result with results
      */
-    public GetProjects_Result getProjects(GetProjects_Param params) {
+    public static GetProjects_Result getProjects(Database database, GetProjects_Param params) {
         
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getProjects()");
         GetProjects_Result result;
         try {
-            ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
+            ValidateUser_Result vResult = validateUser(database, new ValidateUser_Param(params.username(), params.password()));
             if (vResult == null || !vResult.validated()) {
                 result = null;
             }
@@ -138,19 +134,16 @@ public class API {
      * 
      * @return shared.communication.GetSampleImage_Result with results.
      */
-    public GetSampleImage_Result getSampleImage(GetSampleImage_Param params) {
+    public static GetSampleImage_Result getSampleImage(Database database, GetSampleImage_Param params) {
         
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getSampleImage()");
         GetSampleImage_Result result;
-        boolean success = false;
         try {
-            ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
+            ValidateUser_Result vResult = validateUser(database, new ValidateUser_Param(params.username(), params.password()));
             if (vResult == null || !vResult.validated()) {
                 result = null;
             }
             else {
-                database.startTransaction();
-                
                 // Get all Images from this Project
                 Image tImage = new Image();
                 tImage.setProjectId(params.projectId());
@@ -159,7 +152,7 @@ public class API {
                 // Get an unassigned Image
                 String imagePath = null;
                 int index = 0;
-                while (imagePath == null || index >= images.size() - 1) {
+                while (imagePath == null && index < images.size()) {
                     Image currentImage = images.get(index);
                     if (currentImage.currentUser() == 0) {
                         imagePath = currentImage.path();
@@ -171,14 +164,12 @@ public class API {
                 }
                 else {
                     result = new GetSampleImage_Result(imagePath);
-                    success = true;
                 }
             }
         } catch (DatabaseException | GetFailedException ex) {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.WARNING, "getSampleImage request failed.", ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Exiting API.getSampleImage()");
         return result;
         
@@ -195,65 +186,88 @@ public class API {
      * @return shared.communication.DownloadBatch_Result container for the data to be downloaded.
      * exist.
      */
-    public DownloadBatch_Result downloadBatch(DownloadBatch_Param params) {
+    public static DownloadBatch_Result downloadBatch(Database database, DownloadBatch_Param params) {
 
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.downloadBatch()");
         DownloadBatch_Result result;
-        boolean success = false;
         try {
-            ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
+            ValidateUser_Result vResult = validateUser(database, new ValidateUser_Param(params.username(), params.password()));
+            Image hasImage = new Image();
             if (vResult == null || !vResult.validated()) {
                 result = null;
             }
             else {
-                database.startTransaction();
                 
-                // Get the project
-                Project project = new Project();
-                project.setProjectId(params.projectId());
-                ArrayList<Project> projects = (ArrayList) database.get(project);
-                
-                // projectId is unique, so should only return one project.
-                assert projects.size() == 1;
-                int firstProjectIndex = 0;
-                
-                // Get all the images from this Project
-                Image tImage = new Image();
-                tImage.setProjectId(params.projectId());
-                ArrayList<Image> images = (ArrayList) database.get(tImage);
-                Image image = null;
-                int index = 0;
-                while (image == null || index >= images.size() - 1) {
-                    // Find an unassigned image
-                    Image currentImage = images.get(index);
-                    if (currentImage.currentUser() == 0) {
-                        image = currentImage;
+                // Check if this user already has an Image assigned
+                hasImage.setCurrentUser(vResult.userId());
+                ArrayList<Image> hasAssigned = (ArrayList) database.get(hasImage);
+                Image image = null; // Image to be assigned to the User
+                if (hasAssigned.size() > 0) { // If they do
+                    if (hasAssigned.size() > 1) { // If they have more than one.
+                        int userId = vResult.userId();
+                        throw new DatabaseException(String.format( // There is a problem
+                                "User should only have one Image assigned. User ID %d has %d.",
+                                vResult.userId(), hasAssigned.size()));
                     }
-                    ++index;
+                    else { // If they only have one
+                        hasImage = hasAssigned.get(0);
+                        if (hasImage.projectId() == params.projectId()) {
+                            image = hasImage; // Return that Image
+                        }
+                        else {
+                            throw new DatabaseException(String.format(
+                                    "User ID %d already has an image %d assigned from project %d.",
+                                    vResult.userId(), hasImage.imageId(), hasImage.projectId()));
+                        }
+                    }
+                }
+                if (image == null) {
+
+                    // Get all the images from this Project
+                    Image tImage = new Image();
+                    tImage.setProjectId(params.projectId());
+                    ArrayList<Image> images = (ArrayList) database.get(tImage);
+                    int index = 0;
+                    while (image == null && index < images.size()) {
+                        // Find an unassigned image
+                        Image currentImage = images.get(index);
+                        if (currentImage.currentUser() == 0) {
+                            image = currentImage;
+                        }
+                        ++index;
+                    }
                 }
                 // If there is none, fail
                 if (image == null) {
                     result = null;
                 }
                 else { // Otherwise
+                    
+                    // Get the project
+                    Project project = new Project();
+                    project.setProjectId(params.projectId());
+                    ArrayList<Project> projects = (ArrayList) database.get(project);
+
+                    // projectId is unique, so should only return one project.
+                    assert projects.size() == 1;
+                    int firstProjectIndex = 0;
+
                     image.setCurrentUser(vResult.userId());
                     // Set the current user in the image to this user
                     database.update(image);
-                    
+
                     // Get all Fields from this project
                     Field tField = new Field();
                     tField.setProjectId(params.projectId());
                     ArrayList<Field> fields = (ArrayList) database.get(tField);
                     result = new DownloadBatch_Result(
                             projects.get(firstProjectIndex), image, fields);
-                    success = true;
                 }
             }
         } catch (DatabaseException | GetFailedException | UpdateFailedException ex) {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.WARNING, "downloadBatch request failed.", ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Exiting API.downloadBatch()");
         return result;
         
@@ -271,18 +285,16 @@ public class API {
      * @return true if submission is successful
      * @return false if submission is unsuccessful
      */
-    public SubmitBatch_Result submitBatch(SubmitBatch_Param params) {
+    public static SubmitBatch_Result submitBatch(Database database, SubmitBatch_Param params) {
         
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.submitBatch()");
         SubmitBatch_Result result;
-        boolean success = false;
         try { // validate user
-            ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
+            ValidateUser_Result vResult = validateUser(database, new ValidateUser_Param(params.username(), params.password()));
             if (vResult == null || !vResult.validated()) { // not validated
                 result = null;
             }
             else { // user validated
-                database.startTransaction();
                 
                 // Get the Image
                 Image tImage = new Image();
@@ -322,8 +334,7 @@ public class API {
                 user.setUserId(vResult.userId());
                 user.setIndexedRecords(vResult.recordsIndexed() + records.length);
                 database.update(user);
-                success = true;
-                result = new SubmitBatch_Result(success);
+                result = new SubmitBatch_Result(true);
             }
         }
         catch (DatabaseException
@@ -333,7 +344,6 @@ public class API {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.WARNING, "submitBatch request failed.", ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Exiting API.submitBatch()");
         return result;
         
@@ -346,18 +356,16 @@ public class API {
      * 
      * @return GetFields_Result container for the result parameters for this API
      */
-    public GetFields_Result getFields(GetFields_Param params) throws APIException {
+    public static GetFields_Result getFields(Database database, GetFields_Param params) throws APIException {
         
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getFields()");
         GetFields_Result result;
-        boolean success = false;
         try { // Validate User
-            ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
+            ValidateUser_Result vResult = validateUser(database, new ValidateUser_Param(params.username(), params.password()));
             if (vResult == null || !vResult.validated()) { // not validated
                 result = null;
             }
             else { // User exists
-                database.startTransaction();
                 boolean useAll = false;
                 int projectId;
 
@@ -401,15 +409,13 @@ public class API {
                 }
                 else {
                     result = new GetFields_Result(projectId, fieldIds, fieldTitles);
-                    success = true;
                 }
             }
         }
-        catch (DatabaseException | GetFailedException ex) {
+        catch (DatabaseException | GetFailedException | GetFields_Result.GetFields_ResultException ex) {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.WARNING, "getFields request failed.", ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Exiting API.getFields()");
         return result;
         
@@ -422,18 +428,16 @@ public class API {
      * 
      * @return Search_Result container for the results of this API.
      */
-    public Search_Result search(Search_Param params) {
+    public static Search_Result search(Database database, Search_Param params) {
         
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getFields()");
         Search_Result result;
-        boolean success = false;
         try {
-            ValidateUser_Result vResult = validateUser(new ValidateUser_Param(params.username(), params.password()));
+            ValidateUser_Result vResult = validateUser(database, new ValidateUser_Param(params.username(), params.password()));
             if (vResult == null || !vResult.validated()) { // not validated
                 result = null;
             }
             else { // User exists
-                database.startTransaction();
                 
                 // Extract field IDs and convert to ArrayList<String>
                 String[] fieldIdArray = params.fields().split(",", -1);
@@ -484,14 +488,12 @@ public class API {
                     fieldIds.add(new Integer(record.fieldId()));
                 }
                 result = new Search_Result(imageIds, imagePaths, rowNumbers, fieldIds);
-                success = true;
             }
         }
-        catch (DatabaseException | GetFailedException ex) {
+        catch (DatabaseException | GetFailedException | Search_Result.Search_ResultException ex) {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.WARNING, "search request failed.", ex);
         }
-        database.endTransaction(success);
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getFields()");
         return result;
         

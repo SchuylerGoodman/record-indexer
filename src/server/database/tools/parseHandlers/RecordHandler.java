@@ -84,8 +84,14 @@ public class RecordHandler extends DefaultHandler {
             } catch (Database.DatabaseException
                    | Database.GetFailedException
                    | Database.InsertFailedException ex) {
-                database.endTransaction(false);
-                throw new SAXException(ex.getMessage());
+                try {
+                    database.endTransaction(false);
+                } catch (Database.DatabaseException ex1) {
+                    Logger.getLogger(FieldHandler.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+                finally {
+                    throw new SAXException(ex.getMessage());
+                }
             }
         }
         if (qName.equalsIgnoreCase(RECORD)) {

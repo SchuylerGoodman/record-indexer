@@ -8,7 +8,7 @@ import java.util.*;
  * 
  * @author schuyler
  */
-public class GetProjects_Result implements Serializable {
+public class GetProjects_Result extends RequestResult implements Serializable {
     
     private List<Integer> ids;
     private List<String> names;
@@ -17,11 +17,6 @@ public class GetProjects_Result implements Serializable {
         public GetProjects_ResultException(String message) {
             super(message);
         }
-    }
-    
-    public GetProjects_Result() {
-        ids = new ArrayList<>();
-        names = new ArrayList<>();
     }
     
     public GetProjects_Result(List<Integer> inIds, List<String> inNames) throws GetProjects_ResultException {
@@ -44,6 +39,16 @@ public class GetProjects_Result implements Serializable {
     
     public List<String> getProjectNames() {
         return names;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ids.size(); ++i) {
+            sb.append(ids.get(i)).append("\n");
+            sb.append(names.get(i)).append("\n");
+        }
+        return sb.toString();
     }
     
 }

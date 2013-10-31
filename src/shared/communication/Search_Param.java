@@ -7,7 +7,7 @@ import java.io.Serializable;
  * 
  * @author schuyler
  */
-public class Search_Param implements Serializable {
+public class Search_Param extends RequestParam implements Serializable {
     
     private String username;
     private String password;

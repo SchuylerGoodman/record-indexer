@@ -1,6 +1,8 @@
 package shared.communication;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import shared.model.Field;
 import shared.model.Image;
@@ -11,7 +13,7 @@ import shared.model.Project;
  * 
  * @author schuyler
  */
-public class DownloadBatch_Result implements Serializable {
+public class DownloadBatch_Result extends RequestResult implements Serializable {
     
     private int imageId;
     private int projectId;
@@ -103,6 +105,36 @@ public class DownloadBatch_Result implements Serializable {
      */
     public List<Field> fields() {
         return fields;
+    }
+    
+    public String toString(String protocol, String host, int port)
+            throws MalformedURLException {
+        
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(this.imageId).append("\n"); // Batch ID
+        sb.append(this.projectId).append("\n"); // Project ID
+        URL imageUrl = new URL(protocol, host, port, this.imagePath);
+        sb.append(imageUrl).append("\n"); // Image URL
+        sb.append(this.firstYCoord).append("\n"); // First Y Coordinate
+        sb.append(this.recordHeight).append("\n"); // Record Height
+        sb.append(this.numRecords).append("\n"); // Number of Records
+        sb.append(this.numFields).append("\n"); // Number of Fields
+        
+        for (Field field : fields) { // For all returned Fields
+            sb.append(field.fieldId()).append("\n"); // Field ID
+            sb.append(field.columnNumber()).append("\n"); // Column Number
+            sb.append(field.title()).append("\n"); // Title
+            URL helpUrl = new URL(protocol, host, port, field.helpHtml());
+            sb.append(helpUrl).append("\n"); // Help URL
+            sb.append(field.xCoordinate()).append("\n"); // X Coordinate
+            if (field.knownData() != null) { // If known data URL exists for this Field
+                URL dataUrl = new URL(protocol, host, port, field.knownData());
+                sb.append(dataUrl.toString()).append("\n"); // Known Data URL
+            }
+        }
+        
+        return sb.toString();
     }
     
 }

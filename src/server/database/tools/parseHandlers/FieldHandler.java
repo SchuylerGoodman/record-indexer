@@ -72,9 +72,15 @@ public class FieldHandler extends DefaultHandler {
             field.setWidth(Integer.parseInt(content.toString()));
         }
         if (qName.equalsIgnoreCase(HELPHTML)) {
+            if (content.charAt(0) != '/') {
+                content.insert(0, '/');
+            } 
             field.setHelpHtml(content.toString());
         }
         if (qName.equalsIgnoreCase(KNOWNDATA)) {
+            if (content.charAt(0) != '/') {
+                content.insert(0, '/');
+            } 
             field.setKnownData(content.toString());
         }
         if (qName.equalsIgnoreCase(ProjectHandler.FIELD)) {
@@ -84,8 +90,14 @@ public class FieldHandler extends DefaultHandler {
                 database.endTransaction(true);
             }
             catch (Database.DatabaseException | Database.InsertFailedException ex) {
-                database.endTransaction(false);
-                throw new SAXException(ex.getMessage());
+                try {
+                    database.endTransaction(false);
+                } catch (Database.DatabaseException ex1) {
+                    Logger.getLogger(FieldHandler.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+                finally {
+                    throw new SAXException(ex.getMessage());
+                }
             }
             reader.setContentHandler(parent);
         }
