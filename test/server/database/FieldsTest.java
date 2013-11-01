@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import server.database.Fields.*;
 import shared.model.Field;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -116,11 +117,11 @@ public class FieldsTest {
                 u02.setProjectId(rs.getInt(7));
                 u02.setKnownData(rs.getString(8));
             }
-            Assert.assertEquals(u01, u02);
+            assertEquals(u01, u02);
         }
         catch (SQLException
                 | Fields.FieldInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -138,7 +139,7 @@ public class FieldsTest {
             exception.expect(FieldInsertFailedException.class);
             fields.insert(connection, u1);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -174,20 +175,20 @@ public class FieldsTest {
                 u02.setKnownData(rs.getString(8));
             }
             
-            Assert.assertEquals(u0.fieldId(), u02.fieldId());
-            Assert.assertEquals(u0.title(), u02.title());
-            Assert.assertEquals(u0.xCoordinate(), u02.xCoordinate());
-            Assert.assertEquals(u0.width(), u02.width());
-            Assert.assertEquals(base.helpHtml(), u02.helpHtml()); // Null and 0 values not updated
-            Assert.assertEquals(u0.columnNumber(), u02.columnNumber());
-            Assert.assertEquals(base.projectId(), u02.projectId()); // Null and 0 values not updated
-            Assert.assertEquals(u0.knownData(), u02.knownData());
+            assertEquals(u0.fieldId(), u02.fieldId());
+            assertEquals(u0.title(), u02.title());
+            assertEquals(u0.xCoordinate(), u02.xCoordinate());
+            assertEquals(u0.width(), u02.width());
+            assertEquals(base.helpHtml(), u02.helpHtml()); // Null and 0 values not updated
+            assertEquals(u0.columnNumber(), u02.columnNumber());
+            assertEquals(base.projectId(), u02.projectId()); // Null and 0 values not updated
+            assertEquals(u0.knownData(), u02.knownData());
             
         }
         catch (SQLException
                     | Fields.FieldUpdateFailedException
                     | FieldInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -205,7 +206,7 @@ public class FieldsTest {
             fields.update(connection, u0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -218,7 +219,7 @@ public class FieldsTest {
             exception.expectMessage("ID 100 not found in 'fields' table.");
             fields.update(connection, u0);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -234,19 +235,19 @@ public class FieldsTest {
             
             // Returns a correct result
             fieldList.addAll(fields.get(connection, get));
-            Assert.assertEquals(1, fieldList.size());
-            Assert.assertEquals(fieldList.get(0), base);
+            assertEquals(1, fieldList.size());
+            assertEquals(fieldList.get(0), base);
             fieldList.clear();
             
             // Returns null if not found
             get.setFieldId(base.fieldId() + 1);
             fieldList.addAll(fields.get(connection, get));
-            Assert.assertEquals(0, fieldList.size());
+            assertEquals(0, fieldList.size());
             
         } catch (SQLException
                 | FieldInsertFailedException
                 | FieldGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -268,19 +269,19 @@ public class FieldsTest {
             
             // Returns a correct result
             fieldList.addAll(fields.get(connection, get));
-            Assert.assertEquals(1, fieldList.size());
-            Assert.assertEquals(fieldList.get(0), base);
+            assertEquals(1, fieldList.size());
+            assertEquals(fieldList.get(0), base);
             fieldList.clear();
             
             // Returns null if not found
             get.setProjectId(base.projectId() + 1);
             fieldList.addAll(fields.get(connection, get));
-            Assert.assertEquals(0, fieldList.size());
+            assertEquals(0, fieldList.size());
             
         } catch (SQLException
                 | FieldInsertFailedException
                 | FieldGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -310,14 +311,14 @@ public class FieldsTest {
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                Assert.fail("Should have been deleted.");
+                fail("Should have been deleted.");
             }
             
         }
         catch (FieldDeleteFailedException
                 | SQLException
                 | FieldInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -335,7 +336,7 @@ public class FieldsTest {
             fields.delete(connection, id);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -351,7 +352,7 @@ public class FieldsTest {
             
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
 

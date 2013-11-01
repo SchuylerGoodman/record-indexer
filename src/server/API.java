@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.database.Database;
 import server.database.Database.*;
+import server.database.Images;
 import shared.communication.*;
 import shared.model.*;
 
@@ -211,10 +212,10 @@ public class API {
                     }
                     else { // If they only have one
                         hasImage = hasAssigned.get(0);
-                        if (hasImage.projectId() == params.projectId()) {
+                        if (hasImage.projectId() == params.projectId()) { // And it is for this Project
                             image = hasImage; // Return that Image
                         }
-                        else {
+                        else { // Otherwise fail
                             throw new DatabaseException(String.format(
                                     "User ID %d already has an image %d assigned from project %d.",
                                     vResult.userId(), hasImage.imageId(), hasImage.projectId()));
@@ -229,15 +230,16 @@ public class API {
                     ArrayList<Image> images = (ArrayList) database.get(tImage);
                     int index = 0;
                     while (image == null && index < images.size()) {
-                        // Find an unassigned image
+                        // Find an unassigned and uncompleted image
                         Image currentImage = images.get(index);
+                        System.out.println(currentImage.currentUser());
                         if (currentImage.currentUser() == 0) {
                             image = currentImage;
                         }
                         ++index;
                     }
                 }
-                // If there is none, fail
+                // If there are none, fail
                 if (image == null) {
                     result = null;
                 }
@@ -325,8 +327,8 @@ public class API {
                     }
                 }
 
-                // Update Current user for the image to 0 (unassign User)
-                thisImage.setCurrentUser(0);
+                // Update Current user for the image to -1 (complete Image)
+                thisImage.setCurrentUser(Images.IMAGE_COMPLETED);
                 database.update(thisImage);
 
                 // Update the number of indexed records for this user
@@ -460,6 +462,7 @@ public class API {
                 ArrayList<Integer> fieldIds = new ArrayList<>(); // for Search_Result
                 HashMap<Integer, Image> images = new HashMap<>(); // To limit # of database queries
                 Image tImage = new Image(); // base Image object for running get queries
+                tImage.setCurrentUser(Images.IMAGE_COMPLETED); // Only completed images are searchable
                 for (Record record : records) {
 
                     // If we haven't already grabbed this Image from the database

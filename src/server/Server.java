@@ -4,13 +4,7 @@
  */
 package server;
 
-import server.handlers.GetFieldsHandler;
-import server.handlers.DownloadBatchHandler;
-import server.handlers.SubmitBatchHandler;
-import server.handlers.GetSampleImageHandler;
-import server.handlers.GetProjectsHandler;
-import server.handlers.SearchHandler;
-import server.handlers.ValidateUserHandler;
+import server.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import java.net.*;
@@ -69,6 +63,7 @@ public class Server {
     private SubmitBatchHandler submitBatchHandler;
     private GetFieldsHandler getFieldsHandler;
     private SearchHandler searchHandler;
+    private DownloadHandler downloadHandler;
 
     private Server(int port) {
         SERVER_PORT_NUMBER = port;
@@ -79,6 +74,7 @@ public class Server {
         submitBatchHandler = new SubmitBatchHandler();
         getFieldsHandler = new GetFieldsHandler();
         searchHandler = new SearchHandler();
+        downloadHandler = new DownloadHandler();
         run();
     }
 
@@ -109,6 +105,7 @@ public class Server {
         server.createContext("/SubmitBatch", submitBatchHandler);
         server.createContext("/GetFields", getFieldsHandler);
         server.createContext("/Search", searchHandler);
+        server.createContext("/", downloadHandler);
         
         logger.info("Starting HTTP Server");
         

@@ -12,6 +12,8 @@ import shared.model.Image;
  * @author schuyler
  */
 public class Images {
+    
+    public static final int IMAGE_COMPLETED = -1;
 
     public static class ImageInsertFailedException extends Database.InsertFailedException {
         public ImageInsertFailedException(String message) {
@@ -124,17 +126,17 @@ public class Images {
             StringBuilder sql = new StringBuilder();
 
             if (image.path() != null) {
-                sql.append(" path=\"").append(image.path()).append("\"");
+                sql.append(" path=\'").append(image.path()).append("\'");
             }
             if (image.title() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" title=\"").append(image.title()).append("\"");
+                sql.append(" title=\'").append(image.title()).append("\'");
             }
             if (image.projectId() > 0) {
                 if (sql.length() > 0) sql.append(",");
                 sql.append(" projectId=").append(image.projectId());
             }
-            if (image.currentUser() > 0) {
+            if (image.currentUser() > 0 || image.currentUser() == IMAGE_COMPLETED) {
                 if (sql.length() > 0) sql.append(",");
                 sql.append(" currentUser=").append(image.currentUser());
             }
@@ -202,12 +204,12 @@ public class Images {
             if (image.path() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("path=\"").append(image.path()).append("\"");
+                wheres.append("path=\'").append(image.path()).append("\'");
             }
             if (image.title() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("title=\"").append(image.title()).append("\"");
+                wheres.append("title=\'").append(image.title()).append("\'");
             }
             if (image.projectId() > 0) {
                 if (wheres.length() < 1) wheres.append(" where ");

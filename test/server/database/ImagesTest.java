@@ -13,6 +13,7 @@ import org.junit.*;
 import org.junit.rules.ExpectedException;
 import server.database.Images.*;
 import shared.model.Image;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -112,11 +113,11 @@ public class ImagesTest {
                 u02.setProjectId(rs.getInt(4));
                 u02.setCurrentUser(rs.getInt(5));
             }
-            Assert.assertEquals(u01, u02);
+            assertEquals(u01, u02);
         }
         catch (SQLException
                 | Images.ImageInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -134,7 +135,7 @@ public class ImagesTest {
             exception.expect(ImageInsertFailedException.class);
             images.insert(connection, u1);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -167,16 +168,16 @@ public class ImagesTest {
                 u02.setCurrentUser(rs.getInt(5));
             }
             
-            Assert.assertEquals(u0.imageId(), u02.imageId());
-            Assert.assertEquals(u0.path(), u02.path());
-            Assert.assertEquals(base.title(), u02.title()); // Null and 0 values not updated
-            Assert.assertEquals(base.projectId(), u02.projectId());
-            Assert.assertEquals(u0.currentUser(), u02.currentUser());
+            assertEquals(u0.imageId(), u02.imageId());
+            assertEquals(u0.path(), u02.path());
+            assertEquals(base.title(), u02.title()); // Null and 0 values not updated
+            assertEquals(base.projectId(), u02.projectId());
+            assertEquals(u0.currentUser(), u02.currentUser());
         }
         catch (SQLException
                     | Images.ImageUpdateFailedException
                     | ImageInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -194,7 +195,7 @@ public class ImagesTest {
             images.update(connection, u0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -207,7 +208,7 @@ public class ImagesTest {
             exception.expectMessage("ID 100 not found in 'images' table.");
             images.update(connection, u0);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -224,7 +225,7 @@ public class ImagesTest {
             exception.expectMessage("column path is not unique");
             images.update(connection, u0);
         } catch (ImageInsertFailedException | SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -240,20 +241,20 @@ public class ImagesTest {
 
             // Returns a correct result
             imageList.addAll(images.get(connection, get));
-            Assert.assertEquals(1, imageList.size());
-            Assert.assertEquals(imageList.get(0), base);
+            assertEquals(1, imageList.size());
+            assertEquals(imageList.get(0), base);
             imageList.clear();
             
             // Returns null if not found
             get.setImageId(base.imageId() + 1);
             imageList.addAll(images.get(connection, get));
-            Assert.assertEquals(0, imageList.size());
+            assertEquals(0, imageList.size());
             
         }
         catch (SQLException
                 | ImageInsertFailedException
                 | ImageGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -283,14 +284,14 @@ public class ImagesTest {
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                Assert.fail("Should have been deleted.");
+                fail("Should have been deleted.");
             }
             
         }
         catch (ImageDeleteFailedException
                 | SQLException
                 | ImageInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -308,7 +309,7 @@ public class ImagesTest {
             images.delete(connection, id);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -324,7 +325,7 @@ public class ImagesTest {
             
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
 

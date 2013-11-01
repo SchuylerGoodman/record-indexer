@@ -13,6 +13,7 @@ import org.junit.*;
 import org.junit.rules.ExpectedException;
 import server.database.Projects.*;
 import shared.model.Project;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -112,10 +113,10 @@ public class ProjectsTest {
                 p02.setFirstYCoord(rs.getInt(4));
                 p02.setFieldHeight(rs.getInt(5));
             }
-            Assert.assertEquals(p01, p02);
+            assertEquals(p01, p02);
         }
         catch (SQLException | Projects.ProjectInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -133,7 +134,7 @@ public class ProjectsTest {
             exception.expect(ProjectInsertFailedException.class);
             projects.insert(connection, p1);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -167,17 +168,17 @@ public class ProjectsTest {
                 p02.setFieldHeight(rs.getInt(5));
             }
             
-            Assert.assertEquals(p0.projectId(), p02.projectId());
-            Assert.assertEquals(p0.title(), p02.title());
-            Assert.assertEquals(base.recordCount(), p02.recordCount()); // Null and 0 values not updated
-            Assert.assertEquals(p0.firstYCoord(), p02.firstYCoord());
-            Assert.assertEquals(base.fieldHeight(), p02.fieldHeight()); // Null and 0 values not updated
+            assertEquals(p0.projectId(), p02.projectId());
+            assertEquals(p0.title(), p02.title());
+            assertEquals(base.recordCount(), p02.recordCount()); // Null and 0 values not updated
+            assertEquals(p0.firstYCoord(), p02.firstYCoord());
+            assertEquals(base.fieldHeight(), p02.fieldHeight()); // Null and 0 values not updated
             
         }
         catch (SQLException
                     | Projects.ProjectUpdateFailedException
                     | ProjectInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -195,7 +196,7 @@ public class ProjectsTest {
             projects.update(connection, p0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -209,7 +210,7 @@ public class ProjectsTest {
             projects.update(connection, p0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -224,20 +225,20 @@ public class ProjectsTest {
 
             // Returns a correct result
             projectList.addAll(projects.get(connection, get));
-            Assert.assertEquals(1, projectList.size());
-            Assert.assertEquals(projectList.get(0), base);
+            assertEquals(1, projectList.size());
+            assertEquals(projectList.get(0), base);
             projectList.clear();
             
             // Returns null if not found
             get.setProjectId(base.projectId() + 1);
             projectList.addAll(projects.get(connection, get));
-            Assert.assertEquals(0, projectList.size());
+            assertEquals(0, projectList.size());
             
         }
         catch (SQLException
                 | ProjectInsertFailedException
                 | ProjectGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -267,14 +268,14 @@ public class ProjectsTest {
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                Assert.fail("Query returned results, none should exist.");
+                fail("Query returned results, none should exist.");
             }
             
         }
         catch (ProjectDeleteFailedException
                 | SQLException
                 | ProjectInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -292,7 +293,7 @@ public class ProjectsTest {
             projects.delete(connection, id);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -308,7 +309,7 @@ public class ProjectsTest {
             
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     

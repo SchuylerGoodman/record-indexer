@@ -13,6 +13,7 @@ import org.junit.*;
 import org.junit.rules.ExpectedException;
 import server.database.Users.*;
 import shared.model.User;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -114,10 +115,10 @@ public class UsersTest {
                 u02.setEmail(rs.getString(6));
                 u02.setIndexedRecords(rs.getInt(7));
             }
-            Assert.assertEquals(u01, u02);
+            assertEquals(u01, u02);
         }
         catch (SQLException | Users.UserInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -135,7 +136,7 @@ public class UsersTest {
             exception.expect(UserInsertFailedException.class);
             users.insert(connection, u1);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -171,19 +172,19 @@ public class UsersTest {
                 u02.setIndexedRecords(rs.getInt(7));
             }
             
-            Assert.assertEquals(u0.userId(), u02.userId());
-            Assert.assertEquals(u0.username(), u02.username());
-            Assert.assertEquals(u0.firstName(), u02.firstName());
-            Assert.assertEquals(u0.lastName(), u02.lastName());
-            Assert.assertEquals(u0.password(), u02.password());
-            Assert.assertEquals(base.email(), u02.email()); // Null and 0 values not updated
-            Assert.assertEquals(base.indexedRecords(), u02.indexedRecords()); // Null and 0 values not updated
+            assertEquals(u0.userId(), u02.userId());
+            assertEquals(u0.username(), u02.username());
+            assertEquals(u0.firstName(), u02.firstName());
+            assertEquals(u0.lastName(), u02.lastName());
+            assertEquals(u0.password(), u02.password());
+            assertEquals(base.email(), u02.email()); // Null and 0 values not updated
+            assertEquals(base.indexedRecords(), u02.indexedRecords()); // Null and 0 values not updated
             
         }
         catch (SQLException
                     | Users.UserUpdateFailedException
                     | UserInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -201,7 +202,7 @@ public class UsersTest {
             users.update(connection, u0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -214,7 +215,7 @@ public class UsersTest {
             exception.expectMessage("ID 100 not found in 'users' table.");
             users.update(connection, u0);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -230,17 +231,17 @@ public class UsersTest {
                     
             // Returns a correct result
             userList.addAll(users.get(connection, get));
-            Assert.assertEquals(1, userList.size());
-            Assert.assertEquals(userList.get(0), base);
+            assertEquals(1, userList.size());
+            assertEquals(userList.get(0), base);
             userList.clear();
             
             // Returns null if not found
             get.setUserId(base.userId() + 1);
             userList.addAll(users.get(connection, get));
-            Assert.assertEquals(0, userList.size());
+            assertEquals(0, userList.size());
             
         } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -260,17 +261,17 @@ public class UsersTest {
 
             // Returns a correct result
             userList.addAll(users.get(connection, get));
-            Assert.assertEquals(1, userList.size());
-            Assert.assertEquals(userList.get(0), base);
+            assertEquals(1, userList.size());
+            assertEquals(userList.get(0), base);
             userList.clear();
             
             // Returns null
             get.setUsername("HL");
             userList.addAll(users.get(connection, get));
-            Assert.assertEquals(0, userList.size());
+            assertEquals(0, userList.size());
             
         } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -300,14 +301,14 @@ public class UsersTest {
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                Assert.fail("Should have been deleted.");
+                fail("Should have been deleted.");
             }
             
         }
         catch (UserDeleteFailedException
                 | SQLException
                 | UserInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -325,7 +326,7 @@ public class UsersTest {
             users.delete(connection, id);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -341,7 +342,7 @@ public class UsersTest {
             
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
 

@@ -6,6 +6,9 @@ package server.database.tools;
 
 import server.database.tools.parseHandlers.IndexerHandler;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.logging.*;
 import javax.xml.parsers.*;
@@ -37,6 +40,7 @@ public class DatabaseImporter {
             XMLReader reader = SaxParser.getXMLReader();
             reader.setContentHandler(new IndexerHandler(reader)); // Set initial parsing handler
             reader.parse(new InputSource(new BufferedInputStream(new FileInputStream(recordPath))));
+            copyFiles(recordPath);
             
         } catch (ParserConfigurationException
                | SAXException
@@ -46,6 +50,15 @@ public class DatabaseImporter {
             Logger.getLogger(DatabaseImporter.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    private static void copyFiles(String xmlPath) {
+        Path path = Paths.get(xmlPath);
+        try {
+            Files.walkFileTree(path.getParent(), new FileImporter());
+        } catch (IOException ex) {
+            Logger.getLogger(DatabaseImporter.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private static void usage() {

@@ -206,7 +206,7 @@ public class Records {
             if (record.value() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("value=\"").append(record.value()).append("\"");
+                wheres.append("value=\'").append(record.value()).append("\'");
             }
             sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());
@@ -360,7 +360,7 @@ public class Records {
                 if (sqlValue.length() > 0) {
                     sqlValue.append(" or ");
                 }
-                sqlValue.append("value like \"%").append(value).append("%\"");
+                sqlValue.append("value like \'%").append(value).append("%\'");
             }
             sqlValue.append(")");
             sql.append(sqlValue);

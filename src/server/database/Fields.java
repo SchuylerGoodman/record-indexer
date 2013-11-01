@@ -123,7 +123,7 @@ public class Fields {
             StringBuilder sql = new StringBuilder();
 
             if (field.title() != null) {
-                sql.append(" title=\"").append(field.title()).append("\"");
+                sql.append(" title=\'").append(field.title()).append("\'");
             }
             if (field.xCoordinate() > -1) {
                 if (sql.length() > 0) sql.append(",");
@@ -135,7 +135,7 @@ public class Fields {
             }
             if (field.helpHtml() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" helpHtml=\"").append(field.helpHtml()).append("\"");
+                sql.append(" helpHtml=\'").append(field.helpHtml()).append("\'");
             }
             if (field.columnNumber() > 0) {
                 if (sql.length() > 0) sql.append(",");
@@ -147,7 +147,7 @@ public class Fields {
             }
             if (field.knownData() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" knownData=\"").append(field.knownData()).append("\"");
+                sql.append(" knownData=\'").append(field.knownData()).append("\'");
             }
             if (sql.length() > 0) {
                 sql.insert(0, "update fields set");
@@ -212,7 +212,7 @@ public class Fields {
             if (field.title() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("title=\"").append(field.title()).append("\"");
+                wheres.append("title=\'").append(field.title()).append("\'");
             }
             if (field.xCoordinate() > -1) {
                 if (wheres.length() < 1) wheres.append(" where ");
@@ -227,7 +227,7 @@ public class Fields {
             if (field.helpHtml() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("helpHtml=\"").append(field.helpHtml()).append("\"");
+                wheres.append("helpHtml=\'").append(field.helpHtml()).append("\'");
             }
             if (field.columnNumber() > 0) {
                 if (wheres.length() < 1) wheres.append(" where ");
@@ -242,7 +242,7 @@ public class Fields {
             if (field.knownData() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("knownData=\"").append(field.knownData()).append("\"");
+                wheres.append("knownData=\'").append(field.knownData()).append("\'");
             }
             sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());

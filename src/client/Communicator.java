@@ -161,6 +161,37 @@ public class Communicator {
         return (CreateUser_Result) doPost("/CreateUser", params);
     }
     
+    public byte[] downloadFile(URL path) {
+        return (byte[]) doPost(path.getPath(), null);
+    }
+    
+    private Object doGet(String urlPath) {
+        
+        Object result = null;
+        try {
+            URL url = new URL(protocol, host, port, urlPath);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestMethod("GET");
+
+            connection.connect();
+
+            XStream xstream = new XStream(new DomDriver());
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                 try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream())) {
+                     result = xstream.fromXML(in);
+                 }
+            }
+            else {
+                 Logger.getLogger(Communicator.class.getName()).log(
+                         Level.WARNING, String.format("Request failed with response code %d", connection.getResponseCode()));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+    }
+    
     /**
      * Does a post request to the host and port specified in the Object's members.
      * 
@@ -177,7 +208,7 @@ public class Communicator {
             URL url = new URL(protocol, host, port, urlPath);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
-//            connection.setRequestMethod("POST");
+            connection.setRequestMethod("POST");
             
             connection.connect();
             
@@ -203,13 +234,16 @@ public class Communicator {
         return result;
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException {
         try {
-            Server.main(null);
+            Server.main(args);
             Communicator comm = new Communicator("http", "localhost", 6464);
-            ValidateUser_Param param = new ValidateUser_Param("sheila", "parker");
-            ValidateUser_Result res = comm.validateUser(param);
-            System.out.println(res.toString());
+            URL url = new URL("HTTP://localhost:6464/images/1890_image0.png");
+            byte[] b = comm.downloadFile(url);
+            b = b;
+//            ValidateUser_Param param = new ValidateUser_Param("sheila", "parker");
+//            ValidateUser_Result res = comm.validateUser(param);
+//            System.out.println(res.toString());
         } catch (CommunicatorException ex) {
             Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
         }

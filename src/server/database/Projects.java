@@ -115,7 +115,7 @@ public class Projects {
             StringBuilder sql = new StringBuilder();
 
             if (project.title() != null) {
-                sql.append(" title=\"").append(project.title()).append("\"");
+                sql.append(" title=\'").append(project.title()).append("\'");
             }
             if (project.recordCount() > 0) {
                 if (sql.length() > 0) sql.append(",");
@@ -193,7 +193,7 @@ public class Projects {
             if (project.title() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("title=\"").append(project.title()).append("\"");
+                wheres.append("title=\'").append(project.title()).append("\'");
             }
             if (project.recordCount() > -1) {
                 if (wheres.length() < 1) wheres.append(" where ");
@@ -203,12 +203,12 @@ public class Projects {
             if (project.firstYCoord() > -1) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("firstYCoord=\"").append(project.firstYCoord());
+                wheres.append("firstYCoord=\'").append(project.firstYCoord());
             }
             if (project.fieldHeight() > -1) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("fieldHeight=\"").append(project.fieldHeight());
+                wheres.append("fieldHeight=\'").append(project.fieldHeight());
             }
             sql.append(wheres);
             stmt = connection.prepareStatement(sql.toString());

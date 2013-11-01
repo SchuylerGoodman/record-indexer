@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import server.database.Records.*;
 import shared.model.Record;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -113,10 +114,10 @@ public class RecordsTest {
                 u02.setRowNumber(rs.getInt(4));
                 u02.setValue(rs.getString(5));
             }
-            Assert.assertEquals(u01, u02);
+            assertEquals(u01, u02);
         }
         catch (SQLException | Records.RecordInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -134,7 +135,7 @@ public class RecordsTest {
             exception.expect(RecordInsertFailedException.class);
             records.insert(connection, u1);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -167,17 +168,17 @@ public class RecordsTest {
                 u02.setValue(rs.getString(5));
             }
             
-            Assert.assertEquals(u0.recordId(), u02.recordId());
-            Assert.assertEquals(base.imageId(), u02.imageId());
-            Assert.assertEquals(base.fieldId(), u02.fieldId());
-            Assert.assertEquals(base.rowNumber(), u02.rowNumber());
-            Assert.assertEquals(u0.value(), u02.value());
+            assertEquals(u0.recordId(), u02.recordId());
+            assertEquals(base.imageId(), u02.imageId());
+            assertEquals(base.fieldId(), u02.fieldId());
+            assertEquals(base.rowNumber(), u02.rowNumber());
+            assertEquals(u0.value(), u02.value());
             
         }
         catch (SQLException
                     | Records.RecordUpdateFailedException
                     | RecordInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -214,17 +215,17 @@ public class RecordsTest {
                 u02.setValue(rs.getString(5));
             }
             
-            Assert.assertEquals(base.recordId(), u02.recordId());
-            Assert.assertEquals(u0.imageId(), u02.imageId());
-            Assert.assertEquals(u0.fieldId(), u02.fieldId());
-            Assert.assertEquals(u0.rowNumber(), u02.rowNumber());
-            Assert.assertEquals(u0.value(), u02.value());
+            assertEquals(base.recordId(), u02.recordId());
+            assertEquals(u0.imageId(), u02.imageId());
+            assertEquals(u0.fieldId(), u02.fieldId());
+            assertEquals(u0.rowNumber(), u02.rowNumber());
+            assertEquals(u0.value(), u02.value());
             
         }
         catch (SQLException
                     | Records.RecordUpdateFailedException
                     | RecordInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -243,7 +244,7 @@ public class RecordsTest {
             records.update(connection, u0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -257,7 +258,7 @@ public class RecordsTest {
             records.update(connection, u0);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -270,7 +271,7 @@ public class RecordsTest {
             exception.expectMessage("Record was not found or could not be updated.");
             records.update(connection, u0);
         } catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -288,18 +289,18 @@ public class RecordsTest {
 
             // Returns a correct result
             recordList.addAll(records.get(connection, get));
-            Assert.assertEquals(1, recordList.size());
-            Assert.assertEquals(recordList.get(0), base);
+            assertEquals(1, recordList.size());
+            assertEquals(recordList.get(0), base);
             recordList.clear();
             
             // Returns null if not found
             get.setRecordId(base.recordId() + 1);
             recordList.addAll(records.get(connection, get));
-            Assert.assertEquals(0, recordList.size());
+            assertEquals(0, recordList.size());
             
         }
         catch (SQLException | RecordInsertFailedException | RecordGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -324,18 +325,18 @@ public class RecordsTest {
 
             // Returns a correct result
             recordList.addAll(records.get(connection, get));
-            Assert.assertEquals(1, recordList.size());
-            Assert.assertEquals(recordList.get(0), base);
+            assertEquals(1, recordList.size());
+            assertEquals(recordList.get(0), base);
             recordList.clear();
             
             // Returns null if not found
             get.setImageId(base.imageId() + 1);
             recordList.addAll(records.get(connection, get));
-            Assert.assertEquals(0, recordList.size());
+            assertEquals(0, recordList.size());
             
         }
         catch (SQLException | RecordInsertFailedException | RecordGetFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -365,14 +366,14 @@ public class RecordsTest {
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                Assert.fail("Should have been deleted.");
+                fail("Should have been deleted.");
             }
             
         }
         catch (RecordDeleteFailedException
                 | SQLException
                 | RecordInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -403,14 +404,14 @@ public class RecordsTest {
             rs = stmt.executeQuery();
             
             while (rs.next()) {
-                Assert.fail("Should have been deleted.");
+                fail("Should have been deleted.");
             }
             
         }
         catch (RecordDeleteFailedException
                 | SQLException
                 | RecordInsertFailedException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
         finally {
             if (stmt != null) stmt.close();
@@ -428,7 +429,7 @@ public class RecordsTest {
             records.delete(connection, id);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -444,7 +445,7 @@ public class RecordsTest {
             records.delete(connection, imageId, fieldId, rowNumber);
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -460,7 +461,7 @@ public class RecordsTest {
             
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
     
@@ -477,7 +478,7 @@ public class RecordsTest {
             
         }
         catch (SQLException ex) {
-            Assert.fail(ex.getMessage());
+            fail(ex.getMessage());
         }
     }
 

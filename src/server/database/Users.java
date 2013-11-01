@@ -128,27 +128,27 @@ public class Users {
             StringBuilder sql = new StringBuilder();
 
             if (user.username() != null) {
-                sql.append(" username=\"").append(user.username()).append("\"");
+                sql.append(" username=\'").append(user.username()).append("\'");
             }
             if (user.firstName() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" first=\"").append(user.firstName()).append("\"");
+                sql.append(" first=\'").append(user.firstName()).append("\'");
             }
             if (user.lastName() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" last=\"").append(user.lastName()).append("\"");
+                sql.append(" last=\'").append(user.lastName()).append("\'");
             }
             if (user.password() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" password=\"").append(user.password()).append("\"");
+                sql.append(" password=\'").append(user.password()).append("\'");
             }
             if (user.email() != null) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" email=\"").append(user.email()).append("\"");
+                sql.append(" email=\'").append(user.email()).append("\'");
             }
             if (user.indexedRecords() > -1) {
                 if (sql.length() > 0) sql.append(",");
-                sql.append(" records=\"").append(user.indexedRecords()).append("\"");
+                sql.append(" records=\'").append(user.indexedRecords()).append("\'");
             }
             if (sql.length() > 0) {
                 sql.insert(0, "update users set");
@@ -213,27 +213,27 @@ public class Users {
             if (user.username() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("username=\"").append(user.username()).append("\"");
+                wheres.append("username=\'").append(user.username()).append("\'");
             }
             if (user.firstName() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("first=\"").append(user.firstName()).append("\"");
+                wheres.append("first=\'").append(user.firstName()).append("\'");
             }
             if (user.lastName() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("last=\"").append(user.lastName()).append("\"");
+                wheres.append("last=\'").append(user.lastName()).append("\'");
             }
             if (user.password() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("password=\"").append(user.password()).append("\"");
+                wheres.append("password=\'").append(user.password()).append("\'");
             }
             if (user.email() != null) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
-                wheres.append("email=\"").append(user.email()).append("\"");
+                wheres.append("email=\'").append(user.email()).append("\'");
             }
             if (user.indexedRecords() > -1) {
                 if (wheres.length() < 1) wheres.append(" where ");
