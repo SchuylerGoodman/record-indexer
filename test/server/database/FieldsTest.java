@@ -21,6 +21,14 @@ import static org.junit.Assert.*;
  * @author schuyler
  */
 public class FieldsTest {
+
+    static {
+        try {
+            Database.initialize();
+        } catch (Database.DatabaseException ex) {
+            Logger.getLogger(FieldsTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     private Fields fields;
     
@@ -28,12 +36,7 @@ public class FieldsTest {
     
     private ArrayList<Field> fieldList;
     
-    private static String databasePath = "db" + File.separator + "test" + File.separator
-                + "test-record-indexer.sqlite";
-    
-    private static String createStatementsPath = "db" + File.separator + "DatabaseCreate.sql";
-    
-    public FieldsTest() {
+    public FieldsTest() throws Database.DatabaseException {
         try {
             Class.forName("org.sqlite.JDBC");
             fields = new Fields();
@@ -49,8 +52,8 @@ public class FieldsTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            File databaseFile = new File(databasePath);
-            File createStatementFile = new File(createStatementsPath);
+            File databaseFile = new File(server.ServerUnitTests.TEST_DATABASE_PATH);
+            File createStatementFile = new File(server.database.Database.STATEMENT_PATH);
             DatabaseCreator dbc = new DatabaseCreator();
             dbc.createDatabase(databaseFile, createStatementFile);
         }
@@ -66,7 +69,7 @@ public class FieldsTest {
     @Before
     public void setUp() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + server.ServerUnitTests.TEST_DATABASE_PATH);
             connection.setAutoCommit(false);
         } catch (SQLException ex) {
             Logger.getLogger(FieldsTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -136,6 +139,7 @@ public class FieldsTest {
             Field u0 = new Field("Name", 1, 2, "help.html", 3, 4, "data.html");
             Field u1 = new Field("Name", 1, 2, "help.html", 3, 4, "data.html");
             fields.insert(connection, u0);
+            
             exception.expect(FieldInsertFailedException.class);
             fields.insert(connection, u1);
         } catch (SQLException ex) {
@@ -148,12 +152,14 @@ public class FieldsTest {
         
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        Statement kStmt = null;
         
         try {
             Field base = new Field("Name", 1, 2, "help.html", 3, 4, "data.html");
             Field u0 = new Field("Age", 2, 3, null, 4, 0, "data2.html");
             
-            base = fields.insert(connection, base);
+            this.insertField(base);
+//            base = fields.insert(connection, base);
             u0.setFieldId(base.fieldId());
             fields.update(connection, u0);
             
@@ -185,9 +191,7 @@ public class FieldsTest {
             assertEquals(u0.knownData(), u02.knownData());
             
         }
-        catch (SQLException
-                    | Fields.FieldUpdateFailedException
-                    | FieldInsertFailedException ex) {
+        catch (SQLException | Fields.FieldUpdateFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -229,7 +233,7 @@ public class FieldsTest {
         ResultSet rs = null;
         try {
             Field base = new Field("Name", 1, 2, "help.html", 3, 4, "data.html");
-            base = fields.insert(connection, base);
+            this.insertField(base);
             Field get = new Field();
             get.setFieldId(base.fieldId());
             
@@ -244,9 +248,7 @@ public class FieldsTest {
             fieldList.addAll(fields.get(connection, get));
             assertEquals(0, fieldList.size());
             
-        } catch (SQLException
-                | FieldInsertFailedException
-                | FieldGetFailedException ex) {
+        } catch (SQLException | FieldGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -262,7 +264,7 @@ public class FieldsTest {
         ResultSet rs = null;
         try {
             Field base = new Field("Name", 1, 2, "help.html", 3, 4, "data.html");
-            base = fields.insert(connection, base);
+            this.insertField(base);
             Field get = new Field();
             get.setProjectId(base.projectId());
             get.setColumnNumber(base.columnNumber());
@@ -278,9 +280,7 @@ public class FieldsTest {
             fieldList.addAll(fields.get(connection, get));
             assertEquals(0, fieldList.size());
             
-        } catch (SQLException
-                | FieldInsertFailedException
-                | FieldGetFailedException ex) {
+        } catch (SQLException | FieldGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -298,7 +298,7 @@ public class FieldsTest {
         
         try {
             Field base = new Field("Name", 1, 2, "help.html", 3, 4, "data.html");
-            base = fields.insert(connection, base);
+            this.insertField(base);
             
             int rightId = base.fieldId();
             
@@ -315,9 +315,7 @@ public class FieldsTest {
             }
             
         }
-        catch (FieldDeleteFailedException
-                | SQLException
-                | FieldInsertFailedException ex) {
+        catch (FieldDeleteFailedException | SQLException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -353,6 +351,37 @@ public class FieldsTest {
         }
         catch (SQLException ex) {
             fail(ex.getMessage());
+        }
+    }
+    
+    private void insertField(Field field) throws SQLException {
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Statement kStmt = null;
+        
+        try {
+            String insertSql = "insert into fields (title, xCoordinate, width, helpHtml, columnNumber, projectId, knownData) "
+                    + "values (?, ?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(insertSql);
+            stmt.setString(1, field.title());
+            stmt.setInt(2, field.xCoordinate());
+            stmt.setInt(3, field.width());
+            stmt.setString(4, field.helpHtml());
+            stmt.setInt(5, field.columnNumber());
+            stmt.setInt(6, field.projectId());
+            stmt.setString(7, field.knownData());
+            if (stmt.executeUpdate() == 1) {
+                kStmt = connection.createStatement();
+                rs = kStmt.executeQuery("select last_insert_rowid()");
+                rs.next();
+                field.setFieldId(rs.getInt(1));
+            }
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+            if (kStmt != null) kStmt.close();
         }
     }
 

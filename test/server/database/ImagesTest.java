@@ -21,16 +21,19 @@ import static org.junit.Assert.*;
  */
 public class ImagesTest {
     
+    static {
+        try {
+            Database.initialize();
+        } catch (Database.DatabaseException ex) {
+            Logger.getLogger(ImagesTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private Images images;
     
     private Connection connection;
     
     private ArrayList<Image> imageList;
-    
-    private static String databasePath = "db" + File.separator + "test" + File.separator
-                + "test-record-indexer.sqlite";
-    
-    private static String createStatementsPath = "db" + File.separator + "DatabaseCreate.sql";
     
     public ImagesTest() {
         try {
@@ -48,8 +51,8 @@ public class ImagesTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            File databaseFile = new File(databasePath);
-            File createStatementFile = new File(createStatementsPath);
+            File databaseFile = new File(server.ServerUnitTests.TEST_DATABASE_PATH);
+            File createStatementFile = new File(server.database.Database.STATEMENT_PATH);
             DatabaseCreator dbc = new DatabaseCreator();
             dbc.createDatabase(databaseFile, createStatementFile);
         }
@@ -65,7 +68,7 @@ public class ImagesTest {
     @Before
     public void setUp() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + server.ServerUnitTests.TEST_DATABASE_PATH);
             connection.setAutoCommit(false);
         } catch (SQLException ex) {
             Logger.getLogger(ImagesTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -132,6 +135,7 @@ public class ImagesTest {
             Image u0 = new Image("image.png", "image", 1);
             Image u1 = new Image("image.png", "plumage", 1);
             images.insert(connection, u0);
+            
             exception.expect(ImageInsertFailedException.class);
             images.insert(connection, u1);
         } catch (SQLException ex) {
@@ -149,7 +153,7 @@ public class ImagesTest {
             Image base = new Image("image.png", "image", 1);
             Image u0 = new Image("image2.png", null, 1, 5);
             
-            base = images.insert(connection, base);
+            insertImage(base);
             u0.setImageId(base.imageId());
             images.update(connection, u0);
             
@@ -174,9 +178,7 @@ public class ImagesTest {
             assertEquals(base.projectId(), u02.projectId());
             assertEquals(u0.currentUser(), u02.currentUser());
         }
-        catch (SQLException
-                    | Images.ImageUpdateFailedException
-                    | ImageInsertFailedException ex) {
+        catch (SQLException | Images.ImageUpdateFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -235,7 +237,7 @@ public class ImagesTest {
         ResultSet rs = null;
         try {
             Image base = new Image("image.png", "image", 1);
-            base = images.insert(connection, base);
+            insertImage(base);
             Image get = new Image();
             get.setImageId(base.imageId());
 
@@ -251,9 +253,7 @@ public class ImagesTest {
             assertEquals(0, imageList.size());
             
         }
-        catch (SQLException
-                | ImageInsertFailedException
-                | ImageGetFailedException ex) {
+        catch (SQLException | ImageGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -271,7 +271,7 @@ public class ImagesTest {
         
         try {
             Image base = new Image("image.png", "image", 1);
-            base = images.insert(connection, base);
+            insertImage(base);
             
             int rightId = base.imageId();
             
@@ -288,9 +288,7 @@ public class ImagesTest {
             }
             
         }
-        catch (ImageDeleteFailedException
-                | SQLException
-                | ImageInsertFailedException ex) {
+        catch (ImageDeleteFailedException | SQLException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -326,6 +324,34 @@ public class ImagesTest {
         }
         catch (SQLException ex) {
             fail(ex.getMessage());
+        }
+    }
+    
+    private void insertImage(Image image) throws SQLException {
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Statement kStmt = null;
+        
+        try {
+            String insertSql = "insert into images (path, title, projectId, currentUser) "
+                    + "values (?, ?, ?, ?)";
+            stmt = connection.prepareStatement(insertSql);
+            stmt.setString(1, image.path());
+            stmt.setString(2, image.title());
+            stmt.setInt(3, image.projectId());
+            stmt.setInt(4, image.currentUser());
+            if (stmt.executeUpdate() == 1) {
+                kStmt = connection.createStatement();
+                rs = kStmt.executeQuery("select last_insert_rowid()");
+                rs.next();
+                image.setImageId(rs.getInt(1));
+            }
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+            if (kStmt != null) kStmt.close();
         }
     }
 

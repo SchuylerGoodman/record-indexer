@@ -30,7 +30,7 @@ public class GetSampleImageHandler implements HttpHandler {
         
         try {
             
-            HandlerRunner handler = new HandlerRunner(exchange);
+            APIHandler handler = new APIHandler(exchange);
             
             handler.run("getSampleImage");
             exchange.close();

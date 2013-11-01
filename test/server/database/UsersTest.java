@@ -20,17 +20,20 @@ import static org.junit.Assert.*;
  * @author schuyler
  */
 public class UsersTest {
+
+    static {
+        try {
+            Database.initialize();
+        } catch (Database.DatabaseException ex) {
+            Logger.getLogger(UsersTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     private Users users;
     
     private Connection connection;
     
     private ArrayList<User> userList;
-    
-    private static String databasePath = "db" + File.separator + "test" + File.separator
-                + "test-record-indexer.sqlite";
-    
-    private static String createStatementsPath = "db" + File.separator + "DatabaseCreate.sql";
     
     public UsersTest() {
         try {
@@ -48,8 +51,8 @@ public class UsersTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            File databaseFile = new File(databasePath);
-            File createStatementFile = new File(createStatementsPath);
+            File databaseFile = new File(server.ServerUnitTests.TEST_DATABASE_PATH);
+            File createStatementFile = new File(server.database.Database.STATEMENT_PATH);
             DatabaseCreator dbc = new DatabaseCreator();
             dbc.createDatabase(databaseFile, createStatementFile);
         }
@@ -65,7 +68,7 @@ public class UsersTest {
     @Before
     public void setUp() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + server.ServerUnitTests.TEST_DATABASE_PATH);
             connection.setAutoCommit(false);
         } catch (SQLException ex) {
             Logger.getLogger(UsersTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -151,7 +154,7 @@ public class UsersTest {
             User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
             User u0 = new User("HB", "Harry", "Blooper", "blooops", null, -1);
             
-            base = users.insert(connection, base);
+            insertUser(base);
             u0.setUserId(base.userId());
             users.update(connection, u0);
             
@@ -181,9 +184,7 @@ public class UsersTest {
             assertEquals(base.indexedRecords(), u02.indexedRecords()); // Null and 0 values not updated
             
         }
-        catch (SQLException
-                    | Users.UserUpdateFailedException
-                    | UserInsertFailedException ex) {
+        catch (SQLException | Users.UserUpdateFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -226,7 +227,7 @@ public class UsersTest {
         try {
             User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
 
-            base = users.insert(connection, base);
+            insertUser(base);
             User get = new User(base.userId(), null, null, null, null, null);
                     
             // Returns a correct result
@@ -240,7 +241,7 @@ public class UsersTest {
             userList.addAll(users.get(connection, get));
             assertEquals(0, userList.size());
             
-        } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
+        } catch (SQLException | UserGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -256,7 +257,7 @@ public class UsersTest {
         ResultSet rs = null;
         try {
             User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
-            base = users.insert(connection, base);
+            insertUser(base);
             User get = new User(0, base.username(), null, null, base.password(), null);
 
             // Returns a correct result
@@ -270,7 +271,7 @@ public class UsersTest {
             userList.addAll(users.get(connection, get));
             assertEquals(0, userList.size());
             
-        } catch (SQLException | UserInsertFailedException | UserGetFailedException ex) {
+        } catch (SQLException | UserGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -288,7 +289,7 @@ public class UsersTest {
         
         try {
             User base = new User("HH", "Harry", "Hooper", "hooops", "hh@hoops.com", 0);
-            base = users.insert(connection, base);
+            insertUser(base);
             
             int rightId = base.userId();
             
@@ -305,9 +306,7 @@ public class UsersTest {
             }
             
         }
-        catch (UserDeleteFailedException
-                | SQLException
-                | UserInsertFailedException ex) {
+        catch (UserDeleteFailedException | SQLException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -343,6 +342,36 @@ public class UsersTest {
         }
         catch (SQLException ex) {
             fail(ex.getMessage());
+        }
+    }
+    
+    private void insertUser(User user) throws SQLException {
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Statement kStmt = null;
+        
+        try {
+            String insertSql = "insert into users (username, first, last, password, email, records) "
+                    + "values (?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(insertSql);
+            stmt.setString(1, user.username());
+            stmt.setString(2, user.firstName());
+            stmt.setString(3, user.lastName());
+            stmt.setString(4, user.password());
+            stmt.setString(5, user.email());
+            stmt.setInt(6, user.indexedRecords());
+            if (stmt.executeUpdate() == 1) {
+                kStmt = connection.createStatement();
+                rs = kStmt.executeQuery("select last_insert_rowid()");
+                rs.next();
+                user.setUserId(rs.getInt(1));
+            }
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+            if (kStmt != null) kStmt.close();
         }
     }
 

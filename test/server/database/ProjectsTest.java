@@ -20,17 +20,20 @@ import static org.junit.Assert.*;
  * @author schuyler
  */
 public class ProjectsTest {
+
+    static {
+        try {
+            Database.initialize();
+        } catch (Database.DatabaseException ex) {
+            Logger.getLogger(ProjectsTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     private Projects projects;
     
     private Connection connection;
     
     private ArrayList<Project> projectList;
-    
-    private static String databasePath = "db" + File.separator + "test" + File.separator
-                + "test-record-indexer.sqlite";
-    
-    private static String createStatementsPath = "db" + File.separator + "DatabaseCreate.sql";
     
     public ProjectsTest() {
         try {
@@ -48,8 +51,8 @@ public class ProjectsTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            File databaseFile = new File(databasePath);
-            File createStatementFile = new File(createStatementsPath);
+            File databaseFile = new File(server.ServerUnitTests.TEST_DATABASE_PATH);
+            File createStatementFile = new File(server.database.Database.STATEMENT_PATH);
             DatabaseCreator dbc = new DatabaseCreator();
             dbc.createDatabase(databaseFile, createStatementFile);
         }
@@ -65,7 +68,7 @@ public class ProjectsTest {
     @Before
     public void setUp() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + server.ServerUnitTests.TEST_DATABASE_PATH);
             connection.setAutoCommit(false);
         } catch (SQLException ex) {
             Logger.getLogger(ProjectsTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -149,7 +152,7 @@ public class ProjectsTest {
             Project base = new Project("Hoop", 1, 2, 3);
             Project p0 = new Project("Boop", 0, 2, -1);
             
-            base = projects.insert(connection, base);
+            insertProject(base);
             p0.setProjectId(base.projectId());
             projects.update(connection, p0);
             
@@ -175,9 +178,7 @@ public class ProjectsTest {
             assertEquals(base.fieldHeight(), p02.fieldHeight()); // Null and 0 values not updated
             
         }
-        catch (SQLException
-                    | Projects.ProjectUpdateFailedException
-                    | ProjectInsertFailedException ex) {
+        catch (SQLException | Projects.ProjectUpdateFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -220,7 +221,7 @@ public class ProjectsTest {
         ResultSet rs = null;
         try {
             Project base = new Project("Hoop", 1, 2, 3);
-            base = projects.insert(connection, base);
+            insertProject(base);
             Project get = new Project(base.projectId(), null, -1, -1, -1);
 
             // Returns a correct result
@@ -235,9 +236,7 @@ public class ProjectsTest {
             assertEquals(0, projectList.size());
             
         }
-        catch (SQLException
-                | ProjectInsertFailedException
-                | ProjectGetFailedException ex) {
+        catch (SQLException | ProjectGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -255,7 +254,7 @@ public class ProjectsTest {
         
         try {
             Project base = new Project("Hoop", 1, 2, 3);
-            base = projects.insert(connection, base);
+            insertProject(base);
             
             int rightId = base.projectId();
             
@@ -272,9 +271,7 @@ public class ProjectsTest {
             }
             
         }
-        catch (ProjectDeleteFailedException
-                | SQLException
-                | ProjectInsertFailedException ex) {
+        catch (ProjectDeleteFailedException | SQLException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -313,4 +310,32 @@ public class ProjectsTest {
         }
     }
     
+    private void insertProject(Project project) throws SQLException {
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Statement kStmt = null;
+        
+        try {
+            String insertSql = "insert into projects (title, recordCount, firstYCoord, fieldHeight) "
+                    + "values (?, ?, ?, ?)";
+            stmt = connection.prepareStatement(insertSql);
+            stmt.setString(1, project.title());
+            stmt.setInt(2, project.recordCount());
+            stmt.setInt(3, project.firstYCoord());
+            stmt.setInt(4, project.fieldHeight());
+            if (stmt.executeUpdate() == 1) {
+                kStmt = connection.createStatement();
+                rs = kStmt.executeQuery("select last_insert_rowid()");
+                rs.next();
+                project.setProjectId(rs.getInt(1));
+            }
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+            if (kStmt != null) kStmt.close();
+        }
+    }
+
 }

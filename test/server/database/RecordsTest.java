@@ -21,17 +21,20 @@ import static org.junit.Assert.*;
  * @author schuyler
  */
 public class RecordsTest {
+
+    static {
+        try {
+            Database.initialize();
+        } catch (Database.DatabaseException ex) {
+            Logger.getLogger(RecordsTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     private Records records;
     
     private Connection connection;
     
     private ArrayList<Record> recordList;
-    
-    private static String databasePath = "db" + File.separator + "test" + File.separator
-                + "test-record-indexer.sqlite";
-    
-    private static String createStatementsPath = "db" + File.separator + "DatabaseCreate.sql";
     
     public RecordsTest() {
         try {
@@ -49,8 +52,8 @@ public class RecordsTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            File databaseFile = new File(databasePath);
-            File createStatementFile = new File(createStatementsPath);
+            File databaseFile = new File(server.ServerUnitTests.TEST_DATABASE_PATH);
+            File createStatementFile = new File(server.database.Database.STATEMENT_PATH);
             DatabaseCreator dbc = new DatabaseCreator();
             dbc.createDatabase(databaseFile, createStatementFile);
         }
@@ -66,7 +69,7 @@ public class RecordsTest {
     @Before
     public void setUp() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + server.ServerUnitTests.TEST_DATABASE_PATH);
             connection.setAutoCommit(false);
         } catch (SQLException ex) {
             Logger.getLogger(RecordsTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -149,7 +152,7 @@ public class RecordsTest {
             Record base = new Record(1, 2, 3, "value");
             Record u0 = new Record(0, 0, 0, "next value");
             
-            base = records.insert(connection, base);
+            insertRecord(base);
             u0.setRecordId(base.recordId());
             records.update(connection, u0);
             
@@ -175,9 +178,7 @@ public class RecordsTest {
             assertEquals(u0.value(), u02.value());
             
         }
-        catch (SQLException
-                    | Records.RecordUpdateFailedException
-                    | RecordInsertFailedException ex) {
+        catch (SQLException | Records.RecordUpdateFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -196,7 +197,7 @@ public class RecordsTest {
             Record base = new Record(1, 2, 3, "value");
             Record u0 = new Record(1, 2, 3, "next value");
             
-            base = records.insert(connection, base);
+            insertRecord(base);
 //            u0.setRecordId(base.recordId());
             records.update(connection, u0);
             
@@ -222,9 +223,7 @@ public class RecordsTest {
             assertEquals(u0.value(), u02.value());
             
         }
-        catch (SQLException
-                    | Records.RecordUpdateFailedException
-                    | RecordInsertFailedException ex) {
+        catch (SQLException | Records.RecordUpdateFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -283,7 +282,7 @@ public class RecordsTest {
         
         try {
             Record base = new Record(0, 0, 0, "value");
-            base = records.insert(connection, base);
+            insertRecord(base);
             Record get = new Record();
             get.setRecordId(base.recordId());
 
@@ -299,7 +298,7 @@ public class RecordsTest {
             assertEquals(0, recordList.size());
             
         }
-        catch (SQLException | RecordInsertFailedException | RecordGetFailedException ex) {
+        catch (SQLException | RecordGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -317,7 +316,7 @@ public class RecordsTest {
         
         try {
             Record base = new Record(1, 2, 3, "value");
-            base = records.insert(connection, base);
+            insertRecord(base);
             Record get = new Record();
             get.setImageId(base.imageId());
             get.setFieldId(base.fieldId());
@@ -335,7 +334,7 @@ public class RecordsTest {
             assertEquals(0, recordList.size());
             
         }
-        catch (SQLException | RecordInsertFailedException | RecordGetFailedException ex) {
+        catch (SQLException | RecordGetFailedException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -353,7 +352,7 @@ public class RecordsTest {
         
         try {
             Record base = new Record(0, 0, 0, "value");
-            base = records.insert(connection, base);
+            insertRecord(base);
             
             int rightId = base.recordId();
             
@@ -370,9 +369,7 @@ public class RecordsTest {
             }
             
         }
-        catch (RecordDeleteFailedException
-                | SQLException
-                | RecordInsertFailedException ex) {
+        catch (RecordDeleteFailedException | SQLException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -389,7 +386,7 @@ public class RecordsTest {
         
         try {
             Record base = new Record(1, 2, 3, "value");
-            base = records.insert(connection, base);
+            insertRecord(base);
             
             int imageId = base.imageId();
             int fieldId = base.fieldId();
@@ -408,9 +405,7 @@ public class RecordsTest {
             }
             
         }
-        catch (RecordDeleteFailedException
-                | SQLException
-                | RecordInsertFailedException ex) {
+        catch (RecordDeleteFailedException | SQLException ex) {
             fail(ex.getMessage());
         }
         finally {
@@ -479,6 +474,34 @@ public class RecordsTest {
         }
         catch (SQLException ex) {
             fail(ex.getMessage());
+        }
+    }
+    
+    private void insertRecord(Record record) throws SQLException {
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Statement kStmt = null;
+        
+        try {
+            String insertSql = "insert into records (imageId, fieldId, rowNumber, value) "
+                    + "values (?, ?, ?, ?)";
+            stmt = connection.prepareStatement(insertSql);
+            stmt.setInt(1, record.imageId());
+            stmt.setInt(2, record.fieldId());
+            stmt.setInt(3, record.rowNumber());
+            stmt.setString(4, record.value());
+            if (stmt.executeUpdate() == 1) {
+                kStmt = connection.createStatement();
+                rs = kStmt.executeQuery("select last_insert_rowid()");
+                rs.next();
+                record.setRecordId(rs.getInt(1));
+            }
+        }
+        finally {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+            if (kStmt != null) kStmt.close();
         }
     }
 

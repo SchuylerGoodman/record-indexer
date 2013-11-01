@@ -30,7 +30,7 @@ public class GetProjectsHandler implements HttpHandler {
 
         try {
             
-            HandlerRunner handler = new HandlerRunner(exchange);
+            APIHandler handler = new APIHandler(exchange);
             
             handler.run("getProjects");
             

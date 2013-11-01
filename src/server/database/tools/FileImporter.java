@@ -5,11 +5,7 @@
 package server.database.tools;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,7 +22,9 @@ public class FileImporter implements FileVisitor<Path> {
     public FileImporter() {
         target = Paths.get("Files");
         currentDirectory = target;
+        
         try {
+            Files.walkFileTree(target, new FileDeleter());
             Files.createDirectories(target);
         } catch (IOException ex) {
             Logger.getLogger(FileImporter.class.getName()).log(Level.SEVERE, null, ex);

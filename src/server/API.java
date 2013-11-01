@@ -21,7 +21,7 @@ import shared.model.*;
  */
 public class API {
   
-    public static final String URLPREFIX = "localhost/";
+//    public static final String URLPREFIX = "localhost/";
 //    public static final String URLPREFIX = "http://students.cs.byu.edu/~goodm4n/indexer/";
     
     public static class APIException extends Exception {
@@ -212,14 +212,14 @@ public class API {
                     }
                     else { // If they only have one
                         hasImage = hasAssigned.get(0);
-                        if (hasImage.projectId() == params.projectId()) { // And it is for this Project
-                            image = hasImage; // Return that Image
-                        }
-                        else { // Otherwise fail
+//                        if (hasImage.projectId() == params.projectId()) { // And it is for this Project
+//                            image = hasImage; // Return that Image
+//                        }
+//                        else { // Otherwise fail
                             throw new DatabaseException(String.format(
                                     "User ID %d already has an image %d assigned from project %d.",
                                     vResult.userId(), hasImage.imageId(), hasImage.projectId()));
-                        }
+//                        }
                     }
                 }
                 if (image == null) {
@@ -307,6 +307,10 @@ public class API {
                 assert images.size() == 1;
                 int firstImageIndex = 0;
                 Image thisImage = images.get(firstImageIndex);
+                if (thisImage.currentUser() != vResult.userId()) { // If the batch ID was wrong
+                    throw new APIException(String.format(
+                            "This batch does not belong to user ID %d", vResult.userId()));
+                }
                 
                 // Get all Fields from this Image's project
                 Field tField = new Field();

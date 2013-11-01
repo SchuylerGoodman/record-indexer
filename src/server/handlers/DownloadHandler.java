@@ -6,6 +6,7 @@ package server.handlers;
 
 import com.sun.net.httpserver.*;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.nio.file.*;
 import java.util.logging.*;
 import server.Server;
@@ -30,7 +31,15 @@ public class DownloadHandler implements HttpHandler {
             logger.finer(exchange.getRequestHeaders().toString());
             
             Path path = Paths.get("Files" + exchange.getRequestURI().getPath());
-            exchange.sendResponseHeaders(200, 0);
+            
+            int response;
+            if (Files.exists(path)) {
+                response = HttpURLConnection.HTTP_OK;
+            }
+            else {
+                response = HttpURLConnection.HTTP_NOT_FOUND;
+            }
+            exchange.sendResponseHeaders(response, 0);
 
             byte[] data = Files.readAllBytes(path);
             BufferedOutputStream out = new BufferedOutputStream(exchange.getResponseBody());
@@ -41,6 +50,7 @@ public class DownloadHandler implements HttpHandler {
             
         } catch (IOException ex) {
             Logger.getLogger(DownloadHandler.class.getName()).log(Level.SEVERE, null, ex);
+            exchange.close();
         }
         
     }

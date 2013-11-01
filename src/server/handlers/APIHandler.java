@@ -21,7 +21,7 @@ import shared.communication.*;
  * 
  * @author schuyler
  */
-public class HandlerRunner {
+public class APIHandler {
         
     private static Logger logger;
     
@@ -34,14 +34,16 @@ public class HandlerRunner {
     XStream xstream;
     HttpExchange exchange;
     Database database;
+    int response;
     
-    public HandlerRunner(HttpExchange exchange) throws Database.DatabaseException {
+    public APIHandler(HttpExchange exchange) throws Database.DatabaseException {
 
         assert exchange != null;
 
         this.exchange = exchange;
         xstream = new XStream(new DomDriver());
         database = new Database();
+        response = HttpURLConnection.HTTP_OK;
     }
     
     /**
@@ -62,10 +64,12 @@ public class HandlerRunner {
             logger.log(Level.SEVERE, "Error running handler.", ex);
             try {
                 database.endTransaction(false);
+                response = HttpURLConnection.HTTP_BAD_REQUEST;
             } catch (Database.DatabaseException ex1) {
                 logger.log(Level.SEVERE, "Could not close database.", ex1);
+                response = HttpURLConnection.HTTP_INTERNAL_ERROR;
             }
-            exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0);
+            exchange.sendResponseHeaders(response, 0);
         }
         
     }
@@ -114,6 +118,7 @@ public class HandlerRunner {
      * @throws Exception 
      */
     private Method getMethod(String apiName) throws Exception {
+        
         Class<API> APIclass = API.class;
         API api = APIclass.newInstance();
         
@@ -154,7 +159,7 @@ public class HandlerRunner {
             responseCode = HttpURLConnection.HTTP_OK;
         }
         else {
-            responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;
+            responseCode = HttpURLConnection.HTTP_BAD_REQUEST;
             database.endTransaction(false);
         }
         
