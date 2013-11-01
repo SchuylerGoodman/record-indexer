@@ -128,7 +128,8 @@ public class DownloadBatch_Result extends RequestResult implements Serializable 
             URL helpUrl = new URL(protocol, host, port, field.helpHtml());
             sb.append(helpUrl).append("\n"); // Help URL
             sb.append(field.xCoordinate()).append("\n"); // X Coordinate
-            if (field.knownData() != null) { // If known data URL exists for this Field
+            sb.append(field.width()).append("\n"); // Field Width
+            if (!field.knownData().isEmpty() && field.knownData() != null) { // If known data URL exists for this Field
                 URL dataUrl = new URL(protocol, host, port, field.knownData());
                 sb.append(dataUrl.toString()).append("\n"); // Known Data URL
             }

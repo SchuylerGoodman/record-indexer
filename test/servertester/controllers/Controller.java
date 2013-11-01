@@ -110,8 +110,15 @@ public class Controller implements IController {
 			break;
 		}
 	}
+        
+        private void setCommunicatorHttp() {
+            communicator.setProtocol(PROTOCOL);
+            communicator.setHost(getView().getHost());
+            communicator.setPort(Integer.parseInt(getView().getPort()));
+        }
 	
 	private void validateUser() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 2;
             if (hasEmpty(parameterValues)) {
@@ -135,6 +142,7 @@ public class Controller implements IController {
 	}
 	
 	private void getProjects() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 2;
             if (hasEmpty(parameterValues)) {
@@ -158,6 +166,7 @@ public class Controller implements IController {
 	}
 	
 	private void getSampleImage() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 3;
             if (hasEmpty(parameterValues)) {
@@ -187,6 +196,7 @@ public class Controller implements IController {
 	}
 	
 	private void downloadBatch() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 3;
             if (hasEmpty(parameterValues)) {
@@ -216,6 +226,7 @@ public class Controller implements IController {
 	}
 	
 	private void getFields() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 3;
             if (hasEmpty(parameterValues)) {
@@ -240,6 +251,7 @@ public class Controller implements IController {
 	}
 	
 	private void submitBatch() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 4;
             if (hasEmpty(parameterValues)) {
@@ -265,6 +277,7 @@ public class Controller implements IController {
 	}
 	
 	private void search() {
+            setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 4;
             if (hasEmpty(parameterValues)) {

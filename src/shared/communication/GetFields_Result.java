@@ -60,6 +60,7 @@ public class GetFields_Result extends RequestResult implements Serializable {
         return fieldTitles;
     }
     
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldIds.size(); ++i) {
