@@ -5,17 +5,9 @@
 package server.handlers;
 
 import com.sun.net.httpserver.*;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.*;
+import java.nio.file.*;
+import java.util.logging.*;
 import server.Server;
 
 /**
@@ -43,6 +35,7 @@ public class DownloadHandler implements HttpHandler {
             byte[] data = Files.readAllBytes(path);
             BufferedOutputStream out = new BufferedOutputStream(exchange.getResponseBody());
             out.write(data);
+            out.flush();
             
             exchange.close();
             

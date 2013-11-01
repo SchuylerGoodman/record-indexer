@@ -43,7 +43,7 @@ public class ImageHandler extends DefaultHandler {
         throws SAXException {
         
         if (qName.equalsIgnoreCase(RECORD)) {
-            tryInsertImage();
+            tryInsertImage(true);
             ++currentRow;
             reader.setContentHandler(new RecordHandler(reader, database, this, image.projectId(), image.imageId(), currentRow));
         }
@@ -73,14 +73,17 @@ public class ImageHandler extends DefaultHandler {
             }
             image.setPath(content.toString());
 
-            tryInsertImage();
         }
         if (qName.equalsIgnoreCase(ProjectHandler.IMAGE)) {
+            tryInsertImage(false);
             reader.setContentHandler(parent);
         }
     }
     
-    public void tryInsertImage() throws SAXException {
+    public void tryInsertImage(boolean isComplete) throws SAXException {
+        if (isComplete) {
+            image.setCurrentUser(Images.IMAGE_COMPLETED);
+        }
         if (image.imageId() == 0) {
             try {
                 database.startTransaction();

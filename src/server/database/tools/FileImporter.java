@@ -25,7 +25,7 @@ public class FileImporter implements FileVisitor<Path> {
     
     public FileImporter() {
         target = Paths.get("Files");
-        
+        currentDirectory = target;
         try {
             Files.createDirectories(target);
         } catch (IOException ex) {

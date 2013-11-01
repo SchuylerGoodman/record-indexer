@@ -1,4 +1,4 @@
-package server.database;
+ package server.database;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -61,11 +61,11 @@ public class Images {
         try {
             StringBuilder sql = new StringBuilder();
             sql.append("INSERT INTO images (path, title, projectId");
-            if (newImage.currentUser() > 0) {
+            if (newImage.currentUser() > 0 || newImage.currentUser() == IMAGE_COMPLETED) {
                 sql.append(", currentUser");
             }
             sql.append(") VALUES (?, ?, ?");
-            if (newImage.currentUser() > 0) {
+            if (newImage.currentUser() > 0 || newImage.currentUser() == IMAGE_COMPLETED) {
                 sql.append(", ?");
             }
             sql.append(")");
@@ -73,7 +73,7 @@ public class Images {
             stmt.setString(1, newImage.path());
             stmt.setString(2, newImage.title());
             stmt.setInt(3, newImage.projectId());
-            if (newImage.currentUser() > 0) {
+            if (newImage.currentUser() > 0 || newImage.currentUser() == IMAGE_COMPLETED) {
                 stmt.setInt(4, newImage.currentUser());
             }
             
@@ -216,7 +216,7 @@ public class Images {
                 else wheres.append(" and ");
                 wheres.append("projectId=").append(image.projectId());
             }
-            if (image.currentUser() > 0) {
+            if (image.currentUser() > 0 || image.currentUser() == IMAGE_COMPLETED) {
                 if (wheres.length() < 1) wheres.append(" where ");
                 else wheres.append(" and ");
                 wheres.append("currentUser=").append(image.currentUser());

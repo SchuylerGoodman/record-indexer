@@ -312,13 +312,33 @@ public class API {
                 Field tField = new Field();
                 tField.setProjectId(thisImage.projectId());
                 ArrayList<Field> fields = (ArrayList) database.get(tField);
+                
+                // Get the Project for the number of records
+                Project tProject = new Project();
+                tProject.setProjectId(thisImage.projectId());
+                ArrayList<Project> projects = (ArrayList) database.get(tProject);
 
+                // Should only get one Project
+                assert projects.size() == 1;
+                int firstProjectIndex = 0;
+                Project thisProject = projects.get(firstProjectIndex);
+                
                 // Split the records on ';' character
                 String[] records = params.records().split(";");
+                if (records.length != thisProject.recordCount()) {
+                    throw new APIException(String.format(
+                            "Invalid number of records given. %d given, %d required.",
+                            records.length, thisProject.recordCount()));
+                }
                 for (int rowNumber = 0; rowNumber < records.length; ++rowNumber) {
 
                     // Split the record values on ',' character
                     String[] values = records[rowNumber].split(",", -1);
+                    if (values.length != fields.size()) {
+                        throw new APIException(String.format(
+                                "Invalid number of values given. %d given, %d required.",
+                                values.length, fields.size()));
+                    }
                     for (int column = 1; column <= values.length; ++column) {
                         Field currentField = fields.get(column - 1);
 
@@ -342,6 +362,7 @@ public class API {
         catch (DatabaseException
                | InsertFailedException
                | GetFailedException
+               | APIException
                | UpdateFailedException ex) {
             result = null;
             Logger.getLogger(API.class.getName()).log(Level.WARNING, "submitBatch request failed.", ex);
