@@ -232,7 +232,6 @@ public class API {
                     while (image == null && index < images.size()) {
                         // Find an unassigned and uncompleted image
                         Image currentImage = images.get(index);
-                        System.out.println(currentImage.currentUser());
                         if (currentImage.currentUser() == 0) {
                             image = currentImage;
                         }
