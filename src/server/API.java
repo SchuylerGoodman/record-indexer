@@ -392,14 +392,12 @@ public class API {
                 result = null;
             }
             else { // User exists
-                boolean useAll = false;
                 int projectId;
 
                 // If the project ID is a String (It is an Object in params)
                 if (String.class == params.projectId().getClass()) {
                     String projectParam = (String) params.projectId();
                     if (projectParam.isEmpty()) { // And it is empty
-                        useAll = true; // We want to return all fields
                         projectId = 0;
                     }
                     else { // And it is not empty, it is invalid.
@@ -422,19 +420,26 @@ public class API {
                 Field tField = new Field();
                 tField.setProjectId(projectId);
                 ArrayList<Field> fields = (ArrayList) database.get(tField);
-
-                // Get IDs and Titles out of the Fields
-                ArrayList<Integer> fieldIds = new ArrayList<>();
-                ArrayList<String> fieldTitles = new ArrayList<>();
-                for (Field field : fields) {
-                    fieldIds.add(new Integer(field.fieldId()));
-                    fieldTitles.add(field.title());
+                
+                if (fields.isEmpty()) { // If there are no Fields for this project
+                    result = null; // Fail
                 }
-                if (fieldIds.size() != fieldTitles.size()) {
-                    result = null;
-                }
-                else {
-                    result = new GetFields_Result(projectId, fieldIds, fieldTitles);
+                else { // If there are Fields for this Project
+                    // Get IDs and Titles out of the Fields
+                    ArrayList<Integer> projectIds = new ArrayList<>();
+                    ArrayList<Integer> fieldIds = new ArrayList<>();
+                    ArrayList<String> fieldTitles = new ArrayList<>();
+                    for (Field field : fields) {
+                        projectIds.add(new Integer(field.projectId()));
+                        fieldIds.add(new Integer(field.fieldId()));
+                        fieldTitles.add(field.title());
+                    }
+                    if (fieldIds.size() != fieldTitles.size()) {
+                        result = null;
+                    }
+                    else {
+                        result = new GetFields_Result(projectIds, fieldIds, fieldTitles);
+                    }
                 }
             }
         }

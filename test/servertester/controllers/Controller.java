@@ -229,14 +229,20 @@ public class Controller implements IController {
             setCommunicatorHttp();
             String[] parameterValues = getView().getParameterValues();
             assert parameterValues.length == 3;
-            if (hasEmpty(parameterValues)) {
+            if (parameterValues[0].isEmpty() || parameterValues[1].isEmpty()) {
                 getView().setResponse("FAILED\n");
                 return;
             }
             
             String username = parameterValues[0];
             String password = parameterValues[1];
-            int projectId = Integer.parseInt(parameterValues[2]);
+            Object projectId;
+            if (parameterValues[2].isEmpty()) {
+                projectId = parameterValues[2];
+            }
+            else {
+                projectId = new Integer(parameterValues[2]);
+            }
             
             GetFields_Param params = new GetFields_Param(username, password, projectId);
             GetFields_Result result = communicator.getFields(params);

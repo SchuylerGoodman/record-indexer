@@ -16,17 +16,18 @@ public class GetFields_Result extends RequestResult implements Serializable {
         }
     }
     
-    private int projectId;
+    private List<Integer> projectIds;
     private List<Integer> fieldIds;
     private List<String> fieldTitles;
     
-    public GetFields_Result(int projectId, List<Integer> fieldIds, List<String> fieldTitles)
+    public GetFields_Result(List<Integer>projectIds, List<Integer> fieldIds, List<String> fieldTitles)
             throws GetFields_ResultException {
         
-        if (fieldIds.size() != fieldTitles.size()) {
+        if (projectIds.size() != fieldIds.size()
+                && fieldIds.size() != fieldTitles.size()) {
             throw new GetFields_ResultException("Field IDs list and Field Titles list must be the same size.");
         }
-        this.projectId = projectId;
+        this.projectIds = projectIds;
         this.fieldIds = fieldIds;
         this.fieldTitles = fieldTitles;
     }
@@ -36,8 +37,8 @@ public class GetFields_Result extends RequestResult implements Serializable {
      * 
      * @return Project ID to which the fields belong.
      */
-    public int projectId() {
-        return projectId;
+    public List<Integer> projectIds() {
+        return projectIds;
     }
     
     /**
@@ -64,7 +65,7 @@ public class GetFields_Result extends RequestResult implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldIds.size(); ++i) {
-            sb.append(this.projectId).append("\n");
+            sb.append(this.projectIds.get(i)).append("\n");
             sb.append(this.fieldIds.get(i)).append("\n");
             sb.append(this.fieldTitles.get(i)).append("\n");
         }

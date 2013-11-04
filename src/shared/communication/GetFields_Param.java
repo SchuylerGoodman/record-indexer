@@ -25,6 +25,12 @@ public class GetFields_Param extends RequestParam implements Serializable {
         this.projectId = projectId;
     }
     
+    public GetFields_Param(String username, String password, Object projectId) {
+        this.username = username;
+        this.password = password;
+        this.projectId = projectId;
+    }
+    
     /**
      * Getter for the User's username.
      * 
