@@ -2,13 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package client.searchGUI.searchPanel;
+package client.searchGUI.searchPanel.children;
 
 import client.searchGUI.SearchGui;
 import java.awt.Dimension;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 
 /**
  *
@@ -32,11 +31,13 @@ public class ProjectFieldPanel extends JPanel {
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         
         projectPanel = new ProjectPanel(projectContext);
+        projectPanel.setToolTipText("Select a project to search.");
         projectPanel.setPreferredSize(new Dimension(SearchGui.guiWidth / 2, SearchGui.guiHeight / 3 - StringPanel.PANEL_HEIGHT));
 
         this.add(projectPanel);
         
         fieldPanel = new FieldPanel(fieldContext);
+        fieldPanel.setToolTipText("Select a field to search.");
         fieldPanel.setPreferredSize(new Dimension(SearchGui.guiWidth / 2, SearchGui.guiHeight / 3 - StringPanel.PANEL_HEIGHT));
 
         this.add(fieldPanel);

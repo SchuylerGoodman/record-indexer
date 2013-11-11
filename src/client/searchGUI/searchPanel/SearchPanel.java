@@ -4,6 +4,13 @@
  */
 package client.searchGUI.searchPanel;
 
+import client.searchGUI.searchPanel.children.ProjectPanel;
+import client.searchGUI.searchPanel.children.ResultViewPanel;
+import client.searchGUI.searchPanel.children.FilterPanel;
+import client.searchGUI.searchPanel.children.FieldPanel;
+import client.searchGUI.searchPanel.children.StringPanel;
+import client.searchGUI.searchPanel.children.ResultPanel;
+import client.searchGUI.searchPanel.children.ResultsPanel;
 import client.searchGUI.SearchGui;
 import java.awt.Dimension;
 import javax.swing.BoxLayout;

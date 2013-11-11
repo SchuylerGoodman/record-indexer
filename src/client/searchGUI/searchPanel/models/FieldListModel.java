@@ -16,7 +16,10 @@ import javax.swing.AbstractListModel;
  */
 public final class FieldListModel extends AbstractListModel {
 
+    // Map used for caching purposes to limit GetFields requests to the server
+    // ProjectID -> FieldNames ==> FieldName -> FieldID
     private HashMap<Integer, HashMap<String, Integer>> fieldMap;
+    // Fields displayed by the FieldList
     private ArrayList<String> fieldNames;
     private Integer projectId;
     
@@ -41,6 +44,12 @@ public final class FieldListModel extends AbstractListModel {
         return fieldNames.get(index);
     }
     
+    /**
+     * Uses the FieldMap to get all the FieldIds that match the selected Field names.
+     * 
+     * @param fieldNames List of Field names selected by the user.
+     * @return List of Field IDs as Integers
+     */
     public List<Integer> getFieldIdsByName(List<String> fieldNames) {
         
         ArrayList<Integer> fieldIds = new ArrayList<>();
@@ -51,6 +60,13 @@ public final class FieldListModel extends AbstractListModel {
         
     }
     
+    /**
+     * Attempts to find the Fields belonging to the selected project in the FieldMap.
+     * If found, the fields are automatically displayed.
+     * 
+     * @param projectId Project ID for requested Fields
+     * @return true if found, otherwise false
+     */
     public boolean useProjectId(Integer projectId) {
         
         if (!containsProjectId(projectId)) {
@@ -64,6 +80,16 @@ public final class FieldListModel extends AbstractListModel {
         
     }
     
+    /**
+     * Replaces the currently viewed Fields with the ones belonging to a
+     * certain project.
+     * *IMPORTANT* Will use cached values if they exist.
+     * 
+     * @param projectId ID of the project containing the requested fields
+     * @param fieldNames Names of the fields
+     * @param fieldIds IDs of the fields, in a 1 to 1 correspondence with fieldNames
+     * @return true if replaced, false if not
+     */
     public boolean replaceAll(Integer projectId, List<String> fieldNames, List<Integer> fieldIds) {
         
         if (containsProjectId(projectId)) {
@@ -80,10 +106,23 @@ public final class FieldListModel extends AbstractListModel {
         
     }
     
+    /**
+     * Checks to see if the fields for a project are cached.
+     * 
+     * @param projectId Project ID containing fields to check
+     * @return true if they are cached, otherwise false
+     */
     private boolean containsProjectId(Integer projectId) {
         return fieldMap.containsKey(projectId);
     }
     
+    /**
+     * Maps field names to field IDs
+     * 
+     * @param fieldNames List of field names
+     * @param fieldIds List of field IDs, in a 1 to 1 correspondence with fieldNames
+     * @return Map of FieldName -> FieldID pairs
+     */
     private Map<String, Integer> mapFields(List<String> fieldNames, List<Integer> fieldIds) {
         
         assert fieldNames.size() == fieldIds.size();

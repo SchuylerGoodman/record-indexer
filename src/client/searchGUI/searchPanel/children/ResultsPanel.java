@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package client.searchGUI.searchPanel;
+package client.searchGUI.searchPanel.children;
 
 import client.searchGUI.SearchGui;
 import java.awt.BorderLayout;
@@ -32,10 +32,12 @@ public class ResultsPanel extends JPanel {
         this.setLayout(new BorderLayout());
         
         resultPanel = new ResultPanel(resultContext);
+        resultPanel.setToolTipText("Select a result to view.");
         resultPanel.setPreferredSize(new Dimension(SearchGui.guiWidth / 3, SearchGui.guiHeight * 2 / 3));
         this.add(resultPanel, BorderLayout.WEST);
         
         resultViewPanel = new ResultViewPanel(resultViewContext);
+        resultViewPanel.setToolTipText("Ctrl-click and drag to zoom or click and drag to translate.");
         resultViewPanel.setPreferredSize(new Dimension(SearchGui.guiWidth * 2 / 3, SearchGui.guiHeight * 2 / 3));
         this.add(resultViewPanel, BorderLayout.CENTER);
         
