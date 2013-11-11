@@ -2,10 +2,11 @@ package client;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.util.logging.*;
-import server.Server;
+import javax.imageio.ImageIO;
 import shared.communication.*;
 
 /**
@@ -24,14 +25,22 @@ public class Communicator {
         }
     }
     
+    private XStream xstream;
+    
     private String protocol;
     private String host;
     private int port;
 
-    public Communicator(String protocol, String host, int port) throws CommunicatorException {
-        if (protocol == null || host == null || port < 1) {
-            throw new CommunicatorException("Protocol and host cannot be null, and port must be greater than 0.");
-        }
+    public Communicator() {
+        this("HTTP", null, 0);
+    }
+    
+    public Communicator(String protocol, String host, int port) {
+        this.initialize(protocol, host, port);
+    }
+    
+    public final void initialize(String protocol, String host, int port) {
+        xstream = new XStream(new DomDriver());
         this.protocol = protocol;
         this.host = host;
         this.port = port;
@@ -49,6 +58,13 @@ public class Communicator {
         this.port = port;
     }
     
+    private boolean isInitialized() {
+        if (this.protocol == null || this.host == null || this.port < 1) {
+            return false;
+        }
+        return true;
+    }
+    
     /**
      * Queries the database to validate the input shared.communication.ValidateUser_Param object.
      * 
@@ -58,7 +74,7 @@ public class Communicator {
      * User matching the input parameters, or null if the parameters did not match a user in the database.
      */
     public ValidateUser_Result validateUser(ValidateUser_Param params) {
-        return (ValidateUser_Result) doPost("/ValidateUser", params);
+        return (ValidateUser_Result) doRequest("/ValidateUser", "POST", params);
     }
     
     /**
@@ -70,7 +86,7 @@ public class Communicator {
      * array of available Projects.
      */
     public GetProjects_Result getProjects(GetProjects_Param params) {
-        return (GetProjects_Result) doPost("/GetProjects", params);
+        return (GetProjects_Result) doRequest("/GetProjects", "POST", params);
     }
     
     /**
@@ -83,7 +99,7 @@ public class Communicator {
      * match anything in the database.
      */
     public GetSampleImage_Result getSampleImage(GetSampleImage_Param params) {
-        return (GetSampleImage_Result) doPost("/GetSampleImage", params);
+        return (GetSampleImage_Result) doRequest("/GetSampleImage", "POST", params);
     }
     
     /**
@@ -99,7 +115,7 @@ public class Communicator {
      * not match anything in the database.
      */
     public DownloadBatch_Result downloadBatch(DownloadBatch_Param params) {
-        return (DownloadBatch_Result) doPost("/DownloadBatch", params);
+        return (DownloadBatch_Result) doRequest("/DownloadBatch", "POST", params);
     }
 
     /**
@@ -114,7 +130,7 @@ public class Communicator {
      * the submission was successful or not.
      */
     public SubmitBatch_Result submitBatch(SubmitBatch_Param params) {
-        return (SubmitBatch_Result) doPost("/SubmitBatch", params);
+        return (SubmitBatch_Result) doRequest("/SubmitBatch", "POST", params);
     }
     
     /**
@@ -127,7 +143,7 @@ public class Communicator {
      * of returned Field objects.
      */
     public GetFields_Result getFields(GetFields_Param params) {
-        return (GetFields_Result) doPost("/GetFields", params);
+        return (GetFields_Result) doRequest("/GetFields", "POST", params);
     }
     
     /**
@@ -145,7 +161,7 @@ public class Communicator {
      *          Integer fieldId
      */
     public Search_Result search(Search_Param params) {
-        return (Search_Result) doPost("/Search", params);
+        return (Search_Result) doRequest("/Search", "POST", params);
     }
     
     /**
@@ -158,49 +174,51 @@ public class Communicator {
      * id generated on creation.
      */
     public CreateUser_Result createUser(CreateUser_Param params) {
-        return (CreateUser_Result) doPost("/CreateUser", params);
+        return (CreateUser_Result) doRequest("/CreateUser", "POST", params);
     }
     
-    public byte[] downloadFile(URL path) {
-        return (byte[]) doPost(path.getPath(), null);
-    }
-    
-    private Object doGet(String urlPath) {
+    public BufferedImage downloadImage(String path) {
         
-        Object result = null;
+        BufferedImage image = null;
         try {
-            URL url = new URL(protocol, host, port, urlPath);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestMethod("GET");
-
-            connection.connect();
-
-            XStream xstream = new XStream(new DomDriver());
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                 try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream())) {
-                     result = xstream.fromXML(in);
-                 }
-            }
-            else {
-                 Logger.getLogger(Communicator.class.getName()).log(
-                         Level.WARNING, String.format("Request failed with response code %d", connection.getResponseCode()));
-            }
+            InputStream in = connect(path, "GET", null);
+            image = (BufferedImage) ImageIO.read(in);
+            in.close();
         } catch (IOException ex) {
             Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return result;
+        return image;
+        
     }
-    
+
     /**
-     * Does a post request to the host and port specified in the Object's members.
+     * Does an HTTP request to the host and port specified in the Object's members.
      * 
      * @param urlPath Path on the server to the correct handler
+     * @param requestMethod A String containing either "POST" or "GET"
      * @param postData Data to send to the server for processing
      * 
      * @return Result from the server (either null or a RequestResult object)
      */
-    private Object doPost(String urlPath, Object postData) {
+    private Object doRequest(String urlPath, String requestMethod, Object data) {
+        
+        Object result = null;
+        try {
+            InputStream in = connect(urlPath, requestMethod, data);
+            result = xstream.fromXML(in);
+            in.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+        
+    }
+    
+    private InputStream connect(String urlPath, String requestMethod, Object data) {
+        
+        if (!isInitialized()) {
+            Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, "Communicator has not been initialized.");
+        }
         
         Object result = null;
         try {
@@ -208,20 +226,22 @@ public class Communicator {
             URL url = new URL(protocol, host, port, urlPath);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            
+            connection.setRequestMethod(requestMethod);
+
             connection.connect();
             
             // Serialize parameters
-            XStream xstream = new XStream(new DomDriver());
-            try (BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream())) {
-                xstream.toXML(postData, out);
-            }
-            
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream())) {
-                    result = xstream.fromXML(in);
+            if (requestMethod.equalsIgnoreCase("POST")) {
+                try (BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream())) {
+                    xstream.toXML(data, out);
                 }
+            }
+            if (!requestMethod.equalsIgnoreCase("POST") && !requestMethod.equalsIgnoreCase("GET")) {
+                return null;
+            }
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+                return in;
             }
             else {
                 Logger.getLogger(Communicator.class.getName()).log(
@@ -231,22 +251,20 @@ public class Communicator {
         catch (IOException ex) {
             Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return result;
+        return null;
     }
-    
-    public static void main(String[] args) throws MalformedURLException {
-        try {
-            Server.main(args);
-            Communicator comm = new Communicator("http", "localhost", 6464);
-            URL url = new URL("HTTP://localhost:6464/images/1890_image0.png");
-            byte[] b = comm.downloadFile(url);
-            b = b;
+
+    public static void main(String[] args) throws MalformedURLException, IOException {
+
+//        Server.main(args);
+        Communicator comm = new Communicator("http", "localhost", 39641);
+//        URL url = new URL("HTTP://localhost:39641/images/1890_image0.png");
+        BufferedImage b = comm.downloadImage("/images/1890_image0.png");
+        ImageIO.write(b, "png", new File("1890_image0.png"));
 //            ValidateUser_Param param = new ValidateUser_Param("sheila", "parker");
 //            ValidateUser_Result res = comm.validateUser(param);
 //            System.out.println(res.toString());
-        } catch (CommunicatorException ex) {
-            Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }
     
 }

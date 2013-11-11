@@ -150,7 +150,19 @@
 			</assertions>
 		</java>
 	</target>
-	
+
+    <!-- ant search-gui -->
+    <target name="search-gui" depends="compile" description="run search gui">
+        <java classname="client.searchGUI.SearchGui" fork="yes">
+            <classpath>
+                <path refid="all-classpath"/>
+            </classpath>
+            <assertions>
+                <enable/>
+            </assertions>
+        </java>
+    </target>
+
 	<!-- ant client {-Dhost=<SERVER_HOST>} {-Dport=<SERVER_PORT_NUMBER>} -->
 	<!-- EXAMPLE: ant client -Dhost=testserver.cs.byu.edu -Dport=39640 -->
 	<!-- If host and/or port number are omitted, default values are used. -->

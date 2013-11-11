@@ -364,6 +364,7 @@ public class Records {
             }
             sqlValue.append(")");
             sql.append(sqlValue);
+//            System.out.println(sql.toString());
             
             stmt = connection.prepareStatement(sql.toString());
             rs = stmt.executeQuery();

@@ -36,11 +36,7 @@ public class Controller implements IController {
 		getView().setHost("localhost");
 		getView().setPort("39640");
 		operationSelected();
-            try {
                 communicator = new Communicator(PROTOCOL, getView().getHost(), Integer.parseInt(getView().getPort()));
-            } catch (Communicator.CommunicatorException ex) {
-                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-            }
 	}
 
 	@Override

@@ -7,6 +7,7 @@ package server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import server.database.Database;
@@ -471,12 +472,12 @@ public class API {
             else { // User exists
                 
                 // Extract field IDs and convert to ArrayList<String>
-                String[] fieldIdArray = params.fields().split(",", -1);
-                ArrayList<String> fieldIdsAsStrings = new ArrayList<>(Arrays.asList(fieldIdArray));
-                
+                String[] fieldIdArray = params.fields().split(",");
+                ArrayList<String> fieldIdsAsStrings = (ArrayList<String>) removeEmptyStrings(Arrays.asList(fieldIdArray));
+
                 // Extract values and convert to ArrayList<String>
-                String[] valueArray = params.values().split(",", -1);
-                ArrayList<String> values = new ArrayList<>(Arrays.asList(valueArray));
+                String[] valueArray = params.values().split(",");
+                ArrayList<String> values = (ArrayList<String>) removeEmptyStrings(Arrays.asList(valueArray));
                 
                 // Search database for the Records with values in values and
                 // field IDs in fieldIdsAsStrings
@@ -529,6 +530,17 @@ public class API {
         Logger.getLogger(API.class.getName()).log(Level.FINE, "Entering API.getFields()");
         return result;
         
-    }    
+    }
+    
+    private static List<String> removeEmptyStrings(List<String> list) {
+        
+        ArrayList<String> newList = new ArrayList<>(list);
+        ArrayList<String> emptyStringList = new ArrayList<>();
+        emptyStringList.add("");
+        
+        newList.removeAll(emptyStringList);
+        return newList;
+        
+    }
     
 }
