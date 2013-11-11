@@ -51,4 +51,31 @@ public class GetProjects_Result extends RequestResult implements Serializable {
         return sb.toString();
     }
     
+    @Override
+    public int hashCode() {
+        
+        int hash = ids.size() + 47;
+        hash *= names.size() + 31;
+        return hash;
+        
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GetProjects_Result other = (GetProjects_Result) obj;
+        if (!Objects.deepEquals(this.ids, other.ids)) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.names, other.names)) {
+            return false;
+        }
+        return true;
+    }
+    
 }

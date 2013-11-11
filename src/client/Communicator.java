@@ -205,8 +205,10 @@ public class Communicator {
         Object result = null;
         try {
             InputStream in = connect(urlPath, requestMethod, data);
-            result = xstream.fromXML(in);
-            in.close();
+            if (in != null) {
+                result = xstream.fromXML(in);
+                in.close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
         }

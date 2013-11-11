@@ -18,7 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
 /**
- *
+ * Panel for displaying downloaded image from the server.
+ * 
  * @author schuyler
  */
 public class ResultViewPanel extends JPanel {
@@ -71,9 +72,17 @@ public class ResultViewPanel extends JPanel {
         
         this.addMouseListener(mouseInputAdapter);
         this.addMouseMotionListener(mouseInputAdapter);
+        this.addMouseWheelListener(mouseInputAdapter);
         
     }
     
+    /**
+     * Downloads an image from the server (or gets it from the cache) and puts
+     * it in the panel.
+     * 
+     * @param path Relative path to the image on the server
+     * @param imageId ID of the image for caching purposes
+     */
     public void downloadImage(String path, Integer imageId) {
         
         assert path != null;
@@ -103,6 +112,7 @@ public class ResultViewPanel extends JPanel {
         super.paintComponent(g2);
         
         if (image != null) {
+            // Scale image to window, in case the window has been resized
             scaledToWindowDimension = GuiImageManipulator.scaleToWindow(imageDimension, this.getSize());
             if (zoomLevel == 0) { // If not zoomed in, then scale and center in the window
                 scaledImageDimension = scaledToWindowDimension;
