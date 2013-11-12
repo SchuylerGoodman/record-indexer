@@ -24,7 +24,6 @@ public class FileDeleter extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-        Files.delete(file);
         return FileVisitResult.CONTINUE;
     }
 

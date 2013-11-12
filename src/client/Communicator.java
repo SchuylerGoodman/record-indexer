@@ -182,8 +182,10 @@ public class Communicator {
         BufferedImage image = null;
         try {
             InputStream in = connect(path, "GET", null);
-            image = (BufferedImage) ImageIO.read(in);
-            in.close();
+            if (in != null) {
+                image = (BufferedImage) ImageIO.read(in);
+                in.close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
         }

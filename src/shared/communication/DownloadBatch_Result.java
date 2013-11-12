@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import shared.model.Field;
 import shared.model.Image;
 import shared.model.Project;
@@ -136,6 +137,58 @@ public class DownloadBatch_Result extends RequestResult implements Serializable 
         }
         
         return sb.toString();
+    }
+    
+    @Override
+    public int hashCode() {
+        
+        int hash;
+        hash = this.firstYCoord + 13;
+        hash += this.imageId + 31;
+        hash += this.numFields + 47;
+        hash += this.numRecords + 23;
+        hash += this.projectId + 5;
+        hash += this.recordHeight + 17;
+        hash += this.fields.size() + 41;
+        hash += this.imagePath.length() + 37;
+        return hash;
+        
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DownloadBatch_Result other = (DownloadBatch_Result) obj;
+        if (this.imageId != other.imageId) {
+            return false;
+        }
+        if (this.projectId != other.projectId) {
+            return false;
+        }
+        if (!Objects.equals(this.imagePath, other.imagePath)) {
+            return false;
+        }
+        if (this.firstYCoord != other.firstYCoord) {
+            return false;
+        }
+        if (this.recordHeight != other.recordHeight) {
+            return false;
+        }
+        if (this.numRecords != other.numRecords) {
+            return false;
+        }
+        if (this.numFields != other.numFields) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.fields, other.fields)) {
+            return false;
+        }
+        return true;
     }
     
 }

@@ -2,6 +2,7 @@ package shared.communication;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Communication class for the getFields API
@@ -70,6 +71,37 @@ public class GetFields_Result extends RequestResult implements Serializable {
             sb.append(this.fieldTitles.get(i)).append("\n");
         }
         return sb.toString();
+    }
+    
+    @Override
+    public int hashCode() {
+        
+        int hash = projectIds.size() + 41;
+        hash += fieldIds.size() + 37;
+        hash += fieldTitles.size() + 31;
+        return hash;
+        
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GetFields_Result other = (GetFields_Result) obj;
+        if (!Objects.deepEquals(this.projectIds, other.projectIds)) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.fieldIds, other.fieldIds)) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.fieldTitles, other.fieldTitles)) {
+            return false;
+        }
+        return true;
     }
     
 }

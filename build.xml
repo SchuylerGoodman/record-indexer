@@ -152,7 +152,7 @@
 	</target>
 
     <!-- ant search-gui -->
-    <target name="search-gui" depends="compile" description="run search gui">
+    <target name="search" depends="compile" description="run search gui">
         <java classname="client.searchGUI.SearchGui" fork="yes">
             <classpath>
                 <path refid="all-classpath"/>

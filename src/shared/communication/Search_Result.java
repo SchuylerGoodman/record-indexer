@@ -93,4 +93,39 @@ public class Search_Result extends RequestResult implements Serializable {
         return sb.toString();
     }
     
+    @Override
+    public int hashCode() {
+        
+        int hash = imageIds.size() + 31;
+        hash += imagePaths.size() + 37;
+        hash += rowNumbers.size() + 41;
+        hash += fieldIds.size() + 43;
+        return hash;
+        
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Search_Result other = (Search_Result) obj;
+        if (!Objects.deepEquals(this.imageIds, other.imageIds)) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.imagePaths, other.imagePaths)) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.rowNumbers, other.rowNumbers)) {
+            return false;
+        }
+        if (!Objects.deepEquals(this.fieldIds, other.fieldIds)) {
+            return false;
+        }
+        return true;
+    }
+    
 }
