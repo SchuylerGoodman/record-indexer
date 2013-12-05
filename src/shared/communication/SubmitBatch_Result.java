@@ -35,4 +35,29 @@ public class SubmitBatch_Result extends RequestResult implements Serializable {
         }
     }
     
+    @Override
+    public int hashCode() {
+        if (success) {
+            return 1;
+        }
+        else {
+            return 2;
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SubmitBatch_Result other = (SubmitBatch_Result) obj;
+        if (this.success != other.success) {
+            return false;
+        }
+        return true;
+    }
+    
 }

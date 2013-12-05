@@ -52,7 +52,7 @@ public class StringPanel extends JPanel {
         
         stringField = new JTextField();
         stringField.setPreferredSize(new Dimension(SearchGui.guiWidth - 100, PANEL_HEIGHT));
-        stringField.setToolTipText("Enter comma- or space-separated values to search in the records.");
+        stringField.setToolTipText("Enter comma- or semicolon-separated values to search in the records.");
         this.add(stringField, BorderLayout.CENTER);
         
         searchButton = new JButton();
@@ -70,7 +70,7 @@ public class StringPanel extends JPanel {
     
     private String parseInputString(String inputString) {
         
-        String[] params = inputString.split("[\\s,]+");
+        String[] params = inputString.split("[;,]+");
         StringBuilder output = new StringBuilder();
         for (String s : params) {
             if (output.length() != 0) {
