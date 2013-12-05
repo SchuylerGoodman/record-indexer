@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package client.searchGUI.tools;
+package client.gui.util;
 
 import java.awt.Dimension;
 import java.awt.Point;

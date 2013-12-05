@@ -77,7 +77,7 @@ public class SearchGui extends JFrame {
         // Initialize window size based on display
         screenWidth = gd.getDisplayMode().getWidth();
         screenHeight = gd.getDisplayMode().getHeight();
-        center = new Point(screenWidth / 2, screenHeight / 2) {};
+        center = new Point(screenWidth / 2, screenHeight / 2);
         guiWidth = screenWidth * 3 / 4;
         guiHeight = screenHeight * 3 / 4;
         

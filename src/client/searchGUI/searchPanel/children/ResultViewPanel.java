@@ -4,7 +4,7 @@
  */
 package client.searchGUI.searchPanel.children;
 
-import client.searchGUI.tools.GuiImageManipulator;
+import client.gui.util.GuiImageManipulator;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
