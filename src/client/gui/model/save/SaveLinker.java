@@ -4,6 +4,8 @@
  */
 package client.gui.model.save;
 
+import client.gui.model.communication.CommunicationLinker;
+
 /**
  *
  * @author schuyler
@@ -13,11 +15,21 @@ public class SaveLinker {
     private SaveNotifier notifier;
     private SaveModel model;
     
-    public SaveLinker(SaveModel model) {
-        
+    public SaveLinker() {
+
+        model = new SaveModel();
         notifier = new SaveNotifier(model);
-        this.model = model;
         
+    }
+
+    /**
+     * Sets up a connection between the SaveModel and the CommunicationModel.
+     * 
+     * @param communicationLinker the CommunicationLinker with the desired
+     * CommunicationModel.
+     */
+    public void link(CommunicationLinker communicationLinker) {
+        model.link(communicationLinker);
     }
     
     /**
@@ -35,7 +47,7 @@ public class SaveLinker {
      * @return the SaveNotifier linked to the SaveModel for the subscribers
      * given to this SaveLinker.
      */
-    public SaveNotifier getNotifier() {
+    public SaveNotifier getSaveNotifier() {
         return notifier;
     }
     

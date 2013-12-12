@@ -4,6 +4,13 @@
  */
 package client.gui.model.communication;
 
+import client.Communicator;
+import client.gui.model.image.ImageLinker;
+import client.gui.model.image.ImageNotifier;
+import client.gui.model.record.RecordLinker;
+import client.gui.model.record.RecordNotifier;
+import client.gui.model.save.SaveLinker;
+
 /**
  *
  * @author schuyler
@@ -13,9 +20,18 @@ public class CommunicationLinker {
     private CommunicationNotifier notifier;
     private CommunicationModel model;
     
-    public CommunicationLinker(CommunicationModel model) {
+    public CommunicationLinker(Communicator communicator) {
+        
+        model = new CommunicationModel(communicator);
         notifier = new CommunicationNotifier(model);
-        this.model = model;
+        
+    }
+    
+    public void link(ImageLinker imageLinker, RecordLinker recordLinker,
+                     SaveLinker saveLinker) {
+        
+        model.link(imageLinker, recordLinker, saveLinker);
+        
     }
     
     /**
@@ -27,7 +43,13 @@ public class CommunicationLinker {
         model.subscribe(subscriber);
     }
     
-    public CommunicationNotifier getNotifier() {
+    /**
+     * Getter for the CommunicationNotifier linked to this CommunicationLinker.
+     * 
+     * @return the CommunicationNotifier that notifies all
+     * CommunicationSubscribers subscribed to this CommunicationLinker.
+     */
+    public CommunicationNotifier getCommunicationNotifier() {
         return notifier;
     }
     

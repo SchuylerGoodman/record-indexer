@@ -4,6 +4,9 @@
  */
 package client.gui.model.image;
 
+import client.gui.model.communication.CommunicationLinker;
+import client.gui.model.save.SaveLinker;
+
 /**
  *
  * @author schuyler
@@ -13,11 +16,22 @@ public class ImageLinker {
     private ImageNotifier notifier;
     private ImageModel model;
     
-    public ImageLinker(ImageModel model) {
-        
+    public ImageLinker() {
+
+        model = new ImageModel();
         this.notifier = new ImageNotifier(model);
-        this.model = model;
         
+    }
+    
+    /**
+     * Allows the ImageModel to link to the CommunicationModel and the SaveModel.
+     * 
+     * @param communicationLinker the CommunicationLinker with the desired
+     * CommunicationModel.
+     * @param saveLinker the SaveLinker with the desired SaveModel.
+     */
+    public void link(CommunicationLinker communicationLinker, SaveLinker saveLinker) {
+        model.link(communicationLinker, saveLinker);
     }
     
     /**

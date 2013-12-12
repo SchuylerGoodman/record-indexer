@@ -5,15 +5,24 @@
 package client.gui;
 
 import client.Communicator;
+import client.gui.components.DownloadBatchDialog;
+import client.gui.components.LoginDialog;
 import client.gui.components.MainPanel;
-import java.awt.Dimension;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Point;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+import client.gui.model.cell.*;
+import client.gui.model.communication.*;
+import client.gui.model.image.*;
+import client.gui.model.record.*;
+import client.gui.model.save.*;
+import client.gui.model.save.settings.WindowSettings;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.*;
 
 /**
  *
@@ -30,8 +39,18 @@ public class Client extends JFrame {
     private Communicator communicator;
     private GraphicsDevice gd;
     
+    private CommunicationLinker communicationLinker;
+    private RecordLinker recordLinker;
+    private CellLinker cellLinker;
+    private ImageLinker imageLinker;
+    private SaveLinker saveLinker;
+    
+    private SaveNotifier saveNotifier;
+    
     private JMenuBar menuBar;
     private MainPanel mainPanel;
+    private JDialog loginDialog;
+    private DownloadBatchDialog downloadBatchDialog;
     
     public Client() {
         
@@ -40,12 +59,42 @@ public class Client extends JFrame {
         gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         
         communicator = new Communicator();
+        communicator.initialize("HTTP", "localhost", 39640);
+        
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        createLinkers();
+        
+        saveNotifier = saveLinker.getSaveNotifier();
+        saveLinker.subscribe(saveSubscriber);
+        
+        this.addWindowListener(clientWindowListener);
         
         createComponents();
         
     }
     
+    private void createLinkers() {
+        
+        // Initialize linkers, models, and notifiers
+        communicationLinker = new CommunicationLinker(communicator);
+        recordLinker = new RecordLinker();
+        cellLinker = new CellLinker();
+        imageLinker = new ImageLinker();
+        saveLinker = new SaveLinker();
+
+        // Set up connections between models
+        communicationLinker.link(imageLinker, recordLinker, saveLinker);
+        recordLinker.link(communicationLinker, saveLinker);
+        cellLinker.link(communicationLinker, recordLinker, saveLinker);
+        imageLinker.link(communicationLinker, saveLinker);
+        saveLinker.link(communicationLinker);
+        
+    }
+    
     private void createComponents() {
+        
+        this.setVisible(false);
         
         // Initialize GUI dimensions
         SCREEN_WIDTH = gd.getDisplayMode().getWidth();
@@ -68,33 +117,137 @@ public class Client extends JFrame {
         
         // Add Download batch menu item
         JMenuItem downloadBatchItem = new JMenuItem("Download Batch");
-//        downloadBatchItem.addActionListener(downloadBatchAction);
+        downloadBatchItem.addActionListener(downloadBatchAction);
         fileMenu.add(downloadBatchItem);
         
         // Add Logout menu item
         JMenuItem logoutItem = new JMenuItem("Logout");
-//        logoutItem.addActionListener(logoutAction);
+        logoutItem.addActionListener(logoutAction);
         fileMenu.add(logoutItem);
         
         // Add Exit menu item
         JMenuItem exitItem = new JMenuItem("Exit");
-//        exitItem.addActionListener(exitAction);
+        exitItem.addActionListener(exitAction);
         fileMenu.add(exitItem);
         
-        mainPanel = new MainPanel();
-        mainPanel.setPreferredSize(this.getPreferredSize());
+        mainPanel = new MainPanel(communicationLinker, recordLinker, cellLinker,
+                                  imageLinker, saveLinker);
         
+        mainPanel.setPreferredSize(this.getPreferredSize());
+
         this.add(mainPanel);
+        this.pack();
+        
+        loginDialog = new LoginDialog(this, communicationLinker, exitAction, loginDialogCloseListener);
+
+        downloadBatchDialog = new DownloadBatchDialog(this, communicationLinker);
+
+        loginDialog.setVisible(true);
         
     }
     
+    /**
+     * Empties the contents of all child components without saving.
+     */
+    private void empty() {
+        communicationLinker.getCommunicationNotifier().empty();
+    }
+    
+    /**
+     * Sets up a window closing event which is caught by the clientWindowListener
+     * to prompt a save of all user data, if a user is logged in.
+     */
+    private void closeSafely() {
+        
+        WindowEvent wEvent = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
+        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wEvent);
+        
+    }
+    
+    /**
+     * Tells the SaveModel to save all current information.
+     */
+    private void save() {
+        saveNotifier.save();
+    }
+    
+    private AbstractSaveSubscriber saveSubscriber = new AbstractSaveSubscriber() {
+
+        @Override
+        public WindowSettings saveWindowSettings() {
+            
+            Dimension thisSize = Client.this.getSize();
+            Point thisLocation = Client.this.getLocation();
+            return new WindowSettings(thisSize, thisLocation);
+            
+        }
+
+        @Override
+        public void setWindowSettings(WindowSettings settings) {
+            setSize(settings.windowSize());
+            setLocation(settings.windowLocation());
+        }
+        
+    };
+    
+    private ActionListener downloadBatchAction = new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            downloadBatchDialog.setVisible(true);
+        }
+        
+    };
+
+    private ActionListener logoutAction = new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            save();
+            empty();
+            Client.this.setVisible(false);
+            loginDialog.setVisible(true);
+        }
+        
+    };
+    
+    private ActionListener exitAction = new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            loginDialog.dispose();
+            closeSafely();
+        }
+        
+    };
+    
+    private WindowAdapter clientWindowListener = new WindowAdapter() {
+        
+        @Override
+        public void windowClosing(WindowEvent e) {
+            save();
+        }
+        
+    };
+    
+    private WindowAdapter loginDialogCloseListener = new WindowAdapter() {
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            closeSafely();
+        }
+        
+    };
+    
     public static void main(String[] args) {
         
-        Client client = new Client();
-        client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        client.setVisible(true);
-        client.pack();
-        
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                Client client = new Client();
+            }
+        });
+
     }
     
 }

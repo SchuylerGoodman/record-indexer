@@ -19,4 +19,14 @@ public interface RecordSubscriber {
      */
     public void recordChanged(int row, int column, String newValue);
     
+    /**
+     * Process the change of all records.
+     */
+    public void setRecords();
+    
+    /**
+     * Empty all subscribers.
+     */
+    public void empty();
+    
 }

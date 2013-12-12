@@ -38,7 +38,7 @@ public class Communicator {
     public Communicator(String protocol, String host, int port) {
         this.initialize(protocol, host, port);
     }
-    
+
     public final void initialize(String protocol, String host, int port) {
         xstream = new XStream(new DomDriver());
         this.protocol = protocol;
@@ -56,6 +56,22 @@ public class Communicator {
     
     public void setPort(int port) {
         this.port = port;
+    }
+    
+    /**
+     * Create a URL that points to a given path on the server.
+     * 
+     * @param path the path to the desired file on the server.
+     * @return the URL pointing to the desired file.
+     */
+    public URL pathToURL(String path) {
+        if (isInitialized()) {
+            try {
+                return new URL(protocol, host, port, path);
+            }
+            catch (MalformedURLException ex) {}
+        }
+        return null;
     }
     
     private boolean isInitialized() {
@@ -180,16 +196,40 @@ public class Communicator {
     public BufferedImage downloadImage(String path) {
         
         BufferedImage image = null;
-        try {
-            InputStream in = connect(path, "GET", null);
-            if (in != null) {
-                image = (BufferedImage) ImageIO.read(in);
-                in.close();
+        if (path != null) {
+            try {
+                InputStream in = connect(path, "GET", null);
+                if (in != null) {
+                    image = (BufferedImage) ImageIO.read(in);
+                    in.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return image;
+        
+    }
+    
+    public String downloadHtml(String path) {
+        
+        StringBuilder sb = new StringBuilder();
+        if (path != null) {
+            try {
+                InputStream in = connect(path, "GET", null);
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(in));
+                if (in != null) {
+                    String inputLine;
+                    while ((inputLine = reader.readLine()) != null) {
+                        sb.append(inputLine);
+                    }
+                    reader.close();
+                }
+            }
+            catch (IOException ex) {}
+        }
+        return sb.toString();
         
     }
 

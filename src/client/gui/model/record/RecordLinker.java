@@ -4,6 +4,13 @@
  */
 package client.gui.model.record;
 
+import client.gui.model.communication.CommunicationLinker;
+import client.gui.model.communication.CommunicationNotifier;
+import client.gui.model.communication.CommunicationSubscriber;
+import client.gui.model.save.SaveLinker;
+import client.gui.model.save.SaveNotifier;
+import client.gui.model.save.SaveSubscriber;
+
 /**
  *
  * @author schuyler
@@ -13,11 +20,24 @@ public class RecordLinker {
     private RecordNotifier notifier;
     private RecordModel model;
     
-    public RecordLinker(RecordModel model) {
-        
+    public RecordLinker() {
+
+        model = new RecordModel();
         this.notifier = new RecordNotifier(model);
-        this.model = model;
         
+    }
+    
+    /**
+     * Sets up a link between the RecordModel, the CommunicationModel, and the
+     * SaveModel.
+     * 
+     * @param communicationLinker the CommunicationLinker with the desired
+     * CommunicationModel.
+     * @param saveLinker the SaveLinker with the desired SaveModel.
+     */
+    public void link(CommunicationLinker communicationLinker,
+                     SaveLinker saveLinker) {
+        model.link(communicationLinker, saveLinker);
     }
     
     /**

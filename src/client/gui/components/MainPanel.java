@@ -4,14 +4,19 @@
  */
 package client.gui.components;
 
-import client.gui.components.ImagePanel.ImagePanel;
-import client.gui.components.buttons.ImageButtons;
 import client.gui.Client;
+import client.gui.model.cell.CellLinker;
+import client.gui.model.communication.AbstractCommunicationSubscriber;
+import client.gui.model.communication.CommunicationLinker;
+import client.gui.model.image.ImageLinker;
+import client.gui.model.record.RecordLinker;
+import client.gui.model.save.*;
+import client.gui.model.save.settings.ImageSettings;
+import client.gui.model.save.settings.WindowSettings;
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import shared.communication.DownloadBatch_Result;
 
 /**
  * Main split pane for the image panel and the lower panel.
@@ -20,53 +25,92 @@ import javax.swing.JSplitPane;
  */
 public class MainPanel extends JPanel {
     
+    private SaveNotifier saveNotifier;
+    
     private ImageButtons buttonBar;
     private JSplitPane splitPane;
     private ImagePanel imagePanel;
     private UtilityPanel utilityPanel;
     
-    public MainPanel() {
+    public MainPanel(CommunicationLinker communicationLinker,
+                     RecordLinker recordLinker,
+                     CellLinker cellLinker,
+                     ImageLinker imageLinker,
+                     SaveLinker saveLinker) {
         
         super();
+
+        communicationLinker.subscribe(communicationSubscriber);
         
-        createComponents();
+        saveNotifier = saveLinker.getSaveNotifier();
+        saveLinker.subscribe(saveSubscriber);
+        
+        createComponents(communicationLinker, recordLinker, cellLinker,
+                         imageLinker, saveLinker);
         
     }
     
     /**
      * Creates components for this panel.
      */
-    private void createComponents() {
+    private void createComponents(CommunicationLinker communicationLinker,
+                                  RecordLinker recordLinker,
+                                  CellLinker cellLinker,
+                                  ImageLinker imageLinker,
+                                  SaveLinker saveLinker) {
         
-//        this.setLayout(new GridBagLayout());
         this.setLayout(new BorderLayout());
         
-        buttonBar = new ImageButtons();
-//        this.add(buttonBar, gbc(0, 1, 0));
+        buttonBar = new ImageButtons(communicationLinker, imageLinker,
+                                     saveLinker);
         this.add(buttonBar, BorderLayout.NORTH);
         
-        imagePanel = new ImagePanel();
-        utilityPanel = new UtilityPanel();
+        imagePanel = new ImagePanel(recordLinker, cellLinker, imageLinker);
+        utilityPanel = new UtilityPanel(communicationLinker, recordLinker,
+                                        cellLinker, imageLinker, saveLinker);
         
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, imagePanel, utilityPanel);
         splitPane.setResizeWeight(0.0);
         splitPane.setDividerLocation(Client.ORIG_HEIGHT / 2);
         
-//        this.add(splitPane, gbc(1, 15, 1.0));
         this.add(splitPane, BorderLayout.CENTER);
         
     }
     
-    private GridBagConstraints gbc(int yOffset, int yCells, double yWeight) {
+    private AbstractCommunicationSubscriber communicationSubscriber = new AbstractCommunicationSubscriber() {
         
-        GridBagConstraints gbc = new GridBagConstraints();
+        @Override
+        public void setBatch(DownloadBatch_Result result) {
+            
+            boolean enabled = false;
+            if (result != null) {
+                if (!result.equals(new DownloadBatch_Result())) {
+                    enabled = true;
+                }
+            }
+            buttonBar.enabled(enabled);
+            
+        }
         
-        gbc.gridy = yOffset;
-        gbc.gridheight = yCells;
-        gbc.weighty = yWeight;
+    };
+    
+    private AbstractSaveSubscriber saveSubscriber = new AbstractSaveSubscriber() {
+
+        @Override
+        public WindowSettings saveWindowSettings() {
+            return new WindowSettings(splitPane.getDividerLocation());
+        }
+
+        @Override
+        public void setWindowSettings(WindowSettings settings) {
+            splitPane.setDividerLocation(settings.horizontalDividerLocation());
+        }
         
-        return gbc;
+        @Override
+        public void setImageSettings(ImageSettings settings) {
+            buttonBar.enabled(true);
+        }
         
-    }
+    };
     
 }

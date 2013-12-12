@@ -20,12 +20,12 @@ public abstract class AbstractSaveSubscriber implements SaveSubscriber {
     
     @Override
     public IndexerState saveIndexerState() {
-        return null;
+        return new IndexerState();
     }
     
     @Override
     public WindowSettings saveWindowSettings() {
-        return null;
+        return new WindowSettings();
     }
     
     @Override

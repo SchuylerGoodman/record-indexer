@@ -5,6 +5,10 @@
 package client.gui.components;
 
 import client.gui.Client;
+import client.gui.model.cell.CellLinker;
+import client.gui.model.communication.CommunicationLinker;
+import client.gui.model.image.ImageLinker;
+import client.gui.model.record.RecordLinker;
 import java.awt.Dimension;
 import javax.swing.JTabbedPane;
 
@@ -20,20 +24,24 @@ class ExtrasPanel extends JTabbedPane {
     private HelpPanel helpPanel;
     private NavigationPanel navigationPanel;
     
-    public ExtrasPanel() {
+    public ExtrasPanel(CommunicationLinker communicationLinker,
+                       RecordLinker recordLinker, CellLinker cellLinker,
+                       ImageLinker imageLinker) {
         
         super();
         
         this.setMinimumSize(minimumSize);
         this.setPreferredSize(preferredSize);
         
-        createComponents();
+        createComponents(communicationLinker, recordLinker, cellLinker, imageLinker);
         
     }
     
-    private void createComponents() {
+    private void createComponents(CommunicationLinker communicationLinker,
+                                  RecordLinker recordLinker, CellLinker cellLinker,
+                                  ImageLinker imageLinker) {
         
-        helpPanel = new HelpPanel();
+        helpPanel = new HelpPanel(communicationLinker, recordLinker, cellLinker);
         this.addTab("Field Help", helpPanel);
         
         navigationPanel = new NavigationPanel();

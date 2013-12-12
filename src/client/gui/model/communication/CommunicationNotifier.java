@@ -4,6 +4,8 @@
  */
 package client.gui.model.communication;
 
+import java.awt.image.BufferedImage;
+import java.net.URL;
 import shared.communication.*;
 
 /**
@@ -28,6 +30,7 @@ public class CommunicationNotifier {
      * @param password Password to validate
      */
     public void validateUser(String username, String password) {
+        model.validateUser(username, password);
     }
     
     /**
@@ -36,7 +39,7 @@ public class CommunicationNotifier {
      * @return the GetProjects_Result result of the request.
      */
     public GetProjects_Result getProjects() {
-        return null;
+        return model.getProjects();
     }
 
     /**
@@ -46,7 +49,7 @@ public class CommunicationNotifier {
      * @return the GetSampleImage_Result result of the request.
      */
     public GetSampleImage_Result getSampleImage(int projectId) {
-        return null;
+        return model.getSampleImage(projectId);
     }
     
     /**
@@ -58,12 +61,14 @@ public class CommunicationNotifier {
      * @param projectId Id of the desired project.
      */
     public void downloadBatch(int projectId) {
+        model.downloadBatch(projectId);
     }
-    
+
     /**
      * Asks the CommunicationModel to submit a batch to the server.
      */
     public void submitBatch() {
+        model.submitBatch();
     }
 
     /**
@@ -74,6 +79,30 @@ public class CommunicationNotifier {
      * response to CommunicationSubscriber.setFields(GetFields_Result result).
      */
     public void getFields() {
+        model.getFields();
+    }
+    
+    public BufferedImage downloadImage(String path) {
+        return model.downloadImage(path);
+    }
+    
+    public String downloadHtml(String path) {
+        return model.downloadHtml(path);
+    }
+    
+    /**
+     * Asks the CommunicationModel to reset.
+     */
+    public void empty() {
+        model.empty();
+    }
+    
+    public URL pathToURL(String path) {
+        return model.pathToURL(path);
+    }
+    
+    public String getUsername() {
+        return model.getUsername();
     }
     
 }

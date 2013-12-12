@@ -2,8 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package client.gui.components.buttons;
+package client.gui.components;
 
+import client.gui.model.communication.*;
+import client.gui.model.image.*;
+import client.gui.model.save.*;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +25,9 @@ public class ImageButtons extends JPanel {
     
     private static final int BUFFER = 5;
     
-    private ImageButtonsContext context;
+    private CommunicationNotifier communicationNotifier;
+    private ImageNotifier imageNotifier;
+    private SaveNotifier saveNotifier;
     
     private ImageButton zoomIn;
     private ImageButton zoomOut;
@@ -31,9 +36,17 @@ public class ImageButtons extends JPanel {
     private ImageButton save;
     private ImageButton submit;
 
-    public ImageButtons() {
+    public ImageButtons(CommunicationLinker communicationLinker,
+                        ImageLinker imageLinker,
+                        SaveLinker saveLinker) {
         
         super();
+        
+        this.communicationNotifier = communicationLinker.getCommunicationNotifier();
+        
+        this.imageNotifier = imageLinker.getImageNotifier();
+        
+        this.saveNotifier = saveLinker.getSaveNotifier();
         
         createComponents();
         
@@ -64,80 +77,77 @@ public class ImageButtons extends JPanel {
         this.add(highlight);
         this.add(save);
         this.add(submit);
+
+        enabled(false);
         
     }
     
     /**
-     * Uses context to tell the image panel and the navigation panel that a zoom
-     * in has occurred.
+     * Tells the button bar to enable or disable all buttons.
+     * 
+     * @param enabled true if enabled, false if disabled.
      */
+    public void enabled(boolean enabled) {
+        
+        zoomIn.setEnabled(enabled);
+        zoomOut.setEnabled(enabled);
+        invert.setEnabled(enabled);
+        highlight.setEnabled(enabled);
+        save.setEnabled(enabled);
+        submit.setEnabled(enabled);
+        
+    }
+    
     private ActionListener zoomInListener = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            context.zoomIn(10);
+            imageNotifier.zoom(10);
         }
         
     };
 
-    /**
-     * Uses context to tell the image panel and the navigation panel that a zoom
-     * out has occurred.
-     */
     private ActionListener zoomOutListener = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            context.zoomOut(10);
+            imageNotifier.zoom(-10);
         }
         
     };
 
-    /**
-     * Uses context to tell the image panel to invert the colors in the image.
-     */
     private ActionListener invertListener = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            context.invert();
+            imageNotifier.invert();
         }
         
     };
     
-    /**
-     * Uses context to tell the image panel to toggle record highlighting.
-     */
     private ActionListener highlightListener = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            context.toggleHighlights();
+            imageNotifier.toggleHighlights();
         }
         
     };
     
-    /**
-     * Uses context to tell the GUI to save the currently indexed records locally.
-     */
     private ActionListener saveListener = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            context.save();
+            saveNotifier.save();
         }
         
     };
     
-    /**
-     * Uses context to tell the GUI to submit the currently indexed records to
-     * the server.
-     */
     private ActionListener submitListener = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            context.submit();
+            communicationNotifier.submitBatch();
         }
         
     };
@@ -157,7 +167,7 @@ public class ImageButtons extends JPanel {
             createComponents(text, actionListener);
 
         }
-
+        
         /**
          * Creates components for this panel.
          */
@@ -172,6 +182,11 @@ public class ImageButtons extends JPanel {
             
             this.add(Box.createRigidArea(new Dimension(BUFFER * 2, 0)));
             
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            button.setEnabled(enabled);
         }
 
     }

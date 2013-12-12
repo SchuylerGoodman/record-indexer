@@ -3,6 +3,7 @@ package shared.communication;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import shared.model.Field;
@@ -24,6 +25,10 @@ public class DownloadBatch_Result extends RequestResult implements Serializable 
     private int numRecords;
     private int numFields;
     private List<Field> fields;
+    
+    public DownloadBatch_Result() {
+        this(new Project(), new Image(), new ArrayList<Field>());
+    }
     
     public DownloadBatch_Result(Project project, Image image, List<Field> inFields) {
         imageId = image.imageId();

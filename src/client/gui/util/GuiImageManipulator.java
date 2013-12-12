@@ -4,8 +4,12 @@
  */
 package client.gui.util;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 
 /**
  *
@@ -98,20 +102,48 @@ public class GuiImageManipulator {
      * Finds the top-left coordinate that balances an image in the center of a
      * window.
      * 
-     * @param imageDimension Dimension of the image to balance
-     * @param windowDimension Dimension of the window in which to balance it
-     * @return Point representing the top-left coordinate that balances the image
+     * @param balanceDimension Dimension to balance
+     * @param inDimension Dimension in which to balance it
+     * @return Point representing the top-left coordinate that balances the balanceDimension
      */
-    public static Point balanceInWindow(Dimension imageDimension, Dimension windowDimension) {
+    public static Point balanceInWindow(Dimension balanceDimension, Dimension inDimension) {
         
-        assert imageDimension != null && windowDimension != null;
+        assert balanceDimension != null && inDimension != null;
         
         Point topLeftCoords = new Point(0, 0);
         
-        topLeftCoords.x = (windowDimension.width - imageDimension.width) / 2;
-        topLeftCoords.y = (windowDimension.height - imageDimension.height) / 2;
+        topLeftCoords.x = (inDimension.width - balanceDimension.width) / 2;
+        topLeftCoords.y = (inDimension.height - balanceDimension.height) / 2;
         
         return topLeftCoords;
+        
+    }
+    
+    /**
+     * Invert the colors of a grey scale .png.
+     * 
+     * @param image the .png image to invert.
+     * @return The inverted .png formatted image.
+     */
+    public static BufferedImage invert(BufferedImage image) {
+        
+        ColorModel cm = image.getColorModel();
+        boolean isAlphaPremultiplied = image.isAlphaPremultiplied();
+        WritableRaster raster = image.copyData(null);
+        BufferedImage copy = new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+        
+        for (int x = 0; x < image.getWidth(); ++x) {
+            for (int y = 0; y < image.getHeight(); ++y) {
+                int rgb = image.getRGB(x, y);
+                Color color = new Color(rgb, false);
+                color = new Color(255 - color.getRed(),
+                                  255 - color.getBlue(),
+                                  255 - color.getGreen());
+                copy.setRGB(x, y, color.getRGB());
+            }
+        }
+        
+        return copy;
         
     }
 

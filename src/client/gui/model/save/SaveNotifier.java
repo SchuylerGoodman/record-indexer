@@ -17,7 +17,14 @@ public class SaveNotifier {
     public SaveNotifier(SaveModel model) {
         this.model = model;
     }
-
+    
+    /**
+     * Tells the saveModel to save all indexer GUI settings.
+     */
+    public void save() {
+        model.save();
+    }
+    
     /**
      * Tells the SaveModel to save all image settings to a file.
      * 

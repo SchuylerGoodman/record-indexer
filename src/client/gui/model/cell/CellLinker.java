@@ -4,6 +4,10 @@
  */
 package client.gui.model.cell;
 
+import client.gui.model.communication.CommunicationLinker;
+import client.gui.model.record.RecordLinker;
+import client.gui.model.save.SaveLinker;
+
 /**
  *
  * @author schuyler
@@ -13,10 +17,22 @@ public class CellLinker {
     private CellNotifier notifier;
     private CellModel model;
     
-    public CellLinker(CellModel model) {
-        
+    public CellLinker() {
+
+        model = new CellModel();
         this.notifier = new CellNotifier(model);
-        this.model = model;
+        
+    }
+    
+    /**
+     * Sets up a connection between the CellModel to link to the RecordModel.
+     * 
+     * @param recordLinker the RecordLinker with the desired RecordModel.
+     */
+    public void link(CommunicationLinker communicationLinker,
+                     RecordLinker recordLinker, SaveLinker saveLinker) {
+        
+        model.link(communicationLinker, recordLinker, saveLinker);
         
     }
     
