@@ -44,7 +44,7 @@ class ExtrasPanel extends JTabbedPane {
         helpPanel = new HelpPanel(communicationLinker, recordLinker, cellLinker);
         this.addTab("Field Help", helpPanel);
         
-        navigationPanel = new NavigationPanel();
+        navigationPanel = new NavigationPanel(imageLinker);
         this.addTab("Image Navigation", navigationPanel);
         
     }

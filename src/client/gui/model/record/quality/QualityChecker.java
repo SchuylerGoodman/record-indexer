@@ -5,9 +5,6 @@
 package client.gui.model.record.quality;
 
 import client.gui.model.communication.*;
-import client.gui.model.record.AbstractRecordSubscriber;
-import client.gui.model.record.RecordLinker;
-import client.gui.model.record.RecordSubscriber;
 import java.awt.Point;
 import java.util.*;
 import javax.swing.SwingWorker;
@@ -24,11 +21,12 @@ public class QualityChecker {
     private ArrayList<ArrayList<String>> records;
     private ArrayList<Field> fields;
     private ArrayList<TreeSet<String>> dictionaries;
-    private HashMap<PointHash, TreeSet<String>> suggestions;
     
     public QualityChecker(CommunicationLinker communicationLinker) {
         
-        communicationNotifier = communicationLinker.getCommunicationNotifier();
+        if (communicationLinker != null) {
+            communicationNotifier = communicationLinker.getCommunicationNotifier();
+        }
         
     }
     
@@ -39,8 +37,14 @@ public class QualityChecker {
         }
         this.records = records;
         this.fields = fields;
-        initDictionaries.execute();
+        if (communicationNotifier != null) {
+            initDictionaries.execute();
+        }
         
+    }
+    
+    public void initDictionary(ArrayList<TreeSet<String>> dictionaries) {
+        this.dictionaries = dictionaries;
     }
     
     public boolean needsSuggestion(int row, int column) {
@@ -61,17 +65,14 @@ public class QualityChecker {
             return newSuggestions.toArray(new String[newSuggestions.size()]);
         }
         return new String[]{};
-//        if (suggestions != null && suggestions.containsKey(cell)) {
-//            return (String[])suggestions.get(cell).toArray();
-//        }
         
     }
     
     private boolean isKnownValue(int field, String value) {
         
         if (value.isEmpty()) {
-            return true;
-        }
+            return true
+;        }
                 
         if (isAgeField(field)) {
             if (!isValidNumber(value)) {
@@ -80,9 +81,6 @@ public class QualityChecker {
             else {
                 return true;
             }
-        }
-        else if (isValidNumber(value)) {
-            return true;
         }
 
         if (dictionaries == null || dictionaries.size() <= field) {
@@ -129,8 +127,8 @@ public class QualityChecker {
                 distance++;
                 Set<String> similar2 = new TreeSet<>();
                 for (String s : similar) {
-                    if (number && value.matches("\\p{Digit}*^\\p{Digit}+\\p{Digit}*")) {
-                        similar2.add(value.replaceFirst("^\\p{Digit}", ""));
+                    if (number && s.matches(".*\\D+.*")) {
+                        similar2.add(s.replaceFirst("\\D", ""));
                     }
                     else {
                         this.getDeletion(s, similar2);
@@ -142,7 +140,9 @@ public class QualityChecker {
                     }
                     for (String s2 : similar2) {
                         if (isKnownValue(field, s2)) {
-                            inSet.add(s2);
+                            if (!s2.isEmpty()) {
+                                inSet.add(s2);
+                            }
                         }
                     }
                 }
@@ -250,9 +250,11 @@ public class QualityChecker {
                     Field f = fields.get(i);
                     TreeSet<String> dictionary = new TreeSet<>();
                     if (f.knownData() != null) {
-                        String s = communicationNotifier.downloadHtml(f.knownData()).toLowerCase();
-                        List<String> list = Arrays.asList(s.split(","));
-                        dictionary.addAll(list);
+                        if (communicationNotifier != null) {
+                            String s = communicationNotifier.downloadHtml(f.knownData()).toLowerCase();
+                            List<String> list = Arrays.asList(s.split(","));
+                            dictionary.addAll(list);
+                        }
                     }
                     dictionaries.add(dictionary);
                 }

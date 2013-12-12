@@ -29,7 +29,6 @@ public class TableEntryPanel extends JPanel {
     private RecordNotifier recordNotifier;
     private CellNotifier cellNotifier;
     
-    private TableEntryModel tableEntryModel;
     private JTable entryTable;
     private JPopupMenu menuPopup = new JPopupMenu();
     
@@ -62,7 +61,7 @@ public class TableEntryPanel extends JPanel {
 
         this.setLayout(new BorderLayout());
         
-        TableEntryModel model = new TableEntryModel(recordLinker, cellLinker);
+        TableEntryModel model = new TableEntryModel(recordLinker);
         entryTable = new JTable(model);
         model.setColumnModel(entryTable.getColumnModel());
         entryTable.getSelectionModel().addListSelectionListener(selectionListener);

@@ -31,9 +31,8 @@ public class DownloadHandler implements HttpHandler {
             logger.finer(exchange.getRequestHeaders().toString());
             
             Path path = Paths.get("Files" + exchange.getRequestURI().getPath());
-            
             int response;
-            if (Files.exists(path)) {
+            if (!Files.isDirectory(path) && Files.exists(path)) {
                 response = HttpURLConnection.HTTP_OK;
             }
             else {
@@ -41,10 +40,12 @@ public class DownloadHandler implements HttpHandler {
             }
             exchange.sendResponseHeaders(response, 0);
 
-            byte[] data = Files.readAllBytes(path);
-            BufferedOutputStream out = new BufferedOutputStream(exchange.getResponseBody());
-            out.write(data);
-            out.flush();
+            if (response != HttpURLConnection.HTTP_NOT_FOUND) {
+                byte[] data = Files.readAllBytes(path);
+                BufferedOutputStream out = new BufferedOutputStream(exchange.getResponseBody());
+                out.write(data);
+                out.flush();
+            }
             
             exchange.close();
             

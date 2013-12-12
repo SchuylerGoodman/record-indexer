@@ -24,14 +24,9 @@ public class CellModel {
     
     private ArrayList<CellSubscriber> subscribers;
     
-    private RecordNotifier recordNotifier;
-    
-    private int fieldCount;
     private int rowCount;
     
     private ArrayList<Field> fields;
-    private int currentRow;
-    private int currentColumn;
     private int currentCellWidth;
     private int cellHeight;
     private int currentFirstXCoordinate;
@@ -46,8 +41,6 @@ public class CellModel {
                         RecordLinker recordLinker, SaveLinker saveLinker) {
         
         communicationLinker.subscribe(communicationSubscriber);
-        
-        this.recordNotifier = recordLinker.getRecordNotifier();
         
         saveLinker.subscribe(saveSubscriber);
         
@@ -71,11 +64,7 @@ public class CellModel {
      * @param column the column of the selected cell with origin at 0.
      */
     protected void select(int row, int column) {
-        
-        this.currentRow = row;
-        this.currentColumn = column;
         this.selected(row, column);
-        
     }
     
     /**
@@ -119,6 +108,9 @@ public class CellModel {
             this.currentFirstYCoordinate = 0;
         }
         else {
+            if (fields == null || fields.size() <= column) {
+                return;
+            }
             Field field = fields.get(column);
             if (field == null) {
                 return;
@@ -147,7 +139,6 @@ public class CellModel {
         public void setBatch(DownloadBatch_Result result) {
         
             CellModel.this.fields = (ArrayList<Field>) result.fields();
-            CellModel.this.fieldCount = result.numFields();
             CellModel.this.rowCount = result.numRecords();
             CellModel.this.cellHeight = result.recordHeight();
             CellModel.this.firstYCoordinate = result.firstYCoord();
@@ -168,7 +159,6 @@ public class CellModel {
         public void setIndexerState(IndexerState state) {
             
             fields = state.fields();
-            fieldCount = state.columnNumber();
             rowCount = state.rowNumber();
             cellHeight = state.recordHeight();
             firstYCoordinate = state.firstYCoordinate();

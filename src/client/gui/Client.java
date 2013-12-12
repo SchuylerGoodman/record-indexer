@@ -13,17 +13,16 @@ import client.gui.model.communication.*;
 import client.gui.model.image.*;
 import client.gui.model.record.*;
 import client.gui.model.save.*;
+import client.gui.model.save.settings.IndexerState;
 import client.gui.model.save.settings.WindowSettings;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
-
+import shared.communication.DownloadBatch_Result;
+;
 /**
  *
  * @author schuyler
@@ -51,19 +50,22 @@ public class Client extends JFrame {
     private MainPanel mainPanel;
     private JDialog loginDialog;
     private DownloadBatchDialog downloadBatchDialog;
+    private JMenuItem downloadBatchItem;
     
-    public Client() {
+    public Client(String host, int port) {
         
         super("Record Indexer");
         
         gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         
         communicator = new Communicator();
-        communicator.initialize("HTTP", "localhost", 39640);
+        communicator.initialize("HTTP", host, port);
         
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         createLinkers();
+        
+        communicationLinker.subscribe(communicationSubscriber);
         
         saveNotifier = saveLinker.getSaveNotifier();
         saveLinker.subscribe(saveSubscriber);
@@ -116,7 +118,7 @@ public class Client extends JFrame {
         menuBar.add(fileMenu);
         
         // Add Download batch menu item
-        JMenuItem downloadBatchItem = new JMenuItem("Download Batch");
+        downloadBatchItem = new JMenuItem("Download Batch");
         downloadBatchItem.addActionListener(downloadBatchAction);
         fileMenu.add(downloadBatchItem);
         
@@ -171,6 +173,21 @@ public class Client extends JFrame {
         saveNotifier.save();
     }
     
+    private AbstractCommunicationSubscriber communicationSubscriber =
+                                        new AbstractCommunicationSubscriber() {
+
+        @Override
+        public void setBatch(DownloadBatch_Result result) {
+            if (result.equals(new DownloadBatch_Result())) {
+                downloadBatchItem.setEnabled(true);
+            }
+            else {
+                downloadBatchItem.setEnabled(false);
+            }
+        }
+        
+    };
+    
     private AbstractSaveSubscriber saveSubscriber = new AbstractSaveSubscriber() {
 
         @Override
@@ -182,6 +199,11 @@ public class Client extends JFrame {
             
         }
 
+        @Override
+        public void setIndexerState(IndexerState state) {
+            downloadBatchItem.setEnabled(false);
+        }
+        
         @Override
         public void setWindowSettings(WindowSettings settings) {
             setSize(settings.windowSize());
@@ -241,10 +263,13 @@ public class Client extends JFrame {
     
     public static void main(String[] args) {
         
+        final String host = args[0];
+        final int port = Integer.parseInt(args[1]);
+        
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                Client client = new Client();
+                Client client = new Client(host, port);
             }
         });
 

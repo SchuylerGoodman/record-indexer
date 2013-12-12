@@ -1,3 +1,4 @@
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -9,8 +10,6 @@ import client.gui.model.record.*;
 import client.gui.model.record.RecordModel.SuggestionDialog;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.MenuItem;
-import java.awt.Point;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -162,6 +161,7 @@ public class FormEntryPanel extends JPanel {
         @Override
         public void empty() {
             FormEntryPanel.this.removeAll();
+            repaint();
         }
         
     };

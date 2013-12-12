@@ -19,6 +19,7 @@ public class ImageSettings implements DataModel {
     private int zoomLevel;
     private double zoomAmount;
     private boolean highlights;
+    private boolean inverted;
     private double aspectRatio;
     private String pathToImage;
     
@@ -27,24 +28,25 @@ public class ImageSettings implements DataModel {
     
     public ImageSettings(BufferedImage originalImage, Dimension originalDimension,
                          int zoomLevel, double zoomAmount, boolean highlights,
-                         double aspect, String pathToImage,
+                         boolean inverted, double aspect, String pathToImage,
                          Point2D.Double viewRatio, Point2D.Double viewTopLeftRatio) {
         
         this.set(originalImage, originalDimension, zoomLevel, zoomAmount,
-                 highlights, aspect, pathToImage, viewRatio, viewTopLeftRatio);
+                 highlights, inverted, aspect, pathToImage, viewRatio, viewTopLeftRatio);
         
     }
     
     public final void set(BufferedImage originalImage, Dimension originalDimension,
-                         int zoomLevel, double zoomAmount, boolean highlights,
-                         double aspect, String pathToImage,
-                         Point2D.Double viewRatio, Point2D.Double viewTopLeftRatio) {
+                          int zoomLevel, double zoomAmount, boolean highlights,
+                          boolean inverted, double aspect, String pathToImage,
+                          Point2D.Double viewRatio, Point2D.Double viewTopLeftRatio) {
         
         this.originalImage = originalImage;
         this.originalDimension = originalDimension;
         this.zoomLevel = zoomLevel;
         this.zoomAmount = zoomAmount;
         this.highlights = highlights;
+        this.inverted = inverted;
         this.aspectRatio = aspect;
         this.pathToImage = pathToImage;
         this.viewRatio = viewRatio;
@@ -72,6 +74,10 @@ public class ImageSettings implements DataModel {
         return this.highlights;
     }
     
+    public boolean inverted() {
+        return this.inverted;
+    }
+    
     public double aspectRatio() {
         return this.aspectRatio;
     }
@@ -90,6 +96,11 @@ public class ImageSettings implements DataModel {
     
     public void combine(ImageSettings otherSettings) {
         // Do nothing, retain first image settings
+    }
+
+    @Override
+    public boolean hasData() {
+        return true;
     }
     
 }

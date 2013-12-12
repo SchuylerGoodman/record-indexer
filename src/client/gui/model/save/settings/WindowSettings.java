@@ -25,23 +25,23 @@ public class WindowSettings implements DataModel {
     private int selectedExtrasTab;
     
     public WindowSettings() {
-        set(null, null, 0, 0, new EntryTab.None(), new EntryTab.None());
+        set(null, null, 0, 0, -1, -1);
     }
     
     public WindowSettings(Dimension windowSize, Point windowLocation) {
-        set(windowSize, windowLocation, 0, 0, new EntryTab.None(), new EntryTab.None());
+        set(windowSize, windowLocation, 0, 0, -1, -1);
     }
     
     public WindowSettings(int horizontalDividerLocation) {
-        set(null, null, horizontalDividerLocation, 0, new EntryTab.None(), new EntryTab.None());
+        set(null, null, horizontalDividerLocation, 0, -1, -1);
     }
     
-    public WindowSettings(EntryTab selectedEntryTab, EntryTab selectedExtrasTab) {
+    public WindowSettings(int selectedEntryTab, int selectedExtrasTab) {
         set(null, null, 0, 0, selectedEntryTab, selectedExtrasTab);
     }
     
     public WindowSettings(int verticalDividerLocation,
-                          EntryTab selectedEntryTab, EntryTab selectedExtrasTab) {
+                          int selectedEntryTab, int selectedExtrasTab) {
         
         set(null, null, 0, verticalDividerLocation, selectedEntryTab, selectedExtrasTab);
         
@@ -49,14 +49,14 @@ public class WindowSettings implements DataModel {
     
     private void set(Dimension windowSize, Point windowLocation,
                      int horizontalDividerLocation, int verticalDividerLocation,
-                     EntryTab selectedEntryTab, EntryTab selectedExtrasTab) {
+                     int selectedEntryTab, int selectedExtrasTab) {
         
         this.windowSize = windowSize;
         this.windowLocation = windowLocation;
         this.horizontalDividerLocation = horizontalDividerLocation;
         this.verticalDividerLocation = verticalDividerLocation;
-        this.selectedEntryTab = selectedEntryTab.tabNumber;
-        this.selectedExtrasTab = selectedExtrasTab.tabNumber;
+        this.selectedEntryTab = selectedEntryTab;
+        this.selectedExtrasTab = selectedExtrasTab;
         
     }
     
@@ -108,38 +108,35 @@ public class WindowSettings implements DataModel {
                             otherSettings.selectedExtrasTab : this.selectedExtrasTab;
         
     }
+
+    @Override
+    public boolean hasData() {
+        
+        if (this.windowSize == null &&
+                this.windowLocation == null &&
+                this.horizontalDividerLocation == 0 &&
+                this.verticalDividerLocation == 0 &&
+                this.selectedEntryTab == 0 &&
+                this.selectedExtrasTab == 0) {
+            
+            return false;
+        }
+        return true;
+    }
     
     public static class EntryTab {
         
-        private static final int NONE = -1;
-        private static final int FIRST = 0;
-        private static final int SECOND = 1;
+        private static final EntryTab NONE = new EntryTab(-1);
+        private static final EntryTab FIRST = new EntryTab(0);
+        private static final EntryTab SECOND = new EntryTab(1);
         
         public int tabNumber;
         
         public EntryTab(int tabNumber) {
-            if (tabNumber < NONE || tabNumber > SECOND) {
+            if (tabNumber < NONE.tabNumber || tabNumber > SECOND.tabNumber) {
                 throw new IllegalArgumentException();
             }
             this.tabNumber = tabNumber;
-        }
-        
-        public static class None extends EntryTab {
-            public None() {
-                super(NONE);
-            }
-        }
-        
-        public static class First extends EntryTab {
-            public First() {
-                super(FIRST);
-            }
-        }
-        
-        public static class Second extends EntryTab {
-            public Second() {
-                super(SECOND);
-            }
         }
         
     }

@@ -66,8 +66,7 @@ public class UtilityPanel extends JSplitPane {
             int entry = entryPanel.getSelectedIndex();
             int extra = extrasPanel.getSelectedIndex();
             return new WindowSettings(UtilityPanel.this.getDividerLocation(),
-                                      new WindowSettings.EntryTab(entry),
-                                      new WindowSettings.EntryTab(extra));
+                                      entry, extra);
             
         }
 

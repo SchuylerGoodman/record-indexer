@@ -146,4 +146,18 @@ public class IndexerState implements DataModel {
         
     }
 
+    @Override
+    public boolean hasData() {
+        if (this.projectId == 0 &&
+                this.imageId == 0 &&
+                this.recordHeight == 0 &&
+                this.firstYCoordinate == 0 &&
+                this.records == null &&
+                this.fields == null) {
+            
+            return false;
+        }
+        return true;
+    }
+
 }

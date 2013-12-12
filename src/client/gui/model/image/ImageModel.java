@@ -9,6 +9,7 @@ import client.gui.model.save.*;
 import client.gui.model.save.settings.ImageSettings;
 import client.gui.util.GuiImageManipulator;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class ImageModel {
     private Dimension imageDimension;
 //    private Point imageTopLeft; // always (0,0)
     private boolean highlights;
+    private boolean inverted;
     private int zoomLevel;
     private double zoomAmount;
     private double aspectRatio;
@@ -44,29 +46,30 @@ public class ImageModel {
     private ImageSettings settings;
     
     public ImageModel() {
-        this(null, new Dimension(0, 0), 0, 0, false, 0);
+        this(null, new Dimension(0, 0), 0, 0, true, false, 0);
     }
     
     public ImageModel(BufferedImage originalImage, Dimension originalDimension,
                       int zoomLevel, int zoomAmount, boolean highlights,
-                      double aspect) {
+                      boolean inverted, double aspect) {
         
         subscribers = new ArrayList<>();      
         settings = null;
         init(originalImage, originalDimension, zoomLevel, zoomAmount, highlights,
-             aspect);
+             inverted, aspect);
         
     }
     
     private void init(BufferedImage originalImage, Dimension originalDimension,
                       int zoomLevel, int zoomAmount, boolean highlights,
-                      double aspect) {
+                      boolean inverted, double aspect) {
         
         this.originalImage = originalImage;
         this.imageDimension = originalDimension;
         this.zoomLevel = zoomLevel;
         this.zoomAmount = zoomAmount;
         this.highlights = highlights;
+        this.inverted = inverted;
         this.aspectRatio = aspect;
         
     }
@@ -130,6 +133,10 @@ public class ImageModel {
     protected void invert() {
         
         originalImage = GuiImageManipulator.invert(originalImage);
+        inverted = !inverted;
+        this.setSettings(originalImage, imageDimension, zoomLevel,
+                         zoomAmount, highlights, inverted, aspectRatio,
+                         pathToImage, viewRatio, viewTopLeftRatio);
         
         for (ImageSubscriber s : subscribers) {
             s.invert(originalImage);
@@ -149,8 +156,18 @@ public class ImageModel {
     
     protected void moveWindow(Point2D.Double newTopLeftRatio) {
         
-        viewTopLeftRatio = newTopLeftRatio;
-        update();
+        if (imageDimension != null && viewRatio != null) {
+            Dimension viewSize = new Dimension((int)(viewRatio.getX() * imageDimension.getWidth()),
+                                               (int)(viewRatio.getY() * imageDimension.getHeight()));
+            Point topLeft = new Point((int)(newTopLeftRatio.getX() * imageDimension.getWidth()),
+                                      (int)(newTopLeftRatio.getY() * imageDimension.getHeight()));
+            topLeft = GuiImageManipulator.translateWithBounds(topLeft, imageDimension, viewSize);
+            newTopLeftRatio.setLocation(topLeft.getX() / imageDimension.getWidth(),
+                                        topLeft.getY() / imageDimension.getHeight());       
+            
+            viewTopLeftRatio = newTopLeftRatio;
+            update();
+        }
         
     }
     
@@ -173,9 +190,9 @@ public class ImageModel {
     
     private void initSubscribers() {
         
-        settings = new ImageSettings(originalImage, imageDimension, zoomLevel,
-                                     zoomAmount, highlights, aspectRatio,
-                                     pathToImage, viewRatio, viewTopLeftRatio);
+        this.setSettings(originalImage, imageDimension, zoomLevel,
+                         zoomAmount, highlights, inverted, aspectRatio,
+                         pathToImage, viewRatio, viewTopLeftRatio);
         
         for (ImageSubscriber s : subscribers) {
             s.init(settings);
@@ -188,14 +205,31 @@ public class ImageModel {
      */
     private void update() {
         
-        settings.set(originalImage, imageDimension, zoomLevel,
-                     zoomAmount, highlights, aspectRatio,
-                     pathToImage, viewRatio, viewTopLeftRatio);
+        this.setSettings(originalImage, imageDimension, zoomLevel,
+                         zoomAmount, highlights, inverted, aspectRatio,
+                         pathToImage, viewRatio, viewTopLeftRatio);
         
         for (ImageSubscriber s : subscribers) {
             s.update(settings);
         }
 
+    }
+    
+    private void setSettings(BufferedImage originalImage, Dimension imageDimension,
+                             int zoomLevel, double zoomAmount, boolean highlights,
+                             boolean inverted, double aspect, String pathToImage,
+                             Point2D.Double viewRatio, Point2D.Double viewTopLeftRatio) {
+        
+        if (settings == null) {
+            settings = new ImageSettings(originalImage, imageDimension, zoomLevel,
+                                         zoomAmount, highlights, inverted, aspect,
+                                         pathToImage, viewRatio, viewTopLeftRatio);
+        }
+        
+        settings.set(originalImage, imageDimension, zoomLevel,
+                     zoomAmount, highlights, inverted, aspect,
+                     pathToImage, viewRatio, viewTopLeftRatio);
+        
     }
     
     private AbstractCommunicationSubscriber communicationSubscriber
@@ -211,14 +245,13 @@ public class ImageModel {
             if (image != null) {
                 imageD = new Dimension(image.getWidth(), image.getHeight());
                 aspect = imageD.getWidth() / imageD.getHeight();
-                int newHeight = imageD.height + 100;
             }
             else {
                 imageD = new Dimension(0, 0);
                 aspect = 0.0d;
             }
             
-            init(image, imageD, 0, 0, true, aspect);
+            init(image, imageD, 0, 0, true, false, aspect);
             
             initSubscribers();
             
@@ -246,12 +279,17 @@ public class ImageModel {
             zoomLevel = settings.zoomLevel();
             zoomAmount = settings.zoomAmount();
             highlights = settings.highlights();
+            inverted = settings.inverted();
             aspectRatio = settings.aspectRatio();
             pathToImage = settings.pathToImage();
             viewRatio = settings.viewRatio();
             viewTopLeftRatio = settings.viewTopLeftRatio();
             
             update();
+            
+            if (inverted) {
+                invert();
+            }
             
         }
 

@@ -8,7 +8,6 @@ import client.gui.model.cell.*;
 import client.gui.model.record.*;
 import java.awt.*;
 import java.util.ArrayList;
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.*;
@@ -26,7 +25,7 @@ public class TableEntryModel extends AbstractTableModel {
     
     private ArrayList<ArrayList<Boolean>> needsSuggestions;
     
-    public TableEntryModel(RecordLinker recordLinker, CellLinker cellLinker) {
+    public TableEntryModel(RecordLinker recordLinker) {
         
         this.recordNotifier = recordLinker.getRecordNotifier();
         recordLinker.subscribe(recordSubscriber);
@@ -93,6 +92,13 @@ public class TableEntryModel extends AbstractTableModel {
         
         needsSuggestions = new ArrayList<>();
         int rows = recordNotifier.getRowCount();
+        for (int i = 0; i < rows; ++i) {
+            ArrayList<Boolean> columns = new ArrayList<>();
+            for (int j = 0; j < cm.getColumnCount() - 1; ++j) {
+                columns.add(Boolean.FALSE);
+            }
+            needsSuggestions.add(columns);
+        }
         for (int i = 0; i < cm.getColumnCount(); ++i) {
             if (i != 0) {
                 ArrayList<Boolean> needs = new ArrayList<>();

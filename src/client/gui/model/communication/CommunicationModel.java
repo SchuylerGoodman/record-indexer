@@ -133,6 +133,8 @@ public class CommunicationModel {
     }
     
     protected void empty() {
+        this.username = null;
+        this.password = null;
         this.blankAll();
     }
     
@@ -237,9 +239,7 @@ public class CommunicationModel {
     }
     
     private void blankAll() {
-        
-        username = null;
-        password = null;
+
         projectId = 0;
         imageId = 0;
         recordHeight = 0;

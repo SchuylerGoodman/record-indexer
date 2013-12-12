@@ -163,6 +163,11 @@ public class SaveModel {
                         Logger.getLogger(SaveModel.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                else {
+                    if (!data.hasData()) {
+                        pathToFile.delete();
+                    }
+                }
                 oos = new ObjectOutputStream(new FileOutputStream(pathToFile));
                 oos.writeObject(data);
                 success = true;
@@ -174,6 +179,11 @@ public class SaveModel {
                 } catch (IOException ex) {
                     Logger.getLogger(SaveModel.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            }
+        }
+        else if (pathToFile != null && data == null) {
+            if (pathToFile.exists()) {
+                pathToFile.delete();
             }
         }
         return success;

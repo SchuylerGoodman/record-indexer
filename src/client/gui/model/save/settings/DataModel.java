@@ -12,4 +12,6 @@ import java.io.Serializable;
  */
 public interface DataModel extends Serializable {
     
+    public boolean hasData();
+    
 }

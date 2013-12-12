@@ -147,6 +147,7 @@ public class CommunicatorTest {
         
     }
     
+    @Test
     public void submitBatch() {
         
         // Test valid
@@ -171,13 +172,7 @@ public class CommunicatorTest {
         param = new SubmitBatch_Param("test2", "test2", 21, records);
         result = communicator.submitBatch(param);
         assertNull(result);
-        
-        // Test valid
-        records = records + "a,b,c,d,e;a,b,c,d,e;a,b,c,d,e;a,b,c,d,e;a,b,c,d,e;";
-        param = new SubmitBatch_Param("test2", "test2", 21, records);
-        result = communicator.submitBatch(param);
-        assertEquals(result, fakeResult);
-        
+
     }
     
     @Test
