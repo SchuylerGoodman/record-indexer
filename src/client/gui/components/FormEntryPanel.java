@@ -6,7 +6,11 @@ package client.gui.components;
 
 import client.gui.model.cell.*;
 import client.gui.model.record.*;
+import client.gui.model.record.RecordModel.SuggestionDialog;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.MenuItem;
+import java.awt.Point;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -139,6 +143,9 @@ public class FormEntryPanel extends JPanel {
             // be updated when rows are changed anyways.
             if (currentRow == row) {
                 recordForm.setValueAt(newValue, column);
+//                if (recordNotifier.needsSuggestion(row, column)) {
+//                    recordList.
+//                }
             }
         }
 
@@ -282,6 +289,7 @@ public class FormEntryPanel extends JPanel {
         private EntryField entry;
         
         private int column;
+        private boolean needsSuggestion;
         
         public FormEntry(String fieldName, int column) {
             
@@ -319,12 +327,25 @@ public class FormEntryPanel extends JPanel {
             
         }
         
+        public void setNeedsSuggestion(boolean needs) {
+            
+            if (needs) {
+                entry.setBackground(Color.red);
+            }
+            else {
+                entry.setBackground(Color.white);
+            }
+            needsSuggestion = needs;
+            
+        }
+        
         public int getColumn() {
             return column;
         }
         
         public void setValueAt(String value) {
             entry.setText(value);
+            setNeedsSuggestion(recordNotifier.needsSuggestion(currentRow, column));
         }
         
         public String getValue() {
@@ -337,24 +358,52 @@ public class FormEntryPanel extends JPanel {
         
         private class EntryField extends JTextField {
             
+            private JPopupMenu menuPopup = new JPopupMenu();
+            
             public EntryField() {
+                
                 super();
-                this.addKeyListener(k);
+                this.addKeyListener(keyAdapter);
+                this.addMouseListener(mouseAdapter);
+                
+                JMenuItem suggest = new JMenuItem("See Suggestions");
+                
+                suggest.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        SuggestionDialog sd = recordNotifier.getSuggestionDialog(currentRow, column);
+                        sd.setVisible(true);
+                    }
+                });
+                
+                menuPopup.add(suggest);
+                
             }
             
             public int getColumn() {
                 return column;
             }
             
-            private KeyAdapter k = new KeyAdapter() {
+            private KeyAdapter keyAdapter = new KeyAdapter() {
                 // Save record when pressing 'Enter'
                 @Override
                 public void keyTyped(KeyEvent e) {
                     if (e.getKeyChar() == '\n') {
-                        recordForm.setFocusAt(column + 1);
+                        recordNotifier.changeRecord(currentRow, column, getText());
                     }
                 }
 
+            };
+            
+            private MouseAdapter mouseAdapter = new MouseAdapter() {
+                
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (needsSuggestion && e.getButton() == MouseEvent.BUTTON3) {
+                        menuPopup.show(EntryField.this, e.getX(), e.getY());
+                    }
+                }
+                
             };
             
         }

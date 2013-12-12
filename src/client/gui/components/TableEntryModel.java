@@ -7,6 +7,8 @@ package client.gui.components;
 import client.gui.model.cell.*;
 import client.gui.model.record.*;
 import java.awt.*;
+import java.util.ArrayList;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.*;
@@ -21,6 +23,8 @@ public class TableEntryModel extends AbstractTableModel {
     private RecordNotifier recordNotifier;
     
     private TableColumnModel cm;
+    
+    private ArrayList<ArrayList<Boolean>> needsSuggestions;
     
     public TableEntryModel(RecordLinker recordLinker, CellLinker cellLinker) {
         
@@ -58,6 +62,8 @@ public class TableEntryModel extends AbstractTableModel {
         if (columnIndex == 0) {
             return rowIndex;
         }
+        Boolean need = recordNotifier.needsSuggestion(rowIndex, columnIndex - 1);
+        needsSuggestions.get(rowIndex).set(columnIndex - 1, need);
         return recordNotifier.getValueAt(rowIndex, columnIndex - 1);
     }
 
@@ -85,7 +91,16 @@ public class TableEntryModel extends AbstractTableModel {
         TableEntryModel.this.fireTableStructureChanged();
         TableEntryModel.this.fireTableDataChanged();      
         
+        needsSuggestions = new ArrayList<>();
+        int rows = recordNotifier.getRowCount();
         for (int i = 0; i < cm.getColumnCount(); ++i) {
+            if (i != 0) {
+                ArrayList<Boolean> needs = new ArrayList<>();
+                for (int j = 0; j < rows; ++j) {
+                    needs.add(Boolean.FALSE);
+                }
+                needsSuggestions.add(needs);
+            }
             TableColumn column = cm.getColumn(i);
             column.setCellRenderer(new CellRenderer());
         }
@@ -96,7 +111,7 @@ public class TableEntryModel extends AbstractTableModel {
 
         @Override
         public void recordChanged(int row, int column, String newValue) {
-            TableEntryModel.this.fireTableCellUpdated(row, column);
+            TableEntryModel.this.fireTableCellUpdated(row, column + 1);
         }
 
         @Override
@@ -138,7 +153,15 @@ public class TableEntryModel extends AbstractTableModel {
             if (column == 0) {
                 ((JLabel)returnedComponent).setHorizontalAlignment(JLabel.RIGHT);
             }
-            if (isSelected) {
+            if (column != 0 && needsSuggestions.get(row).get(column - 1)) {
+                if (returnedComponent instanceof JLabel) {
+                    returnedComponent.setBackground(Color.red);
+                }
+                else {
+                    returnedComponent.setBackground(Color.WHITE);
+                }
+            }
+            else if (isSelected) {
                 returnedComponent.setBackground(blueOpaque);
             }
             else {

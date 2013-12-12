@@ -209,8 +209,15 @@ public class DownloadBatchDialog extends JDialog {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            communicationNotifier.downloadBatch(selectedId);
-            dispose();
+            if (selectedIndex < sampleImages.size()) {
+                communicationNotifier.downloadBatch(selectedId);
+                dispose();
+            }
+            else {
+                JOptionPane.showMessageDialog(DownloadBatchDialog.this,
+                                              "This project is already fully indexed!",
+                                              "Hooray!", JOptionPane.INFORMATION_MESSAGE);
+            }
         }
         
     };

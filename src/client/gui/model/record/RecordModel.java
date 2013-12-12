@@ -5,19 +5,16 @@
 package client.gui.model.record;
 
 import client.gui.model.communication.*;
+import client.gui.model.record.quality.QualityChecker;
+import client.gui.model.record.quality.QualityChecker.PointHash;
 import client.gui.model.save.*;
 import client.gui.model.save.settings.IndexerState;
+import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Point;
+import java.awt.event.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TreeSet;
-import javax.swing.JDialog;
-import javax.swing.SwingWorker;
+import java.util.*;
+import javax.swing.*;
 import shared.communication.*;
 import shared.model.Field;
 
@@ -31,6 +28,8 @@ public class RecordModel {
     
     private SaveNotifier saveNotifier;
     private CommunicationNotifier communicationNotifier;
+    
+    private QualityChecker qualityChecker;
     
     private ArrayList<ArrayList<String>> records;
     private ArrayList<Field> fields;
@@ -55,6 +54,8 @@ public class RecordModel {
         this.saveNotifier = saveLinker.getSaveNotifier();
         saveLinker.subscribe(saveSubscriber);
         
+        qualityChecker = new QualityChecker(communicationLinker);
+        
     }
     
     /**
@@ -74,6 +75,10 @@ public class RecordModel {
      * @param value the new value of the record.
      */
     protected void changeRecord(int row, int column, String value) {
+        
+        if (records.get(row).get(column).equals(value)) {
+            return;
+        }
         
         records.get(row).set(column, value);
         
@@ -165,19 +170,33 @@ public class RecordModel {
         
     }
     
-    protected boolean needsSuggestion(Point cell) {
-        
-        if (needsSuggestion != null) {
-            String value = records.get(cell.x).get(cell.y);
-            if (needsSuggestion.containsKey(cell)) {
-                return true;
-            }
-        }
-        return false;
-        
+    /**
+     * Checks if the value at an index is incorrect and needs a suggestion.
+     * 
+     * @param row the row of the value to check.
+     * @param column the column of the value to check.
+     * @return true if it needs a suggestion, otherwise false.
+     */
+    protected boolean needsSuggestion(int row, int column) {
+        return qualityChecker.needsSuggestion(row, column);
     }
     
+    /**
+     * Returns a dialog for displaying the suggestions for and changing a word.
+     * 
+     * @param row the row of the value to change.
+     * @param column the column of the value to change.
+     * @return a SuggestionDialog modal window object to call setVisible(true)
+     * on. When closed it will dispose of itself.
+     */
     protected SuggestionDialog getSuggestionDialog(int row, int column) {
+        
+        SuggestionDialog dialog = null;
+        if (qualityChecker.needsSuggestion(row, column)) {
+            String[] suggestions = (String[])qualityChecker.getSuggestions(row, column);
+            dialog = new SuggestionDialog(suggestions, row, column);
+        }
+        return dialog;
         
     }
     
@@ -222,18 +241,7 @@ public class RecordModel {
         }
         
     }
-    
-    private boolean isKnownValue(int field, String value) {
-        if (dictionaries == null || dictionaries.size() <= field) {
-            return true;
-        }
-        return dictionaries.get(field).contains(value);
-    }
-    
-    private TreeSet<String> getSuggestions(int field, String value) {
-        
-    }
-    
+
     private AbstractCommunicationSubscriber communicationSubscriber
                                     = new AbstractCommunicationSubscriber() {
         
@@ -244,7 +252,7 @@ public class RecordModel {
 
                 init(result.numRecords(), result.numFields());
                 fields = (ArrayList<Field>) result.fields();
-                initDictionaries.execute();
+                qualityChecker.init(records, fields);
                 setRecords();
                 
             }
@@ -273,96 +281,102 @@ public class RecordModel {
             
             records = state.records();
             fields = state.fields();
-            initDictionaries.execute();
+            qualityChecker.init(records, fields);
             setRecords();
-//            checkKnownsWorker.execute();
+            
+        }
+   
+    };
+
+    public class SuggestionDialog extends JDialog {
+        
+        private static final int DIALOG_WIDTH = 252;
+        private static final int DIALOG_HEIGHT = 215;
+        
+        private JList suggestionList;
+        
+        private int row;
+        private int column;
+        
+        public SuggestionDialog(String[] suggestions, int row, int column) {
+            
+            super((Frame)null, "Suggestions", true);
+            
+            this.row = row;
+            this.column = column;
+            
+            this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            this.setPreferredSize(new Dimension(DIALOG_WIDTH, DIALOG_HEIGHT));
+            this.setLocation(600, 300);
+            
+            createComponents(suggestions);
+
+//            this.setLocation(Client.SCREEN_WIDTH / 2 - DIALOG_WIDTH / 2,
+//                             Client.SCREEN_HEIGHT / 2 - DIALOG_HEIGHT / 2);
+            this.pack();
+            this.setResizable(false);
             
         }
         
-        private SwingWorker<Void, Void> checkKnownsWorker = new SwingWorker<Void, Void>() {
+        private void createComponents(String[] suggestions) {
+            
+            JPanel mainPanel = new JPanel();
+            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+            mainPanel.setPreferredSize(new Dimension(DIALOG_WIDTH, DIALOG_HEIGHT));
+            mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            
+            Dimension sides = new Dimension(37, 0);
+            
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.X_AXIS));
+            listPanel.add(Box.createRigidArea(sides));
+            
+            suggestionList = new JList(suggestions);
+            suggestionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane scrollPane = new JScrollPane(suggestionList);
+            listPanel.add(scrollPane);
+            
+            listPanel.add(Box.createRigidArea(sides));
+            mainPanel.add(listPanel);
+            mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+            JButton cancel = new JButton("Cancel");
+            cancel.addActionListener(cancelListener);
+            buttonPanel.add(cancel);
+            
+            buttonPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+            
+            JButton useSuggestion = new JButton("Use Suggestion");
+            buttonPanel.add(useSuggestion);
+            useSuggestion.addActionListener(useSuggestionListener);
+            
+            mainPanel.add(buttonPanel);
+            
+            this.add(mainPanel);
+            
+        }
+        
+        private ActionListener cancelListener = new ActionListener() {
 
             @Override
-            protected Void doInBackground() throws Exception {
-                
-                PointHash cell = new PointHash(0, 0);
-                for (int field = 0; field < records.size(); ++field) {
-                    cell.x = field;
-                    ArrayList<String> columns = records.get(field);
-                    for (int row = 0; row < columns.size(); ++row) {
-                        cell.y = row;
-                        String s = columns.get(row);
-                        if (!isKnownValue(field, s)) {
-                            needsSuggestion.put(cell, getSuggestions(field, s));
-                        }
-                    }
-                }
-                return null;
-                
+            public void actionPerformed(ActionEvent e) {
+                SuggestionDialog.this.dispose();
             }
             
         };
         
-    };
-    
-    private SwingWorker<Void, Void> initDictionaries = new SwingWorker<Void, Void>() {
+        private ActionListener useSuggestionListener = new ActionListener() {
 
-        @Override
-        protected Void doInBackground() throws Exception {
-            
-            // Convert known data text files to treeset dictionaries
-            // (because String.hashCode() is really slow)
-            dictionaries = new ArrayList<>();
-            if (fields != null && !fields.isEmpty()) {
-                for (int i = 0; i < fields.size(); ++i) {
-                    Field f = fields.get(i);
-                    TreeSet<String> dictionary = new TreeSet<>();
-                    if (f.knownData() != null) {
-                        String s = communicationNotifier.downloadHtml(f.knownData());
-                        List<String> list = Arrays.asList(s.split(","));
-                        dictionary.addAll(list);
-                    }
-                    dictionaries.add(dictionary);
-                }
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeRecord(row, column, (String)suggestionList.getSelectedValue());
+                SuggestionDialog.this.dispose();
             }
             
-            return null;
-            
-        }
+        };
         
-    };
-    
-    public class SuggestionDialog extends JDialog {
-        
-        public SuggestionDialog() {
-            super((Frame)null, "Suggestions", true);
-            
-            createComponents();
-        }
-        
-        private void createComponents() {
-            
-        }
-        
-    }
-    
-    public class PointHash extends Point {
-        
-        public PointHash(int x, int y) {
-            super(x, y);
-        }
-        
-        @Override
-        public int hashCode() {
-            return x * 31 + y * 47;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof PointHash) {
-                return super.equals(obj);
-            }
-            return false;
-        }
     }
 
 }

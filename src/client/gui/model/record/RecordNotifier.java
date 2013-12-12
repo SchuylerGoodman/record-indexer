@@ -4,6 +4,7 @@
  */
 package client.gui.model.record;
 
+import client.gui.model.record.RecordModel.SuggestionDialog;
 import java.net.URL;
 import java.util.ArrayList;
 import shared.model.Field;
@@ -110,6 +111,29 @@ public class RecordNotifier {
     
     public URL pathToURL(String path) {
         return model.pathToURL(path);
+    }
+    
+    /**
+     * Asks the RecordModel if the value in this row and column is not known and
+     * needs suggestions.
+     * 
+     * @param row the row of the value.
+     * @param column the column of the value.
+     * @return true if needs suggestions, otherwise false.
+     */
+    public boolean needsSuggestion(int row, int column) {
+        return model.needsSuggestion(row, column);
+    }
+    
+    /**
+     * Asks the RecordModel for a new SuggestionDialog with a list of suggestions.
+     * 
+     * @param row the row for the suggestions.
+     * @param column the column for the suggestions.
+     * @return the new SuggestionDialog.
+     */
+    public SuggestionDialog getSuggestionDialog(int row, int column) {
+        return model.getSuggestionDialog(row, column);
     }
     
 }

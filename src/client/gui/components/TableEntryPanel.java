@@ -7,6 +7,10 @@ package client.gui.components;
 import client.gui.model.cell.*;
 import client.gui.model.record.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -22,18 +26,25 @@ public class TableEntryPanel extends JPanel {
     private final static int SENDING_SELECTION = 2;
     private final static int FINISHED_SELECTION = 3;
     
+    private RecordNotifier recordNotifier;
     private CellNotifier cellNotifier;
     
     private TableEntryModel tableEntryModel;
     private JTable entryTable;
+    private JPopupMenu menuPopup = new JPopupMenu();
     
     private int selectedRow;
     private int selectedColumn;
     private int selectionAction;
     
+    private int clickedRow = 0;
+    private int clickedColumn = 0;
+    
     public TableEntryPanel(RecordLinker recordLinker, CellLinker cellLinker) {
         
         super();
+        
+        this.recordNotifier = recordLinker.getRecordNotifier();
         
         this.cellNotifier = cellLinker.getCellNotifier();
         cellLinker.subscribe(cellSubscriber);
@@ -62,6 +73,11 @@ public class TableEntryPanel extends JPanel {
         entryTable.setCellSelectionEnabled(true);
         entryTable.getTableHeader().setResizingAllowed(true);
         entryTable.getTableHeader().setReorderingAllowed(false);
+        entryTable.addMouseListener(mouseListener);
+        
+        JMenuItem suggest = new JMenuItem("See Suggestions");
+        suggest.addActionListener(actionListener);
+        menuPopup.add(suggest);
         
         JScrollPane scrollPane = new JScrollPane(entryTable);
         
@@ -126,6 +142,29 @@ public class TableEntryPanel extends JPanel {
             
         }
         
+    };
+    
+    private MouseAdapter mouseListener = new MouseAdapter() {
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                clickedRow = entryTable.rowAtPoint(e.getPoint());
+                clickedColumn = entryTable.columnAtPoint(e.getPoint()) - 1;
+                if (recordNotifier.needsSuggestion(clickedRow, clickedColumn)) {
+                    menuPopup.show(entryTable, e.getX(), e.getY());
+                }
+            }
+        }
+        
+    };
+    
+    public ActionListener actionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            RecordModel.SuggestionDialog sd = recordNotifier.getSuggestionDialog(clickedRow, clickedColumn);
+            sd.setVisible(true);
+        }
     };
     
 }
